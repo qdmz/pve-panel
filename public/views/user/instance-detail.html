@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>虚拟机详情 — CloudVM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="../../index.html" class="nav-brand">
+        <div class="brand-icon"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+        <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">主菜单</div>
+        <a class="sidebar-item" href="dashboard.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          控制台总览
+        </a>
+        <a class="sidebar-item active" href="instances.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+          我的虚拟机
+        </a>
+        <a class="sidebar-item" href="products.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          购买产品
+        </a>
+        <a class="sidebar-item" href="billing.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          充值 & 账单
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">支持</div>
+        <a class="sidebar-item" href="tickets.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          工单支持
+        </a>
+        <a class="sidebar-item" href="announcements.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          系统公告
+        </a>
+        <a class="sidebar-item" href="profile.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          账号设置
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">张</div>
+        <div><div class="user-name">张三</div><div class="user-balance">余额: ¥128.50</div></div>
+        <a href="../auth/login.html" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="topbar-btn" onclick="toggleSidebar()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="topbar-title">虚拟机详情 — VM-101</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- VM Header -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:20px;background:var(--bg-2);border:1px solid var(--border);border-radius:16px">
+        <div class="vm-status-dot running" style="width:12px;height:12px"></div>
+        <div>
+          <h2 style="font-size:20px;margin-bottom:4px">Web 生产服务器</h2>
+          <div style="font-size:13px;color:var(--text-3);font-family:var(--mono)">VM-101 · KVM · 广州节点 · IP: 45.192.123.45</div>
+        </div>
+        <span class="badge badge-success" style="margin-left:auto">运行中</span>
+        <span class="vm-card-type vm-type-kvm" style="margin-left:8px">KVM</span>
+      </div>
+
+      <!-- Quick Actions -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
+        <button class="btn-sm danger" onclick="VMOperations.perform(101,'stop','关机')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg> 关机
+        </button>
+        <button class="btn-sm default" onclick="VMOperations.perform(101,'restart','重启')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg> 重启
+        </button>
+        <button class="btn-sm primary" onclick="VMOperations.openVNC(101)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg> VNC 控制台
+        </button>
+        <button class="btn-sm default" onclick="VMOperations.openSSH(101)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> WebSSH
+        </button>
+        <button class="btn-sm default" onclick="openSFTP()">📂 SFTP</button>
+        <button class="btn-sm default" onclick="ModalManager.open('resetPwdModal')">🔑 重置密码</button>
+        <button class="btn-sm default" onclick="ModalManager.open('reinstallModal')">💿 重装系统</button>
+        <button class="btn-sm default" onclick="ModalManager.open('snapshotModal')">📷 快照管理</button>
+        <button class="btn-sm default" onclick="ModalManager.open('natModal')">🔌 端口转发</button>
+        <a href="billing.html?renew=101" class="btn-sm success">📅 续费</a>
+      </div>
+
+      <!-- Info + Charts -->
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;margin-bottom:24px">
+        <!-- Info Card -->
+        <div class="card">
+          <div class="card-header"><h3>实例信息</h3></div>
+          <div class="card-body" style="padding:0">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">虚拟化类型</td><td style="padding:10px 16px;font-weight:600">KVM</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">CPU</td><td style="padding:10px 16px;font-family:var(--mono)">2 vCPU</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">内存</td><td style="padding:10px 16px;font-family:var(--mono)">4096 MB</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">存储</td><td style="padding:10px 16px;font-family:var(--mono)">80 GB SSD</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">操作系统</td><td style="padding:10px 16px">Ubuntu 22.04 LTS</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">主 IP</td><td style="padding:10px 16px;font-family:var(--mono)" onclick="copyToClipboard('45.192.123.45')" style="cursor:pointer">45.192.123.45</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">节点</td><td style="padding:10px 16px">广州 CN1</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">创建时间</td><td style="padding:10px 16px">2025-02-01</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">到期时间</td><td style="padding:10px 16px;color:var(--orange);font-weight:600">2025-08-01</td></tr>
+              <tr><td style="padding:10px 16px;color:var(--text-3)">月流量配额</td><td style="padding:10px 16px;font-family:var(--mono)">1 TB</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div class="card">
+            <div class="card-header"><h3>实时性能监控</h3><span style="font-size:12px;color:var(--green)">● 实时刷新</span></div>
+            <div class="card-body">
+              <div style="height:160px"><canvas id="perfChart"></canvas></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="stat-card">
+              <div class="stat-card-icon icon-blue">CPU</div>
+              <div class="stat-card-label">CPU 使用率</div>
+              <div class="stat-card-value" id="cpuVal">45%</div>
+              <div class="stat-card-sub">2 vCPU</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon icon-green">MEM</div>
+              <div class="stat-card-label">内存使用率</div>
+              <div class="stat-card-value" id="memVal">62%</div>
+              <div class="stat-card-sub">4096 MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Traffic -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><h3>流量使用情况（本月）</h3>
+          <div style="font-size:13px;color:var(--text-2)">已用: <strong>234 GB</strong> / 1024 GB</div>
+        </div>
+        <div class="card-body">
+          <div style="height:6px;background:var(--bg-3);border-radius:3px;margin-bottom:12px;overflow:hidden">
+            <div style="width:22.8%;height:100%;background:var(--accent);border-radius:3px;transition:width 0.8s ease"></div>
+          </div>
+          <div style="height:140px"><canvas id="trafficDetail"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Snapshots -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>快照列表</h3>
+          <button class="btn-sm primary" onclick="createSnapshot()">+ 创建快照</button>
+        </div>
+        <div>
+          <table class="data-table">
+            <thead><tr><th>快照名称</th><th>创建时间</th><th>大小</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span style="font-family:var(--mono)">snap-2025-06-28-auto</span></td>
+                <td>2025-06-28 03:00</td>
+                <td>18.3 GB</td>
+                <td><span class="badge badge-success">正常</span></td>
+                <td><div style="display:flex;gap:6px"><button class="btn-sm success" onclick="restoreSnapshot('snap-2025-06-28-auto')">恢复</button><button class="btn-sm danger" onclick="deleteSnapshot('snap-2025-06-28-auto')">删除</button></div></td>
+              </tr>
+              <tr>
+                <td><span style="font-family:var(--mono)">snap-before-upgrade</span></td>
+                <td>2025-06-20 14:23</td>
+                <td>17.8 GB</td>
+                <td><span class="badge badge-success">正常</span></td>
+                <td><div style="display:flex;gap:6px"><button class="btn-sm success" onclick="restoreSnapshot('snap-before-upgrade')">恢复</button><button class="btn-sm danger" onclick="deleteSnapshot('snap-before-upgrade')">删除</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Domain Binding -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>域名建站绑定</h3>
+          <button class="btn-sm primary" onclick="ModalManager.open('domainModal')">+ 绑定域名</button>
+        </div>
+        <div>
+          <table class="data-table">
+            <thead><tr><th>域名</th><th>目标端口</th><th>SSL</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span style="font-family:var(--mono)">example.com</span></td>
+                <td>80</td>
+                <td><span class="badge badge-success">已启用</span></td>
+                <td><span class="badge badge-success">正常</span></td>
+                <td><button class="btn-sm danger" onclick="removeDomain('example.com')">移除</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NAT Ports -->
+      <div class="card">
+        <div class="card-header">
+          <h3>NAT 端口转发</h3>
+          <button class="btn-sm primary" onclick="ModalManager.open('natModal')">+ 添加转发规则</button>
+        </div>
+        <div>
+          <table class="data-table">
+            <thead><tr><th>公网端口</th><th>内网端口</th><th>协议</th><th>说明</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-info">10022</span></td>
+                <td>22</td>
+                <td>TCP</td>
+                <td>SSH 访问</td>
+                <td><button class="btn-sm danger">删除</button></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-info">10080</span></td>
+                <td>80</td>
+                <td>TCP</td>
+                <td>Web 服务</td>
+                <td><button class="btn-sm danger">删除</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal-overlay" id="resetPwdModal">
+  <div class="modal">
+    <div class="modal-header"><h3>重置 Root 密码</h3><button class="modal-close" onclick="ModalManager.close('resetPwdModal')">×</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px">新密码将通过 QEMU Guest Agent 直接注入，无需重启虚拟机。</p>
+      <div class="form-group">
+        <label>新密码</label>
+        <input type="password" class="form-input" id="newRootPwd" placeholder="至少 12 位强密码">
+      </div>
+      <div class="form-group">
+        <label>确认密码</label>
+        <input type="password" class="form-input" id="confirmRootPwd" placeholder="再次输入">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('resetPwdModal')">取消</button>
+      <button class="btn-sm primary" onclick="doResetPwd()">确认重置</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reinstall Modal -->
+<div class="modal-overlay" id="reinstallModal">
+  <div class="modal">
+    <div class="modal-header"><h3>重装操作系统</h3><button class="modal-close" onclick="ModalManager.close('reinstallModal')">×</button></div>
+    <div class="modal-body">
+      <div class="alert alert-danger show" style="margin-bottom:16px">⚠️ 重装将清除系统盘所有数据，操作不可逆！请提前备份重要数据。</div>
+      <div class="form-group">
+        <label>选择操作系统</label>
+        <select class="form-input" id="osSelect">
+          <optgroup label="Ubuntu"><option>Ubuntu 22.04 LTS</option><option>Ubuntu 20.04 LTS</option></optgroup>
+          <optgroup label="Debian"><option>Debian 12</option><option>Debian 11</option></optgroup>
+          <optgroup label="CentOS"><option>CentOS Stream 9</option></optgroup>
+          <optgroup label="Windows"><option>Windows Server 2022</option><option>Windows Server 2019</option></optgroup>
+          <optgroup label="其他"><option>Alpine 3.18</option><option>Arch Linux</option></optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>设置 Root 密码</label>
+        <input type="password" class="form-input" id="reinstallPwd" placeholder="重装后的初始密码">
+      </div>
+      <div class="form-group">
+        <label>确认操作（输入 "REINSTALL" 确认）</label>
+        <input type="text" class="form-input" id="reinstallConfirm" placeholder="REINSTALL">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('reinstallModal')">取消</button>
+      <button class="btn-sm danger" onclick="doReinstall()">确认重装</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAT Modal -->
+<div class="modal-overlay" id="natModal">
+  <div class="modal">
+    <div class="modal-header"><h3>添加 NAT 端口转发</h3><button class="modal-close" onclick="ModalManager.close('natModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>公网端口（10000-65535）</label>
+          <input type="number" class="form-input" placeholder="如: 10443" min="10000" max="65535">
+        </div>
+        <div class="form-group">
+          <label>内网端口</label>
+          <input type="number" class="form-input" placeholder="如: 443" min="1" max="65535">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>协议</label>
+        <select class="form-input"><option>TCP</option><option>UDP</option><option>TCP+UDP</option></select>
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <input type="text" class="form-input" placeholder="如: HTTPS 服务">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('natModal')">取消</button>
+      <button class="btn-sm primary" onclick="addNATRule()">添加规则</button>
+    </div>
+  </div>
+</div>
+
+<!-- Domain Modal -->
+<div class="modal-overlay" id="domainModal">
+  <div class="modal">
+    <div class="modal-header"><h3>绑定域名</h3><button class="modal-close" onclick="ModalManager.close('domainModal')">×</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">请先将域名 CNAME 指向 <strong style="font-family:var(--mono)">45.192.123.45</strong>，然后填写绑定信息。</p>
+      <div class="form-group"><label>域名</label><input type="text" class="form-input" placeholder="example.com"></div>
+      <div class="form-group"><label>目标端口</label><input type="number" class="form-input" placeholder="80" value="80"></div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="enableSSL" style="accent-color:var(--accent)">
+        <label for="enableSSL">自动申请 Let's Encrypt SSL 证书</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('domainModal')">取消</button>
+      <button class="btn-sm primary" onclick="bindDomain()">绑定域名</button>
+    </div>
+  </div>
+</div>
+
+<!-- Snapshot Modal -->
+<div class="modal-overlay" id="snapshotModal">
+  <div class="modal">
+    <div class="modal-header"><h3>创建快照</h3><button class="modal-close" onclick="ModalManager.close('snapshotModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>快照名称</label><input type="text" class="form-input" id="snapName" placeholder="snap-2025-07-01-manual"></div>
+      <div class="form-group"><label>备注</label><input type="text" class="form-input" placeholder="升级前备份"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('snapshotModal')">取消</button>
+      <button class="btn-sm primary" onclick="doCreateSnapshot()">创建快照</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  ThemeManager.init();
+
+  // Performance chart
+  const labels = Array.from({length:20},(_,i) => `-${19-i}s`);
+  const cpuData = Array.from({length:20},() => Math.random()*40+25);
+  const memData = Array.from({length:20},() => Math.random()*20+50);
+  CloudVMCharts.createLineChart(
+    document.getElementById('perfChart').getContext('2d'), labels,
+    [
+      { label:'CPU %', data: cpuData, backgroundColor:'rgba(37,99,235,0.06)', borderColor:'rgba(37,99,235,0.8)' },
+      { label:'内存 %', data: memData, backgroundColor:'rgba(22,163,74,0.06)', borderColor:'rgba(22,163,74,0.8)' }
+    ]
+  );
+
+  // Traffic detail
+  const days = Array.from({length:30},(_,i)=>`${i+1}日`);
+  const inData = Array.from({length:30},()=>Math.random()*8+1);
+  const outData = Array.from({length:30},()=>Math.random()*12+2);
+  CloudVMCharts.createBarChart(
+    document.getElementById('trafficDetail').getContext('2d'), days,
+    [
+      { label:'入站 GB', data: inData, backgroundColor:'rgba(37,99,235,0.6)' },
+      { label:'出站 GB', data: outData, backgroundColor:'rgba(22,163,74,0.6)' }
+    ]
+  );
+
+  // Realtime update simulation
+  setInterval(() => {
+    const cpu = Math.round(Math.random()*40+25);
+    const mem = Math.round(Math.random()*20+52);
+    document.getElementById('cpuVal').textContent = cpu + '%';
+    document.getElementById('memVal').textContent = mem + '%';
+  }, 3000);
+});
+
+async function doResetPwd() {
+  const p1 = document.getElementById('newRootPwd').value;
+  const p2 = document.getElementById('confirmRootPwd').value;
+  if (!p1 || p1 !== p2) { showNotification('错误', '密码不一致或未填写', 'error'); return; }
+  ModalManager.close('resetPwdModal');
+  await new Promise(r => setTimeout(r, 1000));
+  showNotification('成功', 'Root 密码已重置', 'success');
+}
+
+async function doReinstall() {
+  const confirm = document.getElementById('reinstallConfirm').value;
+  if (confirm !== 'REINSTALL') { showNotification('错误', '请输入 REINSTALL 确认操作', 'error'); return; }
+  ModalManager.close('reinstallModal');
+  showNotification('重装中', '系统重装任务已提交，预计 2-5 分钟完成', 'info');
+}
+
+function createSnapshot() { ModalManager.open('snapshotModal'); }
+async function doCreateSnapshot() {
+  const name = document.getElementById('snapName').value || `snap-${new Date().toISOString().slice(0,10)}-manual`;
+  ModalManager.close('snapshotModal');
+  showNotification('创建中', `快照 ${name} 创建任务已提交`, 'success');
+}
+async function restoreSnapshot(name) {
+  const ok = await VMOperations.confirm('确认恢复快照？', `将从 ${name} 恢复，当前状态将丢失。`);
+  if (ok) showNotification('恢复中', `正在从 ${name} 恢复...`, 'info');
+}
+async function deleteSnapshot(name) {
+  const ok = await VMOperations.confirm('确认删除快照？', `快照 ${name} 删除后不可恢复。`);
+  if (ok) showNotification('成功', `快照 ${name} 已删除`, 'success');
+}
+
+function addNATRule() { ModalManager.close('natModal'); showNotification('成功', 'NAT 端口转发规则已添加', 'success'); }
+function bindDomain() { ModalManager.close('domainModal'); showNotification('成功', '域名绑定成功，SSL 证书申请中...', 'success'); }
+function removeDomain(d) { showNotification('成功', `域名 ${d} 已解绑`, 'success'); }
+function openSFTP() { VMOperations.openSSH(101); }
+</script>
+</body>
+</html>

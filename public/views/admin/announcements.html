@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公告管理 — CloudVM Pro 后台</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+<link rel="stylesheet" href="../../css/admin.css">
+<style>
+.badge-type-notice { background:var(--accent-soft);color:var(--accent); }
+.badge-type-maintenance { background:rgba(245,158,11,0.1);color:#d97706; }
+.badge-type-update { background:var(--green-soft);color:var(--green); }
+.badge-type-event { background:rgba(139,92,246,0.1);color:#8b5cf6; }
+.badge-status-published { background:var(--green-soft);color:var(--green); }
+.badge-status-draft { background:var(--bg-3);color:var(--text-3); }
+.announcement-card {
+  background:var(--bg-2); border:1px solid var(--border);
+  border-radius:14px; padding:20px 22px;
+  transition:var(--transition); position:relative;
+  display:flex; gap:16px; align-items:flex-start;
+}
+.announcement-card:hover { box-shadow:var(--shadow); }
+.announcement-card.pinned { border-color:var(--orange); }
+.ann-card-select { margin-top:4px; flex-shrink:0; accent-color:var(--accent); }
+.ann-card-body { flex:1; min-width:0; }
+.ann-card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+.ann-card-title { font-size:16px;font-weight:700; }
+.ann-card-meta { font-size:12px;color:var(--text-3);margin-top:6px;display:flex;gap:16px;align-items:center;flex-wrap:wrap; }
+.ann-card-content { font-size:14px;color:var(--text-2);line-height:1.6;margin-top:10px; }
+.ann-card-actions { display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap; }
+.pin-badge { position:absolute;top:-1px;right:-1px;padding:4px 12px;background:var(--orange);color:#fff;font-size:11px;font-weight:700;border-radius:0 14px 0 12px; }
+.preview-card { background:var(--bg-2);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;margin:0 auto; }
+.preview-card .preview-type { font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;display:inline-block;padding:4px 12px;border-radius:6px; }
+.preview-card .preview-title { font-size:22px;font-weight:800;margin-bottom:8px; }
+.preview-card .preview-date { font-size:13px;color:var(--text-3);margin-bottom:20px; }
+.preview-card .preview-content { font-size:15px;color:var(--text-2);line-height:1.7; }
+.empty-state { text-align:center;padding:60px 20px; }
+.empty-state-icon { font-size:48px;margin-bottom:16px;opacity:0.5; }
+.empty-state h3 { font-size:18px;color:var(--text-2);margin-bottom:6px; }
+.empty-state p { font-size:14px;color:var(--text-3);margin-bottom:20px; }
+.bulk-actions-bar { display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--accent-soft);border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:600; }
+.bulk-actions-bar span { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <div class="nav-brand">
+        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
+      </div>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">概览</div>
+        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">节点管理</div>
+        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">业务管理</div>
+        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户管理</a>
+        <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
+        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
+        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>订单管理</a>
+        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">3</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">财务</div>
+        <a class="sidebar-item" href="coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>优惠码 &amp; 代金券</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">系统</div>
+        <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名审核</a>
+        <a class="sidebar-item active" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>公告管理</a>
+        <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
+        <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
+        <div><div class="user-name">超级管理员</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb">
+        <span class="breadcrumb-current">公告管理</span>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()" title="切换主题">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a href="../user/dashboard.html" class="btn-sm default" style="font-size:12px">切换用户视图</a>
+      </div>
+    </div>
+
+    <div class="admin-page">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1 style="font-size:22px;margin-bottom:4px">公告管理</h1>
+          <p style="font-size:14px;color:var(--text-3)">管理系统公告、维护通知与产品更新</p>
+        </div>
+        <button class="btn-sm primary" onclick="openCreateModal()" style="padding:10px 20px;font-size:14px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          创建公告
+        </button>
+      </div>
+
+      <!-- Bulk Actions Bar -->
+      <div class="bulk-actions-bar" id="bulkBar" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg>
+        <span>已选择 <strong id="bulkCount">0</strong> 条</span>
+        <button class="btn-sm default" onclick="selectAll()">全选</button>
+        <button class="btn-sm danger" onclick="bulkDelete()" style="margin-left:auto">删除选中</button>
+        <button class="btn-sm success" onclick="bulkPublish()">发布选中</button>
+      </div>
+
+      <!-- Announcement Cards -->
+      <div id="announcementList" style="display:flex;flex-direction:column;gap:12px">
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="empty-state-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+        </div>
+        <h3>暂无公告</h3>
+        <p>点击"创建公告"按钮发布第一条系统公告</p>
+        <button class="btn-sm primary" onclick="openCreateModal()">创建第一条公告</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Announcement Modal -->
+<div class="modal-overlay" id="announceModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3 id="announceModalTitle">创建公告</h3>
+      <button class="modal-close" onclick="closeAnnounceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editAnnounceId">
+      <div class="form-group"><label>公告标题 <span style="color:var(--red)">*</span></label>
+        <input type="text" class="form-input" id="announceTitle" placeholder="请输入公告标题" style="width:100%">
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>公告类型</label>
+          <select class="form-input" id="announceType" style="width:100%;cursor:pointer">
+            <option value="notice">通知</option>
+            <option value="maintenance">维护公告</option>
+            <option value="update">产品更新</option>
+            <option value="event">活动</option>
+          </select>
+        </div>
+        <div class="form-group"><label>发布状态</label>
+          <select class="form-input" id="announceStatus" style="width:100%;cursor:pointer">
+            <option value="published">发布</option>
+            <option value="draft">草稿</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>公告内容 <span style="color:var(--red)">*</span></label>
+        <textarea class="form-input" id="announceContent" rows="6" placeholder="请输入公告内容（支持换行）..." style="width:100%;resize:vertical;font-family:var(--font);line-height:1.6"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>目标用户</label>
+          <select class="form-input" id="announceAudience" style="width:100%;cursor:pointer">
+            <option value="all">所有用户</option>
+            <option value="kvm">KVM 用户</option>
+            <option value="lxc">LXC 用户</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display:block;margin-bottom:6px">&nbsp;</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:8px">
+            <input type="checkbox" id="announcePinned" style="accent-color:var(--orange);width:16px;height:16px">
+            <span style="font-size:13px;font-weight:600">置顶公告</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="previewAnnounce()" style="margin-right:auto">预览</button>
+      <button class="btn-sm default" onclick="closeAnnounceModal()">取消</button>
+      <button class="btn-sm primary" onclick="saveAnnounce()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <h3>公告预览</h3>
+      <button class="modal-close" onclick="ModalManager.close('previewModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="preview-card">
+        <div class="preview-type" id="previewType">通知</div>
+        <div class="preview-title" id="previewTitle"></div>
+        <div class="preview-date" id="previewDate"></div>
+        <div class="preview-content" id="previewContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header"><h3>删除公告</h3><button class="modal-close" onclick="ModalManager.close('deleteModal')">&times;</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text-2);font-size:14px;line-height:1.6">确定要删除该公告吗？此操作无法撤销。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('deleteModal')">取消</button>
+      <button class="btn-sm danger" onclick="confirmDelete()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+var announcements = [
+  { id:'A001', title:'[紧急] 广州CN1节点计划维护通知', type:'maintenance', status:'published', content:'亲爱的用户：\n\n我们计划于 2025年7月5日 02:00-04:00 对广州CN1节点进行系统维护升级。\n\n维护期间，该节点上的虚拟机可能出现短暂网络中断（预计不超过10分钟），但不会丢失数据。\n\n建议您提前做好相关业务切换准备。\n\n如有紧急需求，请联系技术支持团队。\n\n感谢您的理解与支持！', audience:'all', pinned:true, created:'2025-07-01', author:'超级管理员' },
+  { id:'A002', title:'新功能上线：一键快照备份与恢复', type:'update', status:'published', content:'我们很高兴地宣布，CloudVM Pro 现已支持一键快照备份功能！\n\n核心特性：\n- 全量/增量快照，支持自定义保留策略\n- 一键恢复到任意时间点\n- 跨节点快照迁移\n- 快照占用空间可视化\n\n所有用户默认享有 3 个免费快照配额，专业版用户无限快照。\n\n立即登录控制台体验！', audience:'all', pinned:false, created:'2025-06-28', author:'超级管理员' },
+  { id:'A003', title:'七月促销活动：年付享8折优惠', type:'event', status:'published', content:'盛夏特惠来临！\n\n活动时间：2025年7月1日 - 7月31日\n\n活动内容：\n- 所有 KVM/LXC 产品年付享 8 折优惠\n- 新用户首次年付额外赠送 1 个月\n- 推荐好友注册双方各得 50 元代金券\n\n活动期间新购或续费均可享受，机会难得！', audience:'all', pinned:true, created:'2025-06-30', author:'超级管理员' },
+  { id:'A004', title:'关于LXC容器网络优化调整的通知', type:'notice', status:'published', content:'各位用户：\n\n为进一步提升LXC容器的网络性能，我们对网络栈进行了优化调整。\n\n主要变更：\n- 默认MTU从1500调整为1400，提升隧道效率\n- NAT转发延迟降低约30%\n- 新增IPv6自动配置支持（需手动开启）\n\n以上变更已自动生效，无需用户操作。如遇到兼容性问题，请提交工单联系我们。', audience:'lxc', pinned:false, created:'2025-06-25', author:'超级管理员' },
+  { id:'A005', title:'KVM专业版新增Windows Server 2025镜像', type:'update', status:'draft', content:'KVM专业版用户现已可使用Windows Server 2025 Datacenter镜像创建虚拟机。\n\n支持版本：\n- Windows Server 2025 Datacenter (含桌面体验)\n- Windows Server 2025 Standard\n\n最低配置要求：2核CPU，4GB内存，40GB系统盘。\n\n（本文尚在起草中，发布前请确认镜像同步完成）', audience:'kvm', pinned:false, created:'2025-06-22', author:'超级管理员' },
+  { id:'A006', title:'关于近期部分用户支付失败的说明', type:'notice', status:'published', content:'接到部分用户反馈支付宝支付偶发失败，经排查系支付宝侧证书到期导致。\n\n我们已于2025年6月20日完成证书更新，支付服务已恢复正常。\n\n受影响的用户，未成功的订单将自动取消，余额不受影响。\n\n给您带来不便敬请谅解，如有疑问请联系：billing@cloudvm.pro', audience:'all', pinned:false, created:'2025-06-20', author:'超级管理员' }
+];
+
+var deleteTargetId = null;
+
+function getTypeBadge(t) {
+  var map = {notice:'通知',maintenance:'维护公告',update:'产品更新',event:'活动'};
+  return '<span class="badge badge-type-'+t+'">'+map[t]+'</span>';
+}
+function getStatusBadge(s) {
+  return s==='published' ? '<span class="badge badge-status-published">已发布</span>' : '<span class="badge badge-status-draft">草稿</span>';
+}
+
+function renderList() {
+  var container = document.getElementById('announcementList');
+  var empty = document.getElementById('emptyState');
+  if (announcements.length===0) {
+    container.innerHTML='';
+    empty.style.display='block';
+    document.getElementById('bulkBar').style.display='none';
+    return;
+  }
+  empty.style.display='none';
+  var html = '';
+  announcements.forEach(function(a){
+    var pinnedTag = a.pinned ? '<div class="pin-badge">置顶</div>' : '';
+    html += '<div class="announcement-card'+(a.pinned?' pinned':'')+'" id="card-'+a.id+'">';
+    html += '<input type="checkbox" class="ann-card-select" data-id="'+a.id+'" onchange="updateBulkBar()">';
+    html += pinnedTag;
+    html += '<div class="ann-card-body">';
+    html += '<div class="ann-card-header">';
+    html += '<span class="ann-card-title">'+a.title+'</span>';
+    html += getTypeBadge(a.type);
+    html += getStatusBadge(a.status);
+    html += '</div>';
+    html += '<div class="ann-card-meta">';
+    html += '<span>作者：'+a.author+'</span>';
+    html += '<span>创建：'+a.created+'</span>';
+    html += '<span>目标：'+(a.audience==='all'?'所有用户':a.audience==='kvm'?'KVM用户':'LXC用户')+'</span>';
+    html += '</div>';
+    html += '<div class="ann-card-content">'+a.content.split('\n').slice(0,2).join(' ')+'...</div>';
+    html += '</div>';
+    html += '<div class="ann-card-actions">';
+    html += '<button class="btn-sm default" onclick="editAnnounce(\''+a.id+'\')">编辑</button>';
+    html += '<button class="btn-sm default" onclick="previewById(\''+a.id+'\')">预览</button>';
+    html += '<button class="btn-sm danger" onclick="deleteAnnounce(\''+a.id+'\')">删除</button>';
+    if (a.status==='draft') {
+      html += '<button class="btn-sm success" onclick="publishSingle(\''+a.id+'\')">发布</button>';
+    }
+    html += '</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function openCreateModal() {
+  document.getElementById('announceModalTitle').textContent = '创建公告';
+  document.getElementById('editAnnounceId').value = '';
+  document.getElementById('announceTitle').value = '';
+  document.getElementById('announceType').value = 'notice';
+  document.getElementById('announceStatus').value = 'published';
+  document.getElementById('announceContent').value = '';
+  document.getElementById('announceAudience').value = 'all';
+  document.getElementById('announcePinned').checked = false;
+  ModalManager.open('announceModal');
+}
+
+function editAnnounce(id) {
+  var a = announcements.find(function(x){return x.id===id;});
+  if (!a) return;
+  document.getElementById('announceModalTitle').textContent = '编辑公告';
+  document.getElementById('editAnnounceId').value = a.id;
+  document.getElementById('announceTitle').value = a.title;
+  document.getElementById('announceType').value = a.type;
+  document.getElementById('announceStatus').value = a.status;
+  document.getElementById('announceContent').value = a.content;
+  document.getElementById('announceAudience').value = a.audience;
+  document.getElementById('announcePinned').checked = a.pinned;
+  ModalManager.open('announceModal');
+}
+
+function closeAnnounceModal() {
+  ModalManager.close('announceModal');
+}
+
+function saveAnnounce() {
+  var title = document.getElementById('announceTitle').value.trim();
+  var content = document.getElementById('announceContent').value.trim();
+  if (!title || !content) {
+    showNotification('提示','请填写标题和内容','error');
+    return;
+  }
+  var editId = document.getElementById('editAnnounceId').value;
+  var data = {
+    title: title,
+    type: document.getElementById('announceType').value,
+    status: document.getElementById('announceStatus').value,
+    content: content,
+    audience: document.getElementById('announceAudience').value,
+    pinned: document.getElementById('announcePinned').checked
+  };
+  if (editId) {
+    var a = announcements.find(function(x){return x.id===editId;});
+    if (a) {
+      a.title=data.title; a.type=data.type; a.status=data.status;
+      a.content=data.content; a.audience=data.audience; a.pinned=data.pinned;
+    }
+    showNotification('已更新','公告 '+editId+' 已更新','success');
+  } else {
+    var newId = 'A'+String(announcements.length+1).padStart(3,'0');
+    announcements.unshift({id:newId, title:data.title, type:data.type, status:data.status,
+      content:data.content, audience:data.audience, pinned:data.pinned,
+      created:new Date().toISOString().slice(0,10), author:'超级管理员'});
+    showNotification('已创建','公告 '+newId+' 已保存','success');
+  }
+  ModalManager.close('announceModal');
+  renderList();
+}
+
+function previewAnnounce() {
+  var title = document.getElementById('announceTitle').value.trim();
+  var content = document.getElementById('announceContent').value.trim();
+  var type = document.getElementById('announceType').value;
+  if (!title || !content) {
+    showNotification('提示','请先填写标题和内容','error');
+    return;
+  }
+  var typeMap = {notice:'通知',maintenance:'维护公告',update:'产品更新',event:'活动'};
+  var typeClass = 'badge-type-'+type;
+  document.getElementById('previewType').textContent = typeMap[type];
+  document.getElementById('previewType').className = 'preview-type '+typeClass;
+  document.getElementById('previewTitle').textContent = title;
+  document.getElementById('previewDate').textContent = new Date().toISOString().slice(0,16).replace('T',' ');
+  document.getElementById('previewContent').innerHTML = content.split('\n').map(function(l){return '<p style="margin-bottom:10px">'+(l||'&nbsp;')+'</p>';}).join('');
+  ModalManager.open('previewModal');
+}
+
+function previewById(id) {
+  var a = announcements.find(function(x){return x.id===id;});
+  if (!a) return;
+  var typeMap = {notice:'通知',maintenance:'维护公告',update:'产品更新',event:'活动'};
+  document.getElementById('previewType').textContent = typeMap[a.type];
+  document.getElementById('previewType').className = 'preview-type badge-type-'+a.type;
+  document.getElementById('previewTitle').textContent = a.title;
+  document.getElementById('previewDate').textContent = a.created;
+  document.getElementById('previewContent').innerHTML = a.content.split('\n').map(function(l){return '<p style="margin-bottom:10px">'+(l||'&nbsp;')+'</p>';}).join('');
+  ModalManager.open('previewModal');
+}
+
+function deleteAnnounce(id) {
+  deleteTargetId = id;
+  ModalManager.open('deleteModal');
+}
+
+function confirmDelete() {
+  if (!deleteTargetId) return;
+  announcements = announcements.filter(function(x){return x.id!==deleteTargetId;});
+  deleteTargetId = null;
+  ModalManager.close('deleteModal');
+  showNotification('已删除','公告已删除','success');
+  renderList();
+}
+
+function publishSingle(id) {
+  var a = announcements.find(function(x){return x.id===id;});
+  if (!a) return;
+  a.status = 'published';
+  showNotification('已发布','公告已发布，用户可见','success');
+  renderList();
+}
+
+function updateBulkBar() {
+  var checked = document.querySelectorAll('.ann-card-select:checked');
+  var bar = document.getElementById('bulkBar');
+  document.getElementById('bulkCount').textContent = checked.length;
+  bar.style.display = checked.length>0 ? 'flex':'none';
+}
+
+function selectAll() {
+  var allChecked = document.querySelectorAll('.ann-card-select:checked').length === document.querySelectorAll('.ann-card-select').length;
+  document.querySelectorAll('.ann-card-select').forEach(function(cb){cb.checked = !allChecked;});
+  updateBulkBar();
+}
+
+function bulkDelete() {
+  var checked = document.querySelectorAll('.ann-card-select:checked');
+  if (checked.length===0) return;
+  var ids = Array.from(checked).map(function(cb){return cb.dataset.id;});
+  announcements = announcements.filter(function(a){return ids.indexOf(a.id)===-1;});
+  showNotification('已删除','已删除 '+ids.length+' 条公告','success');
+  renderList();
+}
+
+function bulkPublish() {
+  var checked = document.querySelectorAll('.ann-card-select:checked');
+  if (checked.length===0) return;
+  var ids = Array.from(checked).map(function(cb){return cb.dataset.id;});
+  announcements.forEach(function(a){
+    if (ids.indexOf(a.id)!==-1) a.status='published';
+  });
+  showNotification('已发布','已发布 '+ids.length+' 条公告','success');
+  renderList();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  ThemeManager.init();
+  renderList();
+});
+</script>
+</body>
+</html>

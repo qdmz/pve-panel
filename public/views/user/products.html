@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>购买产品 - CloudVM Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <style>
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: var(--text-1); margin: 0; }
+    .page-header p { color: var(--text-3); font-size: 13px; margin: 4px 0 0; }
+
+    .filter-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-tab { padding: 7px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+    .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .billing-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 13px; color: var(--text-2); }
+    .toggle-switch { position: relative; width: 48px; height: 26px; }
+    .toggle-switch input { display: none; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 13px; cursor: pointer; transition: 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); }
+    .save-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 6px; background: rgba(16,185,129,0.12); color: #10b981; }
+
+    .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .product-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; backdrop-filter: blur(12px); transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.12); border-color: var(--accent); }
+    .product-card.featured { border-color: rgba(37,99,235,0.3); }
+    .product-card.featured::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #2563eb, #8b5cf6); }
+    .hot-badge { position: absolute; top: 16px; right: 16px; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 8px; background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; letter-spacing: 0.03em; }
+
+    .product-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 24px; }
+    .product-icon.basic { background: rgba(107,114,128,0.1); color: #6b7280; }
+    .product-icon.standard { background: rgba(37,99,235,0.1); color: #2563eb; }
+    .product-icon.premium { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+    .product-icon.enterprise { background: rgba(245,158,11,0.1); color: #f59e0b; }
+
+    .product-name { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; }
+    .product-type-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .type-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 5px; letter-spacing: 0.05em; }
+    .type-badge.kvm { background: rgba(37,99,235,0.1); color: #2563eb; }
+    .type-badge.lxc { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+
+    .specs-list { list-style: none; padding: 0; margin: 0 0 16px; }
+    .specs-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: var(--text-2); border-bottom: 1px solid var(--border); }
+    .specs-list li:last-child { border-bottom: none; }
+    .specs-list li svg { flex-shrink: 0; color: var(--accent); }
+    .spec-value { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 13px; }
+
+    .features-list { list-style: none; padding: 0; margin: 0 0 20px; }
+    .features-list li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; color: var(--text-3); }
+    .features-list li svg { flex-shrink: 0; color: #10b981; }
+
+    .pricing { text-align: center; padding: 16px 0; border-top: 1px solid var(--border); margin-bottom: 16px; }
+    .price-monthly { font-family: 'Outfit', sans-serif; font-size: 36px; font-weight: 800; color: var(--text-1); line-height: 1; }
+    .price-monthly .currency { font-size: 20px; vertical-align: top; margin-top: 4px; display: inline-block; }
+    .price-monthly .period { font-size: 13px; font-weight: 400; color: var(--text-3); }
+    .price-yearly { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+    .price-yearly .orig { text-decoration: line-through; margin-right: 6px; }
+
+    .availability { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); margin-bottom: 14px; }
+    .avail-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .avail-dot.good { background: #10b981; }
+    .avail-dot.limited { background: #f59e0b; }
+
+    .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+    .buy-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(37,99,235,0.3); }
+
+    /* Order Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal h3 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-1); margin: 0 0 20px; }
+    .order-summary { background: var(--bg-2); border-radius: 10px; padding: 14px; margin-bottom: 18px; }
+    .order-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; color: var(--text-2); }
+    .order-row.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 12px; font-size: 16px; font-weight: 700; color: var(--text-1); }
+    .coupon-row { display: flex; gap: 8px; margin-bottom: 18px; }
+    .coupon-input { flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-1); font-size: 13px; font-family: 'Outfit', sans-serif; }
+    .coupon-btn { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+    .coupon-btn:hover { background: var(--accent); color: #fff; }
+    .payment-methods { display: flex; gap: 10px; margin-bottom: 18px; }
+    .payment-method { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-2); text-align: center; cursor: pointer; transition: all 0.2s; font-size: 13px; color: var(--text-2); }
+    .payment-method:hover { border-color: var(--accent); }
+    .payment-method.selected { border-color: var(--accent); background: rgba(37,99,235,0.05); color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+    .modal-btn.cancel { background: var(--bg-2); color: var(--text-2); }
+    .modal-btn.confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .modal-btn.confirm:hover { opacity: 0.9; }
+
+    @media (max-width: 1024px) {
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .products-grid { grid-template-columns: 1fr; }
+      .payment-methods { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-header">
+        <div class="nav-brand">
+          <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+          <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">主菜单</div>
+          <a class="sidebar-item" href="dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>控制台</a>
+          <a class="sidebar-item" href="instances.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>我的虚拟机</a>
+          <a class="sidebar-item active" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>购买产品</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">账户</div>
+          <a class="sidebar-item" href="billing.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>充值 & 账单</a>
+          <a class="sidebar-item" href="tickets.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单支持</a>
+          <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>系统公告</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">设置</div>
+          <a class="sidebar-item" href="profile.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>账号设置</a>
+          <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名认证</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div><div style="font-size:12px;color:var(--text-3)">Balance</div><div style="font-size:16px;font-weight:600">¥ 1,280.00</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb"><a href="dashboard.html">控制台</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">购买产品</span></div>
+      <div class="topbar-actions"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button></div>
+    </header>
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1>购买产品</h1>
+        <p>选择适合您的虚拟机方案，灵活配置，按需付费</p>
+      </div>
+
+      <!-- Billing Toggle -->
+      <div class="billing-toggle">
+        <span id="monthly-label" style="font-weight:600;">按月付费</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="billingToggle" onchange="toggleBilling()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="yearly-label">按年付费</span>
+        <span class="save-badge" id="saveBadge">省 15%</span>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterProducts('all', this)">全部产品</button>
+        <button class="filter-tab" onclick="filterProducts('kvm', this)">KVM 虚拟化</button>
+        <button class="filter-tab" onclick="filterProducts('lxc', this)">LXC 容器</button>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" id="productsGrid">
+        <!-- KVM Basic -->
+        <div class="product-card" data-type="kvm">
+          <div class="product-icon basic">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="product-name">基础型 KVM</div>
+          <div class="product-type-row">
+            <span class="type-badge kvm">KVM</span>
+            <span style="font-size:11px;color:var(--text-3);">入门级虚拟化</span>
+          </div>
+          <ul class="specs-list">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="2" x2="8" y2="22"/></svg> CPU <span class="spec-value">2 核</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="22"/></svg> 内存 <span class="spec-value">4 GB</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> 磁盘 <span class="spec-value">50 GB SSD</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 带宽 <span class="spec-value">5 Mbps</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 流量 <span class="spec-value">500 GB/月</span></li>
+          </ul>
+          <ul class="features-list">
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 独立公网 IPv4</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> VNC 远程控制台</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 快照备份 x1</li>
+          </ul>
+          <div class="pricing">
+            <div class="price-monthly" id="price-basic-kvm"><span class="currency">¥</span>49<span class="period">/月</span></div>
+            <div class="price-yearly"><span class="orig">¥588/年</span> ¥499/年</div>
+          </div>
+          <div class="availability"><span class="avail-dot good"></span> 库存充足 · 可立即开通</div>
+          <button class="buy-btn" onclick="openOrder('基础型 KVM', 'kvm', 49, 499)">立即购买</button>
+        </div>
+
+        <!-- KVM Standard (Featured) -->
+        <div class="product-card featured" data-type="kvm">
+          <span class="hot-badge">热门</span>
+          <div class="product-icon standard">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="product-name">标准型 KVM</div>
+          <div class="product-type-row">
+            <span class="type-badge kvm">KVM</span>
+            <span style="font-size:11px;color:var(--text-3);">推荐方案</span>
+          </div>
+          <ul class="specs-list">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="2" x2="8" y2="22"/></svg> CPU <span class="spec-value">4 核</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="22"/></svg> 内存 <span class="spec-value">8 GB</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> 磁盘 <span class="spec-value">100 GB NVMe</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 带宽 <span class="spec-value">10 Mbps</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 流量 <span class="spec-value">2 TB/月</span></li>
+          </ul>
+          <ul class="features-list">
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 独立公网 IPv4</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> VNC 远程控制台</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 快照备份 x3</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> DDoS 基础防护</li>
+          </ul>
+          <div class="pricing">
+            <div class="price-monthly" id="price-standard-kvm"><span class="currency">¥</span>129<span class="period">/月</span></div>
+            <div class="price-yearly"><span class="orig">¥1,548/年</span> ¥1,316/年</div>
+          </div>
+          <div class="availability"><span class="avail-dot good"></span> 库存充足 · 可立即开通</div>
+          <button class="buy-btn" onclick="openOrder('标准型 KVM', 'kvm', 129, 1316)">立即购买</button>
+        </div>
+
+        <!-- KVM Premium -->
+        <div class="product-card" data-type="kvm">
+          <div class="product-icon premium">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="product-name">高级型 KVM</div>
+          <div class="product-type-row">
+            <span class="type-badge kvm">KVM</span>
+            <span style="font-size:11px;color:var(--text-3);">高性能方案</span>
+          </div>
+          <ul class="specs-list">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="2" x2="8" y2="22"/></svg> CPU <span class="spec-value">8 核</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="22"/></svg> 内存 <span class="spec-value">16 GB</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> 磁盘 <span class="spec-value">200 GB NVMe</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 带宽 <span class="spec-value">30 Mbps</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 流量 <span class="spec-value">5 TB/月</span></li>
+          </ul>
+          <ul class="features-list">
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 独立公网 IPv4 + IPv6</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> VNC 远程控制台</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 快照备份 x10</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> DDoS 高级防护</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 优先技术支持</li>
+          </ul>
+          <div class="pricing">
+            <div class="price-monthly" id="price-premium-kvm"><span class="currency">¥</span>299<span class="period">/月</span></div>
+            <div class="price-yearly"><span class="orig">¥3,588/年</span> ¥3,050/年</div>
+          </div>
+          <div class="availability"><span class="avail-dot limited"></span> 仅剩 3 个节点 · 开通需等待</div>
+          <button class="buy-btn" onclick="openOrder('高级型 KVM', 'kvm', 299, 3050)">立即购买</button>
+        </div>
+
+        <!-- LXC Basic -->
+        <div class="product-card" data-type="lxc">
+          <div class="product-icon basic">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <div class="product-name">轻量型 LXC</div>
+          <div class="product-type-row">
+            <span class="type-badge lxc">LXC</span>
+            <span style="font-size:11px;color:var(--text-3);">轻量容器方案</span>
+          </div>
+          <ul class="specs-list">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="2" x2="8" y2="22"/></svg> CPU <span class="spec-value">2 核</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="22"/></svg> 内存 <span class="spec-value">2 GB</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> 磁盘 <span class="spec-value">30 GB SSD</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 带宽 <span class="spec-value">5 Mbps</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 流量 <span class="spec-value">300 GB/月</span></li>
+          </ul>
+          <ul class="features-list">
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 共享公网 IPv4</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> VNC 远程控制台</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 秒级启动</li>
+          </ul>
+          <div class="pricing">
+            <div class="price-monthly" id="price-basic-lxc"><span class="currency">¥</span>29<span class="period">/月</span></div>
+            <div class="price-yearly"><span class="orig">¥348/年</span> ¥296/年</div>
+          </div>
+          <div class="availability"><span class="avail-dot good"></span> 库存充足 · 可立即开通</div>
+          <button class="buy-btn" onclick="openOrder('轻量型 LXC', 'lxc', 29, 296)">立即购买</button>
+        </div>
+
+        <!-- LXC Standard -->
+        <div class="product-card" data-type="lxc">
+          <div class="product-icon standard">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 10h18"/><path d="M8 3v18"/></svg>
+          </div>
+          <div class="product-name">标准型 LXC</div>
+          <div class="product-type-row">
+            <span class="type-badge lxc">LXC</span>
+            <span style="font-size:11px;color:var(--text-3);">均衡容器方案</span>
+          </div>
+          <ul class="specs-list">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="2" x2="8" y2="22"/></svg> CPU <span class="spec-value">4 核</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="22"/></svg> 内存 <span class="spec-value">4 GB</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> 磁盘 <span class="spec-value">60 GB SSD</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 带宽 <span class="spec-value">10 Mbps</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 流量 <span class="spec-value">1 TB/月</span></li>
+          </ul>
+          <ul class="features-list">
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 独立公网 IPv4</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> VNC 远程控制台</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 快照备份 x1</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 秒级启动</li>
+          </ul>
+          <div class="pricing">
+            <div class="price-monthly" id="price-standard-lxc"><span class="currency">¥</span>69<span class="period">/月</span></div>
+            <div class="price-yearly"><span class="orig">¥828/年</span> ¥704/年</div>
+          </div>
+          <div class="availability"><span class="avail-dot good"></span> 库存充足 · 可立即开通</div>
+          <button class="buy-btn" onclick="openOrder('标准型 LXC', 'lxc', 69, 704)">立即购买</button>
+        </div>
+
+        <!-- LXC Enterprise -->
+        <div class="product-card" data-type="lxc">
+          <div class="product-icon enterprise">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <div class="product-name">企业型 LXC</div>
+          <div class="product-type-row">
+            <span class="type-badge lxc">LXC</span>
+            <span style="font-size:11px;color:var(--text-3);">企业级容器方案</span>
+          </div>
+          <ul class="specs-list">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="2" x2="8" y2="22"/></svg> CPU <span class="spec-value">8 核</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="22"/></svg> 内存 <span class="spec-value">16 GB</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> 磁盘 <span class="spec-value">150 GB NVMe</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 带宽 <span class="spec-value">50 Mbps</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 流量 <span class="spec-value">10 TB/月</span></li>
+          </ul>
+          <ul class="features-list">
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 独立公网 IPv4 + IPv6</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> VNC 远程控制台</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 快照备份 x5</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> DDoS 基础防护</li>
+            <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 独立资源池</li>
+          </ul>
+          <div class="pricing">
+            <div class="price-monthly" id="price-enterprise-lxc"><span class="currency">¥</span>189<span class="period">/月</span></div>
+            <div class="price-yearly"><span class="orig">¥2,268/年</span> ¥1,928/年</div>
+          </div>
+          <div class="availability"><span class="avail-dot good"></span> 库存充足 · 可立即开通</div>
+          <button class="buy-btn" onclick="openOrder('企业型 LXC', 'lxc', 189, 1928)">立即购买</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <h3>确认订单</h3>
+    <div class="order-summary">
+      <div class="order-row"><span>产品名称</span><span id="orderProduct"></span></div>
+      <div class="order-row"><span>类型</span><span id="orderType"></span></div>
+      <div class="order-row"><span>计费周期</span><span id="orderCycle"></span></div>
+      <div class="order-row"><span>单价</span><span id="orderUnitPrice"></span></div>
+    </div>
+    <div class="coupon-row">
+      <input type="text" class="coupon-input" id="couponInput" placeholder="输入优惠码">
+      <button class="coupon-btn" onclick="applyCoupon()">应用</button>
+    </div>
+    <div class="order-summary">
+      <div class="order-row"><span>优惠</span><span id="orderDiscount" style="color:#10b981;">-¥0.00</span></div>
+      <div class="order-row total"><span>应付金额</span><span id="orderTotal"></span></div>
+    </div>
+    <p style="font-size:13px;color:var(--text-3);margin-bottom:12px;">选择支付方式</p>
+    <div class="payment-methods" id="paymentMethods">
+      <div class="payment-method selected" data-method="alipay" onclick="selectPayment(this)">支付宝</div>
+      <div class="payment-method" data-method="wechat" onclick="selectPayment(this)">微信支付</div>
+      <div class="payment-method" data-method="balance" onclick="selectPayment(this)">余额支付</div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeOrder()">取消</button>
+      <button class="modal-btn confirm" onclick="confirmOrder()">确认支付</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+  let isYearly = false;
+  let currentOrder = null;
+
+  function toggleBilling() {
+    isYearly = document.getElementById('billingToggle').checked;
+    document.getElementById('monthly-label').style.fontWeight = isYearly ? '400' : '600';
+    document.getElementById('yearly-label').style.fontWeight = isYearly ? '600' : '400';
+    document.getElementById('saveBadge').style.display = isYearly ? 'inline' : 'none';
+    updatePrices();
+  }
+
+  function updatePrices() {
+    const products = [
+      { id: 'price-basic-kvm', monthly: 49, yearly: 499 },
+      { id: 'price-standard-kvm', monthly: 129, yearly: 1316 },
+      { id: 'price-premium-kvm', monthly: 299, yearly: 3050 },
+      { id: 'price-basic-lxc', monthly: 29, yearly: 296 },
+      { id: 'price-standard-lxc', monthly: 69, yearly: 704 },
+      { id: 'price-enterprise-lxc', monthly: 189, yearly: 1928 },
+    ];
+    products.forEach(p => {
+      const el = document.getElementById(p.id);
+      if (el) {
+        const price = isYearly ? p.yearly : p.monthly;
+        const period = isYearly ? '/年' : '/月';
+        el.innerHTML = '<span class="currency">¥</span>' + price + '<span class="period">' + period + '</span>';
+      }
+    });
+  }
+
+  function filterProducts(type, btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.product-card').forEach(card => {
+      if (type === 'all' || card.dataset.type === type) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function openOrder(name, type, monthlyPrice, yearlyPrice) {
+    currentOrder = { name, type, monthlyPrice, yearlyPrice };
+    document.getElementById('orderProduct').textContent = name;
+    document.getElementById('orderType').textContent = type.toUpperCase();
+    const price = isYearly ? yearlyPrice : monthlyPrice;
+    const cycle = isYearly ? '按年' : '按月';
+    document.getElementById('orderCycle').textContent = cycle;
+    document.getElementById('orderUnitPrice').textContent = '¥' + price;
+    document.getElementById('orderTotal').textContent = '¥' + price;
+    document.getElementById('orderDiscount').textContent = '-¥0.00';
+    document.getElementById('couponInput').value = '';
+    document.getElementById('orderModal').classList.add('active');
+  }
+
+  function closeOrder() {
+    document.getElementById('orderModal').classList.remove('active');
+  }
+
+  function selectPayment(el) {
+    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function applyCoupon() {
+    const code = document.getElementById('couponInput').value.trim();
+    if (code === 'VIP2026') {
+      const price = isYearly ? currentOrder.yearlyPrice : currentOrder.monthlyPrice;
+      const discount = Math.round(price * 0.2);
+      document.getElementById('orderDiscount').textContent = '-¥' + discount;
+      document.getElementById('orderTotal').textContent = '¥' + (price - discount);
+    } else if (code) {
+      alert('无效的优惠码');
+    }
+  }
+
+  function confirmOrder() {
+    const payment = document.querySelector('.payment-method.selected').dataset.method;
+    const total = document.getElementById('orderTotal').textContent;
+    alert('订单确认成功！\n支付方式: ' + payment + '\n金额: ' + total + '\n\n即将跳转到支付页面...');
+    closeOrder();
+  }
+
+  // Close modal on overlay click
+  document.getElementById('orderModal').addEventListener('click', function(e) {
+    if (e.target === this) closeOrder();
+  });
+</script>
+</body>
+</html>

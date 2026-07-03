@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>实名认证 - CloudVM Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <style>
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: var(--text-1); margin: 0; }
+    .page-header p { color: var(--text-3); font-size: 13px; margin: 4px 0 0; }
+
+    .verify-layout { max-width: 680px; }
+
+    .status-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 32px; backdrop-filter: blur(12px); margin-bottom: 20px; text-align: center; }
+    .status-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .status-icon.info { background: rgba(37,99,235,0.1); color: #2563eb; }
+    .status-icon.pending { background: rgba(245,158,11,0.1); color: #f59e0b; }
+    .status-icon.success { background: rgba(16,185,129,0.1); color: #10b981; }
+    .status-icon.rejected { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .status-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-1); margin: 0 0 8px; }
+    .status-desc { font-size: 14px; color: var(--text-2); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: #f59e0b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 16px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 28px; backdrop-filter: blur(12px); margin-bottom: 20px; }
+    .form-card h3 { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-1); margin: 0 0 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+    .form-label .required { color: #ef4444; }
+    .form-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-1); font-size: 14px; font-family: 'Outfit', sans-serif; transition: border-color 0.2s; box-sizing: border-box; }
+    .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .form-input.error { border-color: #ef4444; }
+    .form-select { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-1); font-size: 14px; font-family: 'Outfit', sans-serif; cursor: pointer; box-sizing: border-box; }
+    .form-hint { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+    .form-error { font-size: 11px; color: #ef4444; margin-top: 4px; display: none; }
+
+    .upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--bg-2); position: relative; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+    .upload-zone:hover { border-color: var(--accent); background: rgba(37,99,235,0.03); }
+    .upload-zone.has-file { border-style: solid; border-color: #10b981; padding: 8px; }
+    .upload-zone .upload-icon { color: var(--text-3); }
+    .upload-zone .upload-text { font-size: 13px; color: var(--text-2); }
+    .upload-zone .upload-sub { font-size: 11px; color: var(--text-3); }
+    .upload-zone img { max-width: 100%; max-height: 160px; border-radius: 8px; object-fit: contain; }
+    .upload-zone .remove-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.5); border: none; color: #fff; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 14px; line-height: 1; }
+    .upload-zone.has-file .remove-btn { display: flex; }
+
+    .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; }
+    .checkbox-row input[type="checkbox"] { margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); }
+    .checkbox-row label { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+    .checkbox-row label a { color: var(--accent); }
+
+    .submit-btn { width: 100%; padding: 13px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+    .submit-btn:hover { opacity: 0.9; box-shadow: 0 4px 15px rgba(37,99,235,0.3); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+    .retry-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 24px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; text-decoration: none; }
+    .retry-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .support-link { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--accent); margin-top: 16px; text-decoration: none; }
+    .support-link:hover { text-decoration: underline; }
+
+    .info-banner { background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: var(--text-2); line-height: 1.6; display: flex; gap: 12px; }
+    .info-banner .info-icon { flex-shrink: 0; color: var(--accent); margin-top: 1px; }
+
+    .verify-state { display: none; }
+    .verify-state.active { display: block; }
+
+    @media (max-width: 768px) {
+      .status-card { padding: 24px 16px; }
+      .form-card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-header">
+        <div class="nav-brand">
+          <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+          <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">主菜单</div>
+          <a class="sidebar-item" href="dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>控制台</a>
+          <a class="sidebar-item" href="instances.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>我的虚拟机</a>
+          <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>购买产品</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">账户</div>
+          <a class="sidebar-item" href="billing.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>充值 & 账单</a>
+          <a class="sidebar-item" href="tickets.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单支持</a>
+          <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>系统公告</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">设置</div>
+          <a class="sidebar-item" href="profile.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>账号设置</a>
+          <a class="sidebar-item active" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名认证</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div><div style="font-size:12px;color:var(--text-3)">Balance</div><div style="font-size:16px;font-weight:600">¥ 1,280.00</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb"><a href="dashboard.html">控制台</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">实名认证</span></div>
+      <div class="topbar-actions"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button></div>
+    </header>
+    <div class="page-content">
+      <div class="page-header">
+        <h1>实名认证</h1>
+        <p>根据国家相关法规要求，请完成实名认证以使用全部功能</p>
+      </div>
+
+      <div class="verify-layout">
+        <!-- State Switcher (demo only - start with unverified) -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--text-3);line-height:30px;">演示切换:</span>
+          <button onclick="showState('unverified')" class="retry-btn" style="padding:4px 12px;font-size:12px;">未认证</button>
+          <button onclick="showState('pending')" class="retry-btn" style="padding:4px 12px;font-size:12px;">审核中</button>
+          <button onclick="showState('approved')" class="retry-btn" style="padding:4px 12px;font-size:12px;">已通过</button>
+          <button onclick="showState('rejected')" class="retry-btn" style="padding:4px 12px;font-size:12px;">已拒绝</button>
+        </div>
+
+        <!-- Unverified State -->
+        <div class="verify-state active" id="state-unverified">
+          <div class="info-banner">
+            <svg class="info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <strong>为什么需要实名认证？</strong><br>
+              根据《中华人民共和国网络安全法》第二十四条规定，网络运营者为用户提供信息发布、即时通讯等服务时，应当要求用户提供真实身份信息。完成实名认证后，您将获得完整的服务使用权限，包括订购产品、创建虚拟机实例等。
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h3>身份信息填写</h3>
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> 真实姓名</label>
+              <input type="text" class="form-input" id="realName" placeholder="请输入身份证上的真实姓名">
+              <div class="form-error" id="nameError">请输入真实姓名</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> 证件类型</label>
+              <select class="form-select" id="idType">
+                <option value="idcard">中华人民共和国居民身份证</option>
+                <option value="passport">护照</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> 证件号码</label>
+              <input type="text" class="form-input" id="idNumber" placeholder="请输入证件号码">
+              <div class="form-error" id="idError">请输入正确的证件号码</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:0;">
+              <div>
+                <label class="form-label"><span class="required">*</span> 证件正面照</label>
+                <div class="upload-zone" id="uploadFront" onclick="document.getElementById('frontInput').click()">
+                  <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span class="upload-text">点击或拖拽上传</span>
+                  <span class="upload-sub">支持 JPG/PNG, ≤5MB</span>
+                  <img src="" alt="正面照预览" style="display:none;">
+                  <button class="remove-btn" onclick="event.stopPropagation();removeImage('front')">×</button>
+                  <input type="file" id="frontInput" accept="image/*" style="display:none" onchange="handleUpload(event, 'front')">
+                </div>
+              </div>
+              <div>
+                <label class="form-label"><span class="required">*</span> 证件背面照</label>
+                <div class="upload-zone" id="uploadBack" onclick="document.getElementById('backInput').click()">
+                  <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span class="upload-text">点击或拖拽上传</span>
+                  <span class="upload-sub">支持 JPG/PNG, ≤5MB</span>
+                  <img src="" alt="背面照预览" style="display:none;">
+                  <button class="remove-btn" onclick="event.stopPropagation();removeImage('back')">×</button>
+                  <input type="file" id="backInput" accept="image/*" style="display:none" onchange="handleUpload(event, 'back')">
+                </div>
+              </div>
+            </div>
+
+            <div class="checkbox-row">
+              <input type="checkbox" id="termsAgree">
+              <label for="termsAgree">我已阅读并同意 <a href="#">《用户服务协议》</a> 和 <a href="#">《隐私政策》</a>，承诺所提交信息真实有效。</label>
+            </div>
+
+            <button class="submit-btn" onclick="submitVerification()">提交认证</button>
+          </div>
+
+          <a href="tickets.html" class="support-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            认证遇到问题？联系客服
+          </a>
+        </div>
+
+        <!-- Pending State -->
+        <div class="verify-state" id="state-pending">
+          <div class="status-card">
+            <div class="status-icon pending">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h2 class="status-title">审核中</h2>
+            <p class="status-desc">您的实名认证信息已提交，我们正在审核中。审核通常需要 1-3 个工作日，请耐心等待。</p>
+            <div class="spinner"></div>
+            <p style="font-size:12px;color:var(--text-3);margin-top:12px;">预计审核完成时间：2026年7月3日</p>
+            <div style="margin-top:20px;padding:16px;background:var(--bg-2);border-radius:10px;text-align:left;">
+              <p style="font-size:12px;color:var(--text-3);margin:0 0 8px;">提交信息摘要</p>
+              <div style="font-size:13px;color:var(--text-2);line-height:1.8;">
+                <div>姓名：张**</div>
+                <div>证件类型：中华人民共和国居民身份证</div>
+                <div>证件号码：330***********1234</div>
+                <div>提交时间：2026-06-30 14:22:08</div>
+              </div>
+            </div>
+          </div>
+          <a href="tickets.html" class="support-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            审核太久？提交工单咨询
+          </a>
+        </div>
+
+        <!-- Approved State -->
+        <div class="verify-state" id="state-approved">
+          <div class="status-card">
+            <div class="status-icon success">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h2 class="status-title">认证已通过</h2>
+            <p class="status-desc">恭喜！您的实名认证已审核通过。现在您可以使用 CloudVM Pro 的全部功能。</p>
+            <div style="margin-top:20px;padding:16px;background:var(--bg-2);border-radius:10px;text-align:left;">
+              <p style="font-size:12px;color:var(--text-3);margin:0 0 8px;">认证信息</p>
+              <div style="font-size:13px;color:var(--text-2);line-height:1.8;">
+                <div>认证姓名：张三</div>
+                <div>证件类型：中华人民共和国居民身份证</div>
+                <div>认证时间：2026-06-30 16:45:30</div>
+                <div>认证状态：<span style="color:#10b981;font-weight:600;">已通过</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rejected State -->
+        <div class="verify-state" id="state-rejected">
+          <div class="status-card">
+            <div class="status-icon rejected">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <h2 class="status-title">认证未通过</h2>
+            <p class="status-desc">很抱歉，您的实名认证未通过审核。请根据以下原因修正后重新提交。</p>
+            <div style="margin-top:20px;padding:16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;text-align:left;">
+              <p style="font-size:12px;color:#ef4444;margin:0 0 8px;font-weight:600;">拒绝原因</p>
+              <p style="font-size:13px;color:var(--text-2);margin:0;line-height:1.6;">证件照片模糊，无法清晰辨认身份信息。请使用高清相机在光线充足的环境下重新拍摄，确保证件边框完整、文字清晰可读。</p>
+            </div>
+            <button class="submit-btn" style="margin-top:20px;" onclick="showState('unverified')">重新提交认证</button>
+          </div>
+          <a href="tickets.html" class="support-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            对审核结果有疑问？联系我们
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+  function showState(state) {
+    document.querySelectorAll('.verify-state').forEach(el => el.classList.remove('active'));
+    document.getElementById('state-' + state).classList.add('active');
+  }
+
+  function handleUpload(event, side) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const zone = document.getElementById('upload' + (side === 'front' ? 'Front' : 'Back'));
+    const img = zone.querySelector('img');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      img.src = e.target.result;
+      img.style.display = 'block';
+      zone.classList.add('has-file');
+      zone.querySelector('.upload-icon').style.display = 'none';
+      zone.querySelector('.upload-text').style.display = 'none';
+      zone.querySelector('.upload-sub').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage(side) {
+    const zone = document.getElementById('upload' + (side === 'front' ? 'Front' : 'Back'));
+    const img = zone.querySelector('img');
+    img.src = '';
+    img.style.display = 'none';
+    zone.classList.remove('has-file');
+    zone.querySelector('.upload-icon').style.display = '';
+    zone.querySelector('.upload-text').style.display = '';
+    zone.querySelector('.upload-sub').style.display = '';
+    const inputId = side === 'front' ? 'frontInput' : 'backInput';
+    document.getElementById(inputId).value = '';
+  }
+
+  function validateIdNumber(number, type) {
+    if (type === 'idcard') {
+      const idReg = /^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/;
+      return idReg.test(number);
+    }
+    return number.length >= 6;
+  }
+
+  function submitVerification() {
+    let valid = true;
+    const name = document.getElementById('realName').value.trim();
+    const idType = document.getElementById('idType').value;
+    const idNumber = document.getElementById('idNumber').value.trim();
+    const terms = document.getElementById('termsAgree').checked;
+
+    // Validate name
+    if (!name) {
+      document.getElementById('nameError').style.display = 'block';
+      document.getElementById('realName').classList.add('error');
+      valid = false;
+    } else {
+      document.getElementById('nameError').style.display = 'none';
+      document.getElementById('realName').classList.remove('error');
+    }
+
+    // Validate ID number
+    if (!idNumber || !validateIdNumber(idNumber, idType)) {
+      document.getElementById('idError').style.display = 'block';
+      document.getElementById('idError').textContent = idType === 'idcard' ? '请输入正确的18位身份证号码' : '请输入有效的证件号码';
+      document.getElementById('idNumber').classList.add('error');
+      valid = false;
+    } else {
+      document.getElementById('idError').style.display = 'none';
+      document.getElementById('idNumber').classList.remove('error');
+    }
+
+    // Validate terms
+    if (!terms) {
+      alert('请先阅读并同意用户服务协议和隐私政策');
+      valid = false;
+    }
+
+    if (valid) {
+      alert('认证信息已提交！我们将尽快审核。');
+      showState('pending');
+    }
+  }
+
+  // Drag & drop support
+  ['Front', 'Back'].forEach(function(side) {
+    const zone = document.getElementById('upload' + side);
+    zone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      zone.style.borderColor = 'var(--accent)';
+    });
+    zone.addEventListener('dragleave', function() {
+      zone.style.borderColor = '';
+    });
+    zone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      zone.style.borderColor = '';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const inputId = side === 'Front' ? 'frontInput' : 'backInput';
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById(inputId).files = dt.files;
+        handleUpload({ target: { files: dt.files } }, side.toLowerCase());
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+
+/**
+ * @property int $id
+ * @property string $key
+ * @property string|null $value
+ * @property string $type
+ * @property string $group
+ * @property string|null $description
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ */
+class Setting extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'key',
+        'value',
+        'type',
+        'group',
+        'description',
+    ];
+
+    public static function getValue(string $key, mixed $default = null): mixed
+    {
+        $setting = Cache::remember("setting.{$key}", 3600, function () use ($key) {
+            return static::where('key', $key)->first();
+        });
+
+        if (!$setting) {
+            return $default;
+        }
+
+        return $setting->castValue();
+    }
+
+    public static function setValue(string $key, mixed $value, ?string $type = null): void
+    {
+        $setting = static::where('key', $key)->first();
+
+        if (!$setting) {
+            static::create([
+                'key' => $key,
+                'value' => (string) $value,
+                'type' => $type ?? 'string',
+            ]);
+        } else {
+            $setting->update([
+                'value' => (string) $value,
+                'type' => $type ?? $setting->type,
+            ]);
+        }
+
+        Cache::forget("setting.{$key}");
+    }
+
+    public function castValue(): mixed
+    {
+        return match ($this->type) {
+            'integer' => (int) $this->value,
+            'boolean' => filter_var($this->value, FILTER_VALIDATE_BOOLEAN),
+            'json' => json_decode($this->value, true),
+            default => $this->value,
+        };
+    }
+
+    public function scopeByGroup($query, string $group)
+    {
+        return $query->where('group', $group);
+    }
+}

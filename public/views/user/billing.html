@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>充值 & 账单 — CloudVM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="../../index.html" class="nav-brand">
+        <div class="brand-icon"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+        <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>控制台总览</a>
+        <a class="sidebar-item" href="instances.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>我的虚拟机</a>
+        <a class="sidebar-item active" href="billing.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>充值 & 账单</a>
+      </div>
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="tickets.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单支持</a>
+        <a class="sidebar-item" href="profile.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>账号设置</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">张</div>
+        <div><div class="user-name">张三</div><div class="user-balance">余额: ¥128.50</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="topbar-btn" onclick="toggleSidebar()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="topbar-title">充值 & 账单</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+        <!-- Recharge Card -->
+        <div class="card">
+          <div class="card-header"><h3>账户充值</h3></div>
+          <div class="card-body">
+            <div style="text-align:center;padding:16px 0 20px">
+              <div style="font-size:13px;color:var(--text-3);margin-bottom:4px">当前余额</div>
+              <div style="font-size:3rem;font-weight:900;color:var(--green)">¥128.50</div>
+            </div>
+
+            <div class="form-group">
+              <label>快速金额选择</label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+                <button class="amount-btn" onclick="setAmount(50)">¥50</button>
+                <button class="amount-btn" onclick="setAmount(100)">¥100</button>
+                <button class="amount-btn" onclick="setAmount(200)">¥200</button>
+                <button class="amount-btn" onclick="setAmount(500)">¥500</button>
+              </div>
+              <input type="number" class="form-input" id="rechargeAmount" placeholder="自定义金额（最低 ¥1）" min="1">
+            </div>
+
+            <div class="form-group">
+              <label>优惠码 / 代金券</label>
+              <div style="display:flex;gap:8px">
+                <input type="text" class="form-input" id="couponCode" placeholder="输入优惠码">
+                <button class="btn-sm default" onclick="applyCoupon()">应用</button>
+              </div>
+              <div id="couponResult" style="font-size:12px;margin-top:4px;display:none"></div>
+            </div>
+
+            <div class="form-group">
+              <label>支付方式</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <label class="pay-method" id="alipay-method">
+                  <input type="radio" name="payMethod" value="alipay" checked>
+                  <span>支付宝</span>
+                </label>
+                <label class="pay-method" id="wxpay-method">
+                  <input type="radio" name="payMethod" value="wxpay">
+                  <span>微信支付</span>
+                </label>
+              </div>
+            </div>
+
+            <button class="btn-submit" onclick="doRecharge()">立即充值</button>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card-header"><h3>消费统计</h3></div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div style="text-align:center;padding:16px;background:var(--bg-3);border-radius:12px">
+                  <div style="font-size:20px;font-weight:800;color:var(--accent)">¥79.00</div>
+                  <div style="font-size:12px;color:var(--text-3);margin-top:4px">本月消费</div>
+                </div>
+                <div style="text-align:center;padding:16px;background:var(--bg-3);border-radius:12px">
+                  <div style="font-size:20px;font-weight:800;color:var(--orange)">¥29.00</div>
+                  <div style="font-size:12px;color:var(--text-3);margin-top:4px">即将扣费</div>
+                </div>
+                <div style="text-align:center;padding:16px;background:var(--bg-3);border-radius:12px">
+                  <div style="font-size:20px;font-weight:800">¥486.00</div>
+                  <div style="font-size:12px;color:var(--text-3);margin-top:4px">累计充值</div>
+                </div>
+                <div style="text-align:center;padding:16px;background:var(--bg-3);border-radius:12px">
+                  <div style="font-size:20px;font-weight:800">¥357.50</div>
+                  <div style="font-size:12px;color:var(--text-3);margin-top:4px">累计消费</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>即将到期服务</h3></div>
+            <div>
+              <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px">
+                <div><div style="font-weight:600">测试容器 CT-102</div><div style="color:var(--orange);margin-top:2px">到期: 2025-07-15 (14天后)</div></div>
+                <a href="?renew=102" class="btn-sm success">续费 ¥29</a>
+              </div>
+              <div style="padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:13px">
+                <div><div style="font-weight:600">Web 生产服务器 VM-101</div><div style="color:var(--text-3);margin-top:2px">到期: 2025-08-01</div></div>
+                <a href="?renew=101" class="btn-sm default">续费 ¥79</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h3>账单流水</h3>
+          <select class="select-filter" id="billType">
+            <option value="">全部类型</option>
+            <option value="recharge">充值</option>
+            <option value="consume">消费</option>
+            <option value="refund">退款</option>
+          </select>
+          <button class="btn-sm default">导出 CSV</button>
+        </div>
+        <table class="data-table" id="billTable">
+          <thead><tr><th>时间</th><th>类型</th><th>描述</th><th>金额</th><th>余额</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>2025-07-01 10:23</td><td><span class="badge badge-success">充值</span></td><td>支付宝充值</td><td style="color:var(--green);font-weight:700">+¥100.00</td><td>¥128.50</td><td><span class="badge badge-success">成功</span></td></tr>
+            <tr><td>2025-07-01 00:00</td><td><span class="badge badge-danger">消费</span></td><td>VM-101 KVM 标准月费</td><td style="color:var(--red);font-weight:700">-¥79.00</td><td>¥28.50</td><td><span class="badge badge-success">成功</span></td></tr>
+            <tr><td>2025-06-15 14:33</td><td><span class="badge badge-info">充值</span></td><td>微信支付充值</td><td style="color:var(--green);font-weight:700">+¥200.00</td><td>¥107.50</td><td><span class="badge badge-success">成功</span></td></tr>
+            <tr><td>2025-06-01 00:00</td><td><span class="badge badge-danger">消费</span></td><td>CT-102 LXC 入门月费</td><td style="color:var(--red);font-weight:700">-¥29.00</td><td>¥-92.50</td><td><span class="badge badge-success">成功</span></td></tr>
+            <tr><td>2025-06-01 00:00</td><td><span class="badge badge-danger">消费</span></td><td>VM-101 KVM 标准月费</td><td style="color:var(--red);font-weight:700">-¥79.00</td><td>¥-13.50</td><td><span class="badge badge-success">成功</span></td></tr>
+            <tr><td>2025-05-28</td><td><span class="badge badge-success">充值</span></td><td>支付宝充值 (SUMMER2025 优惠码)</td><td style="color:var(--green);font-weight:700">+¥186.00</td><td>¥65.50</td><td><span class="badge badge-success">成功</span></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <button class="page-btn" disabled>«</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">»</button>
+          <span style="font-size:13px;color:var(--text-3);margin-left:auto">共 18 条记录</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment QR Modal -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header"><h3 id="payTitle">扫码支付</h3><button class="modal-close" onclick="ModalManager.close('payModal')">×</button></div>
+    <div class="modal-body" style="text-align:center">
+      <div id="qrPlaceholder" style="width:200px;height:200px;background:var(--bg-3);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-3)">
+        支付二维码<br>（由易支付生成）
+      </div>
+      <div style="font-size:22px;font-weight:800;color:var(--green)" id="payAmount">¥100.00</div>
+      <p style="font-size:13px;color:var(--text-3);margin-top:8px">请在 15 分钟内完成支付</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px">
+        <div class="spinner" style="width:14px;height:14px"></div>
+        <span style="font-size:13px;color:var(--text-3)">等待支付确认...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<style>
+.amount-btn { padding:10px;background:var(--bg-3);border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);color:var(--text-2);transition:var(--transition); }
+.amount-btn:hover,.amount-btn.active { background:var(--accent-soft);border-color:var(--accent);color:var(--accent); }
+.pay-method { display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg-3);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:var(--transition); }
+.pay-method:has(input:checked) { background:var(--accent-soft);border-color:var(--accent);color:var(--accent); }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
+
+function setAmount(v) {
+  document.getElementById('rechargeAmount').value = v;
+  document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function applyCoupon() {
+  const code = document.getElementById('couponCode').value.trim();
+  const result = document.getElementById('couponResult');
+  if (code === 'SUMMER2025') {
+    result.style.display = 'block';
+    result.style.color = 'var(--green)';
+    result.textContent = '✓ 优惠码有效！享受 8 折优惠';
+  } else if (code) {
+    result.style.display = 'block';
+    result.style.color = 'var(--red)';
+    result.textContent = '✗ 优惠码无效或已过期';
+  }
+}
+
+async function doRecharge() {
+  const amount = document.getElementById('rechargeAmount').value;
+  if (!amount || amount < 1) { showNotification('错误', '请输入充值金额', 'error'); return; }
+  const method = document.querySelector('input[name="payMethod"]:checked')?.value || 'alipay';
+  document.getElementById('payTitle').textContent = method === 'alipay' ? '支付宝扫码支付' : '微信扫码支付';
+  document.getElementById('payAmount').textContent = `¥${parseFloat(amount).toFixed(2)}`;
+  ModalManager.open('payModal');
+
+  // Simulate payment success
+  setTimeout(() => {
+    ModalManager.close('payModal');
+    showNotification('充值成功', `账户已到账 ¥${amount}`, 'success');
+  }, 5000);
+}
+</script>
+</body>
+</html>

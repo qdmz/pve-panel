@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>控制台 — CloudVM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="../../index.html" class="nav-brand">
+        <div class="brand-icon"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+        <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">主菜单</div>
+        <a class="sidebar-item active" href="dashboard.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          控制台总览
+        </a>
+        <a class="sidebar-item" href="instances.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+          我的虚拟机
+          <span class="sidebar-badge">3</span>
+        </a>
+        <a class="sidebar-item" href="products.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          购买产品
+        </a>
+        <a class="sidebar-item" href="billing.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          充值 & 账单
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">支持</div>
+        <a class="sidebar-item" href="tickets.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          工单支持
+          <span class="sidebar-badge" style="background:var(--orange)">1</span>
+        </a>
+        <a class="sidebar-item" href="announcements.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          系统公告
+        </a>
+        <a class="sidebar-item" href="profile.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          账号设置
+        </a>
+        <a class="sidebar-item" href="verify.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          实名认证
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">张</div>
+        <div>
+          <div class="user-name">张三</div>
+          <div class="user-balance">余额: ¥128.50</div>
+        </div>
+        <a href="../auth/login.html" style="color:var(--text-3);margin-left:auto" title="退出">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <button class="topbar-btn" onclick="toggleSidebar()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-title">控制台总览</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()" title="切换主题">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a href="billing.html" class="btn-primary" style="height:36px;align-items:center;display:inline-flex">
+          充值
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>控制台总览</h1>
+        <p>欢迎回来，张三。您当前有 3 台虚拟机实例。</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+          </div>
+          <div class="stat-card-label">虚拟机实例</div>
+          <div class="stat-card-value">3</div>
+          <div class="stat-card-sub">2 运行中 · 1 已停止</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div class="stat-card-label">账户余额</div>
+          <div class="stat-card-value" style="color:var(--green)">¥128.50</div>
+          <div class="stat-card-sub">充值记录 →</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon icon-orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-card-label">本月流量</div>
+          <div class="stat-card-value">234 GB</div>
+          <div class="stat-card-sub">配额: 2 TB</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon icon-purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="stat-card-label">待处理工单</div>
+          <div class="stat-card-value" style="color:var(--orange)">1</div>
+          <div class="stat-card-sub"><a href="tickets.html" style="color:var(--accent)">查看详情</a></div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px">
+        <div class="card">
+          <div class="card-header">
+            <h3>流量使用趋势（近 30 天）</h3>
+            <select style="padding:5px 10px;border:1px solid var(--border);border-radius:7px;background:var(--bg-3);font-size:12px;color:var(--text-2)">
+              <option>全部实例</option><option>VM-101</option><option>VM-102</option>
+            </select>
+          </div>
+          <div class="card-body">
+            <div style="height:200px">
+              <canvas id="trafficChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>实例状态</h3></div>
+          <div class="card-body">
+            <div style="height:160px">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VM List -->
+      <div class="card">
+        <div class="card-header">
+          <h3>我的虚拟机</h3>
+          <a href="products.html" class="btn-sm primary">+ 购买新实例</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="vm-grid" style="padding:20px">
+
+            <!-- VM 1: Running KVM -->
+            <div class="vm-card">
+              <div class="vm-card-header">
+                <div class="vm-status-dot running" data-vm-status="101"></div>
+                <div class="vm-card-title">
+                  <h4>Web 生产服务器</h4>
+                  <span>VM-101 · 广州节点 · #101</span>
+                </div>
+                <span class="vm-card-type vm-type-kvm">KVM</span>
+              </div>
+              <div class="vm-specs">
+                <div class="vm-spec"><span class="vm-spec-val">2</span><span class="vm-spec-key">vCPU</span></div>
+                <div class="vm-spec"><span class="vm-spec-val">4G</span><span class="vm-spec-key">内存</span></div>
+                <div class="vm-spec"><span class="vm-spec-val">80G</span><span class="vm-spec-key">SSD</span></div>
+              </div>
+              <div class="vm-usage">
+                <div class="vm-usage-row">
+                  <span class="vm-usage-label">CPU</span>
+                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-blue" data-pct="45" style="width:45%"></div></div>
+                  <span class="vm-usage-pct">45%</span>
+                </div>
+                <div class="vm-usage-row">
+                  <span class="vm-usage-label">内存</span>
+                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-green" data-pct="62" style="width:62%"></div></div>
+                  <span class="vm-usage-pct">62%</span>
+                </div>
+              </div>
+              <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-family:var(--mono)">
+                IP: 45.192.123.45 · 到期: 2025-08-01
+              </div>
+              <div class="vm-actions">
+                <button class="vm-btn danger" data-vm="101" data-action="stop" onclick="VMOperations.perform(101,'stop','关机')">关机</button>
+                <button class="vm-btn" data-vm="101" data-action="restart" onclick="VMOperations.perform(101,'restart','重启')">重启</button>
+                <button class="vm-btn primary" onclick="VMOperations.openVNC(101)">VNC</button>
+                <button class="vm-btn" onclick="VMOperations.openSSH(101)">SSH</button>
+                <button class="vm-btn" onclick="window.location.href='instance-detail.html?id=101'">详情</button>
+              </div>
+            </div>
+
+            <!-- VM 2: Running LXC -->
+            <div class="vm-card">
+              <div class="vm-card-header">
+                <div class="vm-status-dot running" data-vm-status="102"></div>
+                <div class="vm-card-title">
+                  <h4>测试容器</h4>
+                  <span>CT-102 · 上海节点 · #102</span>
+                </div>
+                <span class="vm-card-type vm-type-lxc">LXC</span>
+              </div>
+              <div class="vm-specs">
+                <div class="vm-spec"><span class="vm-spec-val">1</span><span class="vm-spec-key">vCPU</span></div>
+                <div class="vm-spec"><span class="vm-spec-val">1G</span><span class="vm-spec-key">内存</span></div>
+                <div class="vm-spec"><span class="vm-spec-val">20G</span><span class="vm-spec-key">SSD</span></div>
+              </div>
+              <div class="vm-usage">
+                <div class="vm-usage-row">
+                  <span class="vm-usage-label">CPU</span>
+                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-blue" data-pct="12" style="width:12%"></div></div>
+                  <span class="vm-usage-pct">12%</span>
+                </div>
+                <div class="vm-usage-row">
+                  <span class="vm-usage-label">内存</span>
+                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-green" data-pct="38" style="width:38%"></div></div>
+                  <span class="vm-usage-pct">38%</span>
+                </div>
+              </div>
+              <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-family:var(--mono)">
+                IP: NAT · 端口: 10022→22 · 到期: 2025-07-15
+              </div>
+              <div class="vm-actions">
+                <button class="vm-btn danger" onclick="VMOperations.perform(102,'stop','关机')">关机</button>
+                <button class="vm-btn" onclick="VMOperations.perform(102,'restart','重启')">重启</button>
+                <button class="vm-btn" onclick="VMOperations.openSSH(102)">SSH</button>
+                <button class="vm-btn" onclick="window.location.href='instance-detail.html?id=102'">详情</button>
+                <button class="vm-btn" style="color:var(--orange)" onclick="renewVM(102)">续费</button>
+              </div>
+            </div>
+
+            <!-- VM 3: Stopped -->
+            <div class="vm-card">
+              <div class="vm-card-header">
+                <div class="vm-status-dot stopped" data-vm-status="103"></div>
+                <div class="vm-card-title">
+                  <h4>备用服务器</h4>
+                  <span>VM-103 · 香港节点 · #103</span>
+                </div>
+                <span class="vm-card-type vm-type-kvm">KVM</span>
+              </div>
+              <div class="vm-specs">
+                <div class="vm-spec"><span class="vm-spec-val">4</span><span class="vm-spec-key">vCPU</span></div>
+                <div class="vm-spec"><span class="vm-spec-val">8G</span><span class="vm-spec-key">内存</span></div>
+                <div class="vm-spec"><span class="vm-spec-val">100G</span><span class="vm-spec-key">SSD</span></div>
+              </div>
+              <div class="vm-usage">
+                <div class="vm-usage-row">
+                  <span class="vm-usage-label">CPU</span>
+                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-blue" data-pct="0" style="width:0%"></div></div>
+                  <span class="vm-usage-pct">0%</span>
+                </div>
+                <div class="vm-usage-row">
+                  <span class="vm-usage-label">内存</span>
+                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-green" data-pct="0" style="width:0%"></div></div>
+                  <span class="vm-usage-pct">0%</span>
+                </div>
+              </div>
+              <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-family:var(--mono)">
+                IP: 154.9.237.88 · 已停止 · 到期: 2025-12-31
+              </div>
+              <div class="vm-actions">
+                <button class="vm-btn success" onclick="VMOperations.perform(103,'start','开机')">开机</button>
+                <button class="vm-btn primary" onclick="VMOperations.openVNC(103)">VNC</button>
+                <button class="vm-btn" onclick="window.location.href='instance-detail.html?id=103'">详情</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Announcements preview -->
+      <div class="card">
+        <div class="card-header">
+          <h3>最新公告</h3>
+          <a href="announcements.html" class="btn-sm default">查看全部</a>
+        </div>
+        <div>
+          <div class="ticket-item">
+            <div class="ticket-priority priority-medium"></div>
+            <div class="ticket-info">
+              <div class="ticket-title">广州节点例行维护通知</div>
+              <div class="ticket-meta"><span>2025-07-01</span><span>维护</span></div>
+            </div>
+            <span class="badge badge-warning">维护</span>
+          </div>
+          <div class="ticket-item">
+            <div class="ticket-priority priority-low"></div>
+            <div class="ticket-info">
+              <div class="ticket-title">WebSSH 2.0 正式上线公告</div>
+              <div class="ticket-meta"><span>2025-06-28</span><span>新功能</span></div>
+            </div>
+            <span class="badge badge-info">新功能</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  ThemeManager.init();
+  animateUsageBars();
+
+  // Traffic chart
+  const labels = Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return `${d.getMonth()+1}/${d.getDate()}`;});
+  const data = Array.from({length:30},()=>Math.random()*20+5);
+  CloudVMCharts.createLineChart(
+    document.getElementById('trafficChart').getContext('2d'), labels,
+    [{ label:'流量(GB)', data, backgroundColor:'rgba(37,99,235,0.08)', borderColor:'rgba(37,99,235,0.8)' }]
+  );
+
+  // Status chart
+  CloudVMCharts.createDoughnutChart(
+    document.getElementById('statusChart').getContext('2d'),
+    ['运行中','已停止'],
+    [2, 1],
+    ['rgba(22,163,74,0.8)', 'rgba(220,38,38,0.7)']
+  );
+});
+
+function renewVM(id) {
+  window.location.href = `billing.html?renew=${id}`;
+}
+</script>
+</body>
+</html>

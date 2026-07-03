@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>虚拟机管理 — CloudVM Pro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+<link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <div class="nav-brand">
+        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
+      </div>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">概览</div>
+        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">节点管理</div>
+        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">业务管理</div>
+        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户管理</a>
+        <a class="sidebar-item active" href="vms.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
+        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
+        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>订单管理</a>
+        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">3</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">财务</div>
+        <a class="sidebar-item" href="coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>优惠码 & 代金券</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">系统</div>
+        <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名审核</a>
+        <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>公告管理</a>
+        <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
+        <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
+        <div><div class="user-name">超级管理员</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">虚拟机管理</span>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="admin-page">
+      <div style="margin-bottom:24px">
+        <h1 style="font-size:22px;margin-bottom:4px">虚拟机管理</h1>
+        <p style="font-size:14px;color:var(--text-3)">管理所有用户虚拟机实例，支持开机、关机、重启、强制停止及批量操作</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="overview-grid">
+        <div class="overview-card">
+          <div class="ov-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg></div>
+          <div class="ov-label">虚拟机总数</div>
+          <div class="ov-value">512</div>
+          <div class="ov-change up">↑ +8 今日新增</div>
+        </div>
+        <div class="overview-card green">
+          <div class="ov-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div class="ov-label">运行中</div>
+          <div class="ov-value">387</div>
+          <div class="ov-change up">75.6% 运行率</div>
+        </div>
+        <div class="overview-card">
+          <div class="ov-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></div>
+          <div class="ov-label">已停止</div>
+          <div class="ov-value">98</div>
+          <div class="ov-change down">19.1% 停止率</div>
+        </div>
+        <div class="overview-card orange">
+          <div class="ov-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="ov-label">即将到期</div>
+          <div class="ov-value">27</div>
+          <div class="ov-change">7天内到期</div>
+        </div>
+      </div>
+
+      <!-- VM Table -->
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h3>虚拟机列表</h3>
+          <input type="text" class="search-input" id="vmSearch" placeholder="搜索 VMID / 用户名..." oninput="filterVMs()">
+          <select class="select-filter" id="vmStatusFilter" onchange="filterVMs()">
+            <option value="all">全部状态</option>
+            <option value="running">运行中</option>
+            <option value="stopped">已停止</option>
+            <option value="suspended">已挂起</option>
+            <option value="expired">已过期</option>
+          </select>
+          <button class="btn-sm danger" id="batchActionBtn" onclick="batchAction()" disabled>批量操作</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="accent-color:var(--orange)"></th>
+                <th>ID</th>
+                <th>Instance ID</th>
+                <th>所属用户</th>
+                <th>节点</th>
+                <th>类型</th>
+                <th>CPU/RAM/磁盘</th>
+                <th>IP 地址</th>
+                <th>状态</th>
+                <th>到期时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="vmTableBody">
+              <tr data-status="running">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2001</td>
+                <td style="font-family:var(--mono);font-weight:600">1101</td>
+                <td style="font-weight:600">张三</td>
+                <td>广州 CN1</td>
+                <td><span class="node-type-tag tag-kvm">KVM</span></td>
+                <td style="font-family:var(--mono);font-size:12px">4C / 8GB / 80GB</td>
+                <td style="font-family:var(--mono);font-size:12px">45.192.123.15</td>
+                <td><span class="badge badge-success">运行中</span></td>
+                <td style="font-size:13px">2025-09-15</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm success" onclick="vmAction('stop','2001')">停止</button>
+                  <button class="btn-sm default" onclick="vmAction('restart','2001')">重启</button>
+                  <button class="btn-sm default" onclick="vmAction('detail','2001')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2001','1101')">删除</button>
+                </div></td>
+              </tr>
+              <tr data-status="running">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2002</td>
+                <td style="font-family:var(--mono);font-weight:600">1102</td>
+                <td style="font-weight:600">李四</td>
+                <td>广州 CN1</td>
+                <td><span class="node-type-tag tag-lxc" style="background:var(--green-soft);color:var(--green)">LXC</span></td>
+                <td style="font-family:var(--mono);font-size:12px">2C / 4GB / 40GB</td>
+                <td style="font-family:var(--mono);font-size:12px">45.192.123.22</td>
+                <td><span class="badge badge-success">运行中</span></td>
+                <td style="font-size:13px">2025-08-20</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm success" onclick="vmAction('stop','2002')">停止</button>
+                  <button class="btn-sm default" onclick="vmAction('restart','2002')">重启</button>
+                  <button class="btn-sm default" onclick="vmAction('detail','2002')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2002','1102')">删除</button>
+                </div></td>
+              </tr>
+              <tr data-status="stopped">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2003</td>
+                <td style="font-family:var(--mono);font-weight:600">1205</td>
+                <td style="font-weight:600">赵六</td>
+                <td>上海 CN2</td>
+                <td><span class="node-type-tag tag-kvm">KVM</span></td>
+                <td style="font-family:var(--mono);font-size:12px">8C / 16GB / 160GB</td>
+                <td style="font-family:var(--mono);font-size:12px">192.168.2.45</td>
+                <td><span class="badge badge-danger">已停止</span></td>
+                <td style="font-size:13px">2025-10-01</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm success" onclick="vmAction('start','2003')">开机</button>
+                  <button class="btn-sm default" onclick="vmAction('detail','2003')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2003','1205')">删除</button>
+                </div></td>
+              </tr>
+              <tr data-status="running">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2004</td>
+                <td style="font-family:var(--mono);font-weight:600">1301</td>
+                <td style="font-weight:600">张三</td>
+                <td>中国香港 HK1</td>
+                <td><span class="node-type-tag tag-kvm">KVM</span></td>
+                <td style="font-family:var(--mono);font-size:12px">4C / 8GB / 80GB</td>
+                <td style="font-family:var(--mono);font-size:12px">154.9.237.10</td>
+                <td><span class="badge badge-success">运行中</span></td>
+                <td style="font-size:13px">2025-09-15</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm success" onclick="vmAction('stop','2004')">停止</button>
+                  <button class="btn-sm default" onclick="vmAction('restart','2004')">重启</button>
+                  <button class="btn-sm default" onclick="vmAction('detail','2004')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2004','1301')">删除</button>
+                </div></td>
+              </tr>
+              <tr data-status="suspended">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2005</td>
+                <td style="font-family:var(--mono);font-weight:600">1402</td>
+                <td style="font-weight:600">周八</td>
+                <td>广州 CN1</td>
+                <td><span class="node-type-tag tag-lxc" style="background:var(--green-soft);color:var(--green)">LXC</span></td>
+                <td style="font-family:var(--mono);font-size:12px">1C / 2GB / 30GB</td>
+                <td style="font-family:var(--mono);font-size:12px">45.192.123.88</td>
+                <td><span class="badge badge-warning">已挂起</span></td>
+                <td style="font-size:13px">2025-07-30</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm success" onclick="vmAction('resume','2005')">恢复</button>
+                  <button class="btn-sm default" onclick="vmAction('detail','2005')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2005','1402')">删除</button>
+                </div></td>
+              </tr>
+              <tr data-status="expired">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2006</td>
+                <td style="font-family:var(--mono);font-weight:600">1503</td>
+                <td style="font-weight:600">王五</td>
+                <td>上海 CN2</td>
+                <td><span class="node-type-tag tag-kvm">KVM</span></td>
+                <td style="font-family:var(--mono);font-size:12px">2C / 4GB / 50GB</td>
+                <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">—</td>
+                <td><span class="badge badge-default" style="background:rgba(0,0,0,0.05);color:var(--text-3)">已过期</span></td>
+                <td style="font-size:13px;color:var(--red)">2025-06-01</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm default" onclick="vmAction('detail','2006')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2006','1503')">删除</button>
+                </div></td>
+              </tr>
+              <tr data-status="running">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2007</td>
+                <td style="font-family:var(--mono);font-weight:600">1601</td>
+                <td style="font-weight:600">吴九</td>
+                <td>中国香港 HK1</td>
+                <td><span class="node-type-tag tag-kvm">KVM</span></td>
+                <td style="font-family:var(--mono);font-size:12px">4C / 8GB / 100GB</td>
+                <td style="font-family:var(--mono);font-size:12px">154.9.237.33</td>
+                <td><span class="badge badge-success">运行中</span></td>
+                <td style="font-size:13px">2025-11-20</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm success" onclick="vmAction('stop','2007')">停止</button>
+                  <button class="btn-sm default" onclick="vmAction('restart','2007')">重启</button>
+                  <button class="btn-sm default" onclick="vmAction('detail','2007')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2007','1601')">删除</button>
+                </div></td>
+              </tr>
+              <tr data-status="stopped">
+                <td><input type="checkbox" class="vm-checkbox" onchange="updateBatchBtn()" style="accent-color:var(--orange)"></td>
+                <td style="font-family:var(--mono);font-size:12px">#2008</td>
+                <td style="font-family:var(--mono);font-weight:600">1702</td>
+                <td style="font-weight:600">张三</td>
+                <td>广州 CN1</td>
+                <td><span class="node-type-tag tag-lxc" style="background:var(--green-soft);color:var(--green)">LXC</span></td>
+                <td style="font-family:var(--mono);font-size:12px">2C / 4GB / 40GB</td>
+                <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">—</td>
+                <td><span class="badge badge-danger">已停止</span></td>
+                <td style="font-size:13px">2025-09-15</td>
+                <td><div class="table-actions">
+                  <button class="btn-sm success" onclick="vmAction('start','2008')">开机</button>
+                  <button class="btn-sm default" onclick="vmAction('detail','2008')">详情</button>
+                  <button class="btn-sm danger" onclick="openDeleteVM('2008','1702')">删除</button>
+                </div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <button class="page-btn" disabled>&lt;</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">...</button>
+          <button class="page-btn">52</button>
+          <button class="page-btn">&gt;</button>
+          <span style="margin-left:8px;font-size:13px;color:var(--text-3)">共 512 条</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete VM Confirmation Modal -->
+<div class="modal-overlay" id="deleteVMModal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header"><h3 style="color:var(--red)">删除虚拟机</h3><button class="modal-close" onclick="ModalManager.close('deleteVMModal')">&times;</button></div>
+    <div class="modal-body">
+      <div style="padding:16px;background:rgba(220,38,38,0.06);border-radius:10px;margin-bottom:16px">
+        <p style="font-size:14px;color:var(--red);font-weight:600;margin-bottom:4px">⚠ 此操作不可撤销</p>
+        <p style="font-size:13px;color:var(--text-2)">删除后将永久移除该虚拟机及其所有数据，包括磁盘、快照和备份。</p>
+      </div>
+      <div class="form-group">
+        <label>请输入虚拟机 ID 以确认删除：<strong id="deleteVMIdDisplay" style="color:var(--red);font-family:var(--mono)"></strong></label>
+        <input type="text" class="form-input" id="deleteVMConfirm" placeholder="输入 VMID 确认" style="font-family:var(--mono)">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('deleteVMModal')">取消</button>
+      <button class="btn-sm danger" id="confirmDeleteBtn" disabled onclick="confirmDeleteVM()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+let currentDeleteVMId = '';
+let currentDeleteVmid = '';
+
+document.addEventListener('DOMContentLoaded', () => {
+  ThemeManager.init();
+  const confirmInput = document.getElementById('deleteVMConfirm');
+  confirmInput.addEventListener('input', function() {
+    document.getElementById('confirmDeleteBtn').disabled = this.value !== currentDeleteVmid;
+  });
+});
+
+function filterVMs() {
+  const search = document.getElementById('vmSearch').value.toLowerCase();
+  const status = document.getElementById('vmStatusFilter').value;
+  const rows = document.querySelectorAll('#vmTableBody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const rowStatus = row.getAttribute('data-status');
+    const matchSearch = !search || text.includes(search);
+    const matchStatus = status === 'all' || rowStatus === status;
+    row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+  });
+}
+
+function toggleSelectAll(el) {
+  document.querySelectorAll('.vm-checkbox').forEach(cb => cb.checked = el.checked);
+  updateBatchBtn();
+}
+
+function updateBatchBtn() {
+  const checked = document.querySelectorAll('.vm-checkbox:checked').length;
+  const btn = document.getElementById('batchActionBtn');
+  btn.disabled = checked === 0;
+  btn.textContent = checked > 0 ? `批量操作 (${checked})` : '批量操作';
+}
+
+async function batchAction() {
+  const checked = document.querySelectorAll('.vm-checkbox:checked').length;
+  showNotification('批量操作', `已选择 ${checked} 台虚拟机`, 'info');
+}
+
+async function vmAction(action, id) {
+  const actions = {
+    start: ['开机', 'success'],
+    stop: ['停止', 'info'],
+    restart: ['重启', 'info'],
+    resume: ['恢复', 'success'],
+    detail: ['查看详情', 'info']
+  };
+  const [label, type] = actions[action] || ['操作', 'info'];
+  if (action === 'detail') {
+    showNotification('提示', `查看虚拟机 #${id} 详情`, 'info');
+    return;
+  }
+  showNotification('执行中', `正在${label}虚拟机 #${id}...`, 'info');
+  await new Promise(r => setTimeout(r, 1200));
+  showNotification(`${label}成功`, `虚拟机 #${id} 已${label}`, type);
+}
+
+function openDeleteVM(id, vmid) {
+  currentDeleteVMId = id;
+  currentDeleteVmid = vmid;
+  document.getElementById('deleteVMIdDisplay').textContent = vmid;
+  document.getElementById('deleteVMConfirm').value = '';
+  document.getElementById('confirmDeleteBtn').disabled = true;
+  ModalManager.open('deleteVMModal');
+}
+
+async function confirmDeleteVM() {
+  ModalManager.close('deleteVMModal');
+  await new Promise(r => setTimeout(r, 800));
+  showNotification('已删除', `虚拟机 #${currentDeleteVmid} 已被永久删除`, 'success');
+}
+</script>
+</body>
+</html>

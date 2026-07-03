@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>节点管理 — CloudVM Pro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+<link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar (same structure as index) -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <div class="nav-brand">
+        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
+      </div>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">节点管理</div>
+        <a class="sidebar-item active" href="nodes.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">业务管理</div>
+        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>用户管理</a>
+        <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
+        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
+        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a>
+        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">5</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">系统</div>
+        <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
+        <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
+        <div><div class="user-name">超级管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">节点管理</span>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+        <button class="btn-sm primary" onclick="ModalManager.open('addNodeModal')">+ 添加节点</button>
+        <button class="btn-sm default" onclick="syncAllNodes()">↻ 同步全部节点</button>
+      </div>
+    </div>
+
+    <div class="admin-page">
+      <div style="margin-bottom:24px">
+        <h1 style="font-size:22px;margin-bottom:4px">节点管理</h1>
+        <p style="font-size:14px;color:var(--text-3)">管理所有 Proxmox VE 节点，测试连接，同步虚拟机数据和镜像</p>
+      </div>
+
+      <!-- Node Cards -->
+      <div class="node-grid">
+        <!-- Node 1 -->
+        <div class="node-manage-card">
+          <div class="node-card-header">
+            <div class="node-ping-indicator online"></div>
+            <h4>广州 CN1</h4>
+            <span class="node-type-tag tag-both">KVM+LXC</span>
+          </div>
+          <div class="node-meta">
+            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">192.168.1.10</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">156</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">延迟</div><div class="node-meta-value" style="color:var(--green)">3ms</div></div>
+          </div>
+          <div class="node-usage">
+            <div class="node-usage-row">
+              <span class="node-usage-label">CPU</span>
+              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:45%"></div></div>
+              <span class="node-usage-pct">45%</span>
+            </div>
+            <div class="node-usage-row">
+              <span class="node-usage-label">内存</span>
+              <div class="node-usage-bar"><div class="node-usage-fill fill-green" style="width:62%"></div></div>
+              <span class="node-usage-pct">62%</span>
+            </div>
+            <div class="node-usage-row">
+              <span class="node-usage-label">存储</span>
+              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:70%"></div></div>
+              <span class="node-usage-pct">70%</span>
+            </div>
+          </div>
+          <div class="node-card-actions">
+            <button class="btn-sm default" onclick="testNode('cn1')">🔍 测试连接</button>
+            <button class="btn-sm default" onclick="syncNodeVMs('cn1')">↻ 同步 VM</button>
+            <button class="btn-sm default" onclick="syncNodeImages('cn1')">📀 同步镜像</button>
+            <button class="btn-sm default" onclick="editNode('cn1')">编辑</button>
+          </div>
+        </div>
+
+        <!-- Node 2 -->
+        <div class="node-manage-card">
+          <div class="node-card-header">
+            <div class="node-ping-indicator online"></div>
+            <h4>上海 CN2</h4>
+            <span class="node-type-tag tag-kvm">KVM</span>
+          </div>
+          <div class="node-meta">
+            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">192.168.2.10</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">98</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">延迟</div><div class="node-meta-value" style="color:var(--green)">5ms</div></div>
+          </div>
+          <div class="node-usage">
+            <div class="node-usage-row">
+              <span class="node-usage-label">CPU</span>
+              <div class="node-usage-bar"><div class="node-usage-fill" style="width:78%;background:var(--orange)"></div></div>
+              <span class="node-usage-pct">78%</span>
+            </div>
+            <div class="node-usage-row">
+              <span class="node-usage-label">内存</span>
+              <div class="node-usage-bar"><div class="node-usage-fill" style="width:85%;background:var(--orange)"></div></div>
+              <span class="node-usage-pct">85%</span>
+            </div>
+            <div class="node-usage-row">
+              <span class="node-usage-label">存储</span>
+              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:55%"></div></div>
+              <span class="node-usage-pct">55%</span>
+            </div>
+          </div>
+          <div class="node-card-actions">
+            <button class="btn-sm default" onclick="testNode('cn2')">🔍 测试</button>
+            <button class="btn-sm default" onclick="syncNodeVMs('cn2')">↻ 同步 VM</button>
+            <button class="btn-sm default" onclick="syncNodeImages('cn2')">📀 镜像</button>
+            <button class="btn-sm default" onclick="editNode('cn2')">编辑</button>
+          </div>
+        </div>
+
+        <!-- Node 3 - HK -->
+        <div class="node-manage-card">
+          <div class="node-card-header">
+            <div class="node-ping-indicator online"></div>
+            <h4>中国香港 HK1</h4>
+            <span class="node-type-tag tag-both">KVM+LXC</span>
+          </div>
+          <div class="node-meta">
+            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">192.168.3.10</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">133</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">延迟</div><div class="node-meta-value" style="color:var(--green)">8ms</div></div>
+          </div>
+          <div class="node-usage">
+            <div class="node-usage-row">
+              <span class="node-usage-label">CPU</span>
+              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:35%"></div></div>
+              <span class="node-usage-pct">35%</span>
+            </div>
+            <div class="node-usage-row">
+              <span class="node-usage-label">内存</span>
+              <div class="node-usage-bar"><div class="node-usage-fill fill-green" style="width:48%"></div></div>
+              <span class="node-usage-pct">48%</span>
+            </div>
+            <div class="node-usage-row">
+              <span class="node-usage-label">存储</span>
+              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:42%"></div></div>
+              <span class="node-usage-pct">42%</span>
+            </div>
+          </div>
+          <div class="node-card-actions">
+            <button class="btn-sm default" onclick="testNode('hk1')">🔍 测试</button>
+            <button class="btn-sm default" onclick="syncNodeVMs('hk1')">↻ 同步 VM</button>
+            <button class="btn-sm default" onclick="syncNodeImages('hk1')">📀 镜像</button>
+            <button class="btn-sm default" onclick="editNode('hk1')">编辑</button>
+          </div>
+        </div>
+
+        <!-- Node 4 - Offline -->
+        <div class="node-manage-card" style="opacity:0.7">
+          <div class="node-card-header">
+            <div class="node-ping-indicator offline"></div>
+            <h4>美西 LA1</h4>
+            <span class="node-type-tag tag-kvm">KVM</span>
+          </div>
+          <div class="node-meta">
+            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">10.0.4.10</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">—</div></div>
+            <div class="node-meta-item"><div class="node-meta-label">状态</div><div class="node-meta-value" style="color:var(--red)">离线</div></div>
+          </div>
+          <div style="padding:12px;background:rgba(220,38,38,0.08);border-radius:8px;font-size:13px;color:var(--red);margin-bottom:12px">
+            ⚠️ 节点无法连接，请检查 PVE 服务或网络
+          </div>
+          <div class="node-card-actions">
+            <button class="btn-sm danger" onclick="testNode('la1')">🔄 重试连接</button>
+            <button class="btn-sm default" onclick="editNode('la1')">编辑配置</button>
+            <button class="btn-sm danger" onclick="deleteNode('la1')">删除</button>
+          </div>
+        </div>
+
+        <!-- Add Node Placeholder -->
+        <div class="node-manage-card" style="border:2px dashed var(--border-2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240px" onclick="ModalManager.open('addNodeModal')">
+          <div style="font-size:32px;margin-bottom:12px;opacity:0.5">+</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text-3)">添加新节点</div>
+          <div style="font-size:13px;color:var(--text-3);margin-top:4px">接入新的 PVE 节点</div>
+        </div>
+      </div>
+
+      <!-- NAT Config -->
+      <div class="table-wrapper" style="margin-top:24px">
+        <div class="table-header">
+          <h3>NAT 网络配置</h3>
+          <button class="btn-sm primary" onclick="ModalManager.open('natConfigModal')">+ 添加 NAT 池</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>节点</th><th>公网 IP</th><th>端口范围</th><th>已用端口</th><th>最大端口数/实例</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>广州 CN1</td>
+              <td style="font-family:var(--mono)">45.192.123.0/24</td>
+              <td style="font-family:var(--mono)">10000 - 65535</td>
+              <td>1,248 / 55,535</td>
+              <td>10</td>
+              <td><button class="btn-sm default" onclick="editNATConfig('cn1')">编辑</button></td>
+            </tr>
+            <tr>
+              <td>中国香港 HK1</td>
+              <td style="font-family:var(--mono)">154.9.237.0/24</td>
+              <td style="font-family:var(--mono)">20000 - 60000</td>
+              <td>890 / 40,000</td>
+              <td>15</td>
+              <td><button class="btn-sm default" onclick="editNATConfig('hk1')">编辑</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Node Modal -->
+<div class="modal-overlay" id="addNodeModal">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header"><h3>添加 PVE 节点</h3><button class="modal-close" onclick="ModalManager.close('addNodeModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>节点名称 *</label><input type="text" class="form-input" placeholder="如: 广州 CN3"></div>
+        <div class="form-group"><label>地区</label><input type="text" class="form-input" placeholder="如: 广州"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>PVE 主机 IP *</label><input type="text" class="form-input" id="nodeIP" placeholder="192.168.1.10"></div>
+        <div class="form-group"><label>PVE 端口</label><input type="number" class="form-input" value="8006"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>API 用户名 *</label><input type="text" class="form-input" placeholder="root@pam"></div>
+        <div class="form-group"><label>API 密码 / Token</label><input type="password" class="form-input" placeholder="PVE API Token"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>虚拟化类型</label>
+          <select class="form-input">
+            <option>KVM + LXC</option>
+            <option>仅 KVM</option>
+            <option>仅 LXC</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>存储池</label>
+          <input type="text" class="form-input" placeholder="local-lvm">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>NAT 公网 IP</label>
+        <input type="text" class="form-input" placeholder="45.192.0.0/24（NAT 节点填写）">
+      </div>
+      <div class="form-group">
+        <label>NAT 端口范围</label>
+        <div class="form-row">
+          <input type="number" class="form-input" placeholder="10000" value="10000">
+          <input type="number" class="form-input" placeholder="65535" value="65535">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm default" onclick="ModalManager.close('addNodeModal')">取消</button>
+      <button class="btn-sm default" onclick="testNewNode()">🔍 测试连接</button>
+      <button class="btn-sm primary" onclick="addNode()">添加节点</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
+
+async function testNode(id) {
+  showNotification('测试中', `正在连接节点 ${id}...`, 'info');
+  await new Promise(r => setTimeout(r, 1500));
+  showNotification('连接成功', `节点 ${id} 响应正常，PVE 版本: 8.2.2`, 'success');
+}
+
+async function syncNodeVMs(id) {
+  showNotification('同步中', `正在从节点 ${id} 同步虚拟机数据...`, 'info');
+  await new Promise(r => setTimeout(r, 2500));
+  showNotification('同步完成', `节点 ${id} VM 数据已同步`, 'success');
+}
+
+async function syncNodeImages(id) {
+  showNotification('同步中', `正在从节点 ${id} 同步镜像列表...`, 'info');
+  await new Promise(r => setTimeout(r, 2000));
+  showNotification('同步完成', `节点 ${id} 镜像列表已更新`, 'success');
+}
+
+async function syncAllNodes() {
+  showNotification('同步中', '正在同步全部节点数据，请稍候...', 'info');
+  await new Promise(r => setTimeout(r, 3000));
+  showNotification('同步完成', '所有节点数据已同步', 'success');
+}
+
+function editNode(id) { showNotification('提示', `编辑节点 ${id} 配置`, 'info'); }
+async function deleteNode(id) {
+  const ok = await VMOperations.confirm('删除节点', '确认删除该节点？此操作不可恢复。');
+  if (ok) showNotification('已删除', `节点 ${id} 已移除`, 'success');
+}
+
+async function testNewNode() {
+  const ip = document.getElementById('nodeIP').value;
+  if (!ip) { showNotification('错误', '请输入节点 IP', 'error'); return; }
+  showNotification('测试中', `正在连接 ${ip}:8006...`, 'info');
+  await new Promise(r => setTimeout(r, 1500));
+  showNotification('连接成功', `PVE 节点连接正常`, 'success');
+}
+
+async function addNode() {
+  ModalManager.close('addNodeModal');
+  await new Promise(r => setTimeout(r, 500));
+  showNotification('成功', '节点已添加，正在同步初始数据...', 'success');
+}
+
+function editNATConfig(id) { showNotification('提示', `编辑节点 ${id} NAT 配置`, 'info'); }
+</script>
+</body>
+</html>

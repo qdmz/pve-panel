@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 — CloudVM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/>
+            <rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/>
+            <rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/>
+            <rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/>
+          </svg>
+        </div>
+        <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+      </div>
+      <div class="auth-tagline">
+        <h2>欢迎回来</h2>
+        <p>登录您的账号，管理您的虚拟机实例和云资源。</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><div class="auth-feature-dot"></div><span>实时监控 CPU、内存、流量</span></div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div><span>一键开关机、重启、重装</span></div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div><span>浏览器 VNC 图形控制台</span></div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div><span>工单系统 7×24 技术支持</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrapper">
+      <h1>登录账号</h1>
+      <p class="subtitle">还没有账号？<a href="register.html">免费注册</a></p>
+
+      <div class="alert" id="alertMsg"></div>
+
+      <!-- Registered success tip -->
+      <div id="registeredTip" class="alert alert-success" style="display:none">
+        注册成功！验证邮件已发送，请先激活账号再登录。
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label>邮箱 / 用户名</label>
+          <input type="text" class="form-input" id="loginEmail" placeholder="邮箱或用户名" autofocus>
+          <div class="form-error" id="emailErr">请输入邮箱或用户名</div>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="margin-bottom:0">登录密码</label>
+            <a href="forgot.html" style="font-size:13px;color:var(--accent)">忘记密码？</a>
+          </div>
+          <div class="form-input-icon">
+            <input type="password" class="form-input" id="loginPwd" placeholder="请输入密码">
+            <span class="input-icon" onclick="togglePwd()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+          </div>
+          <div class="form-error" id="pwdErr">请输入密码</div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-2)">
+            <input type="checkbox" id="rememberMe" style="accent-color:var(--accent)">
+            <span>记住登录状态</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="loginBtn">登录</button>
+      </form>
+
+      <div class="form-divider">或</div>
+
+      <button onclick="guestLogin()" style="width:100%;padding:12px;background:var(--bg-3);border:1px solid var(--border-2);border-radius:10px;font-size:14px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:var(--font);transition:var(--transition)">
+        体验演示账号（只读模式）
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  ThemeManager.init();
+  const params = new URLSearchParams(location.search);
+  if (params.get('registered')) {
+    document.getElementById('registeredTip').style.display = 'block';
+  }
+});
+
+function togglePwd() {
+  const inp = document.getElementById('loginPwd');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const pwd = document.getElementById('loginPwd').value;
+  let valid = true;
+
+  if (!email) { document.getElementById('emailErr').classList.add('show'); valid = false; }
+  else document.getElementById('emailErr').classList.remove('show');
+  if (!pwd) { document.getElementById('pwdErr').classList.add('show'); valid = false; }
+  else document.getElementById('pwdErr').classList.remove('show');
+
+  if (!valid) return;
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;margin:0 auto"></div>';
+
+  await new Promise(r => setTimeout(r, 1200));
+
+  // Demo: admin goes to admin panel, others to user dashboard
+  if (email.includes('admin')) {
+    window.location.href = '../admin/index.html';
+  } else {
+    window.location.href = '../user/dashboard.html';
+  }
+});
+
+function guestLogin() {
+  document.getElementById('loginEmail').value = 'demo@cloudvm.pro';
+  document.getElementById('loginPwd').value = 'Demo@2025';
+  document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+}
+</script>
+</body>
+</html>

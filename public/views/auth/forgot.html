@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>忘记密码 — CloudVM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="nav-brand">
+        <div class="brand-icon" style="background:var(--orange)">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/>
+            <rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/>
+            <rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/>
+            <rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/>
+          </svg>
+        </div>
+        <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+      </div>
+      <div class="auth-tagline">
+        <h2>重置密码</h2>
+        <p>我们会向您注册的邮箱发送一封包含重置链接的邮件。</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><div class="auth-feature-dot" style="background:#f59e0b"></div><span>重置链接 30 分钟内有效</span></div>
+        <div class="auth-feature"><div class="auth-feature-dot" style="background:#f59e0b"></div><span>每 24 小时最多发送 5 次</span></div>
+        <div class="auth-feature"><div class="auth-feature-dot" style="background:#f59e0b"></div><span>如未收到请检查垃圾邮件</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrapper">
+      <!-- Step 1: Enter Email -->
+      <div id="step1">
+        <h1>忘记密码</h1>
+        <p class="subtitle">记起密码了？<a href="login.html">返回登录</a></p>
+        <div class="alert" id="alertMsg"></div>
+        <form id="forgotForm">
+          <div class="form-group">
+            <label>注册邮箱</label>
+            <input type="email" class="form-input" id="forgotEmail" placeholder="your@email.com" autofocus>
+            <div class="form-error" id="emailErr">请输入有效的邮箱地址</div>
+          </div>
+          <div class="form-group">
+            <label>邮箱验证码</label>
+            <div class="captcha-row">
+              <input type="text" class="form-input" id="vcode" placeholder="6 位验证码" maxlength="6">
+              <button type="button" class="btn-captcha" id="sendBtn" onclick="sendCode()">发送验证码</button>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit">下一步</button>
+        </form>
+      </div>
+
+      <!-- Step 2: New Password -->
+      <div id="step2" style="display:none">
+        <h1>设置新密码</h1>
+        <p class="subtitle">请输入您的新密码</p>
+        <form id="resetForm">
+          <div class="form-group">
+            <label>新密码</label>
+            <div class="form-input-icon">
+              <input type="password" class="form-input" id="newPwd" placeholder="至少 8 位" minlength="8">
+              <span class="input-icon" onclick="document.getElementById('newPwd').type=document.getElementById('newPwd').type==='password'?'text':'password'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>确认新密码</label>
+            <input type="password" class="form-input" id="newPwdConfirm" placeholder="再次输入新密码">
+            <div class="form-error" id="confirmErr">两次输入不一致</div>
+          </div>
+          <button type="submit" class="btn-submit">重置密码</button>
+        </form>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div id="step3" style="display:none;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">✅</div>
+        <h1>密码已重置</h1>
+        <p style="color:var(--text-2);margin:12px 0 28px">您的密码已成功更新，请使用新密码登录。</p>
+        <a href="login.html" class="btn-submit" style="display:block;text-align:center;text-decoration:none">返回登录</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
+
+async function sendCode() {
+  const email = document.getElementById('forgotEmail').value;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('emailErr').classList.add('show'); return;
+  }
+  document.getElementById('emailErr').classList.remove('show');
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true; btn.textContent = '发送中...';
+  await new Promise(r => setTimeout(r, 800));
+  showNotification('验证码已发送', `重置验证码已发至 ${email}`, 'success');
+  startCountdown(60, btn, '重新发送');
+}
+
+document.getElementById('forgotForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail').value;
+  const code = document.getElementById('vcode').value;
+  if (!email || !code) { return; }
+  const btn = this.querySelector('.btn-submit');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;margin:0 auto"></div>';
+  await new Promise(r => setTimeout(r, 1000));
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+});
+
+document.getElementById('resetForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const p1 = document.getElementById('newPwd').value;
+  const p2 = document.getElementById('newPwdConfirm').value;
+  if (p1 !== p2) { document.getElementById('confirmErr').classList.add('show'); return; }
+  const btn = this.querySelector('.btn-submit');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;margin:0 auto"></div>';
+  await new Promise(r => setTimeout(r, 1000));
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+});
+</script>
+</body>
+</html>

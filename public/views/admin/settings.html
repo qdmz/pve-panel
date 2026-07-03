@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统配置 — CloudVM Pro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../../css/dashboard.css">
+<link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <div class="nav-brand">
+        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
+        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点管理</a>
+        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>用户管理</a>
+        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
+        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a>
+        <a class="sidebar-item active" href="settings.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
+        <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
+        <div><div class="user-name">超级管理员</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">系统配置</span>
+      </div>
+      <div style="margin-left:auto">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="admin-page">
+      <div style="margin-bottom:24px">
+        <h1 style="font-size:22px;margin-bottom:4px">系统配置</h1>
+        <p style="font-size:14px;color:var(--text-3)">配置支付接口、邮件 SMTP、邮件通知模板、实名认证接口等</p>
+      </div>
+
+      <div class="config-sections">
+        <!-- Config Nav -->
+        <nav class="config-nav">
+          <a class="config-nav-item active" data-panel="general" onclick="switchConfig('general')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            基础设置
+          </a>
+          <a class="config-nav-item" data-panel="payment" onclick="switchConfig('payment')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            支付接口
+          </a>
+          <a class="config-nav-item" data-panel="email" onclick="switchConfig('email')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            邮件 SMTP
+          </a>
+          <a class="config-nav-item" data-panel="templates" onclick="switchConfig('templates')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            邮件模板
+          </a>
+          <a class="config-nav-item" data-panel="verify" onclick="switchConfig('verify')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            实名认证
+          </a>
+          <a class="config-nav-item" data-panel="site" onclick="switchConfig('site')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            网站设置
+          </a>
+        </nav>
+
+        <!-- Panels -->
+        <div>
+          <!-- General -->
+          <div class="config-panel active" id="general">
+            <div class="config-section">
+              <div class="config-section-header">
+                <h3>基础信息</h3>
+                <p>配置平台基本信息</p>
+              </div>
+              <div class="config-section-body">
+                <div class="config-row">
+                  <div class="config-label"><strong>平台名称</strong><span>显示在页面标题</span></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" value="CloudVM Pro"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>平台 Logo</strong><span>上传 PNG/SVG</span></div>
+                  <div class="config-input-wrap">
+                    <input type="file" class="form-input" accept=".png,.svg,.jpg">
+                    <p style="font-size:12px;color:var(--text-3);margin-top:4px">建议尺寸 120×40px</p>
+                  </div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>备案号</strong><span>底部显示</span></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" placeholder="粤ICP备XXXXXXXX号"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>联系邮箱</strong><span>客服邮箱</span></div>
+                  <div class="config-input-wrap"><input type="email" class="form-input" value="support@cloudvm.pro"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>新用户注册</strong><span>是否允许注册</span></div>
+                  <div class="config-input-wrap">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                      <input type="checkbox" checked style="accent-color:var(--accent)"> 开放注册
+                    </label>
+                  </div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>邮箱验证</strong><span>注册需验证邮箱</span></div>
+                  <div class="config-input-wrap">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                      <input type="checkbox" checked style="accent-color:var(--accent)"> 启用邮箱激活
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="config-actions"><button class="btn-sm primary" onclick="saveConfig('general')">保存设置</button></div>
+          </div>
+
+          <!-- Payment -->
+          <div class="config-panel" id="payment">
+            <div class="config-section">
+              <div class="config-section-header">
+                <h3>易支付配置</h3>
+                <p>配置易支付接口（支持支付宝、微信）</p>
+              </div>
+              <div class="config-section-body">
+                <div class="config-row">
+                  <div class="config-label"><strong>易支付 URL</strong><span>服务商地址</span></div>
+                  <div class="config-input-wrap"><input type="url" class="form-input" placeholder="https://pay.example.com"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>商户 ID</strong><span>pid</span></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" placeholder="商户 ID"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>商户密钥</strong><span>key</span></div>
+                  <div class="config-input-wrap"><input type="password" class="form-input" placeholder="商户密钥"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>回调域名</strong><span>支付结果通知地址</span></div>
+                  <div class="config-input-wrap"><input type="url" class="form-input" placeholder="https://yourdomain.com/api/payment/notify"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>支付方式</strong><span>启用的支付渠道</span></div>
+                  <div class="config-input-wrap" style="display:flex;gap:16px">
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" checked style="accent-color:var(--accent)">支付宝</label>
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" checked style="accent-color:var(--accent)">微信支付</label>
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="accent-color:var(--accent)">QQ 钱包</label>
+                  </div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>最低充值金额</strong><span>单位: 元</span></div>
+                  <div class="config-input-wrap"><input type="number" class="form-input" value="1" min="0.01"></div>
+                </div>
+              </div>
+            </div>
+            <div class="config-actions">
+              <button class="btn-sm default" onclick="testPayment()">测试支付接口</button>
+              <button class="btn-sm primary" onclick="saveConfig('payment')">保存配置</button>
+            </div>
+          </div>
+
+          <!-- Email SMTP -->
+          <div class="config-panel" id="email">
+            <div class="config-section">
+              <div class="config-section-header">
+                <h3>SMTP 邮件配置</h3>
+                <p>配置发件服务器，用于发送注册验证、通知邮件</p>
+              </div>
+              <div class="config-section-body">
+                <div class="config-row">
+                  <div class="config-label"><strong>SMTP 服务器</strong><span>主机地址</span></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" placeholder="smtp.gmail.com"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>SMTP 端口</strong><span>通常 465(SSL) 或 587(TLS)</span></div>
+                  <div class="config-input-wrap">
+                    <div class="form-row">
+                      <input type="number" class="form-input" value="465">
+                      <select class="form-input"><option>SSL/TLS</option><option>STARTTLS</option><option>无加密</option></select>
+                    </div>
+                  </div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>发件人邮箱</strong><span>From 地址</span></div>
+                  <div class="config-input-wrap"><input type="email" class="form-input" placeholder="noreply@cloudvm.pro"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>SMTP 用户名</strong></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" placeholder="邮箱账号"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>SMTP 密码</strong></div>
+                  <div class="config-input-wrap"><input type="password" class="form-input" placeholder="邮箱密码或应用密码"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>发件人名称</strong></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" value="CloudVM Pro"></div>
+                </div>
+              </div>
+            </div>
+            <div class="config-actions">
+              <button class="btn-sm default" onclick="testEmail()">发送测试邮件</button>
+              <button class="btn-sm primary" onclick="saveConfig('email')">保存配置</button>
+            </div>
+          </div>
+
+          <!-- Email Templates -->
+          <div class="config-panel" id="templates">
+            <div class="config-section">
+              <div class="config-section-header">
+                <h3>邮件通知模板</h3>
+                <p>管理各类邮件通知的发送内容，支持变量替换</p>
+              </div>
+              <div class="config-section-body">
+                <div style="margin-bottom:16px">
+                  <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">
+                    可用变量：<code style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">{username}</code>
+                    <code style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">{email}</code>
+                    <code style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">{link}</code>
+                    <code style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">{code}</code>
+                    <code style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">{amount}</code>
+                    <code style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">{vm_name}</code>
+                    <code style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">{expire_date}</code>
+                  </div>
+                </div>
+                <!-- Template Tabs -->
+                <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px">
+                  <button class="btn-sm primary" onclick="switchTemplate('register')">注册激活</button>
+                  <button class="btn-sm default" onclick="switchTemplate('reset')">密码重置</button>
+                  <button class="btn-sm default" onclick="switchTemplate('recharge')">充值成功</button>
+                  <button class="btn-sm default" onclick="switchTemplate('vm_create')">VM 开通</button>
+                  <button class="btn-sm default" onclick="switchTemplate('vm_expire')">即将到期</button>
+                  <button class="btn-sm default" onclick="switchTemplate('ticket')">工单回复</button>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>邮件主题</strong></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" id="tplSubject" value="【CloudVM Pro】请激活您的账号"></div>
+                </div>
+                <div class="config-row" style="border-bottom:none">
+                  <div class="config-label"><strong>邮件正文</strong><span>支持 HTML</span></div>
+                  <div class="config-input-wrap">
+                    <textarea class="form-input" id="tplBody" rows="10" style="font-family:var(--mono);font-size:12px">亲爱的 {username}，
+
+感谢您注册 CloudVM Pro！
+
+请点击以下链接激活您的账号：
+{link}
+
+链接有效期为 24 小时，请及时激活。
+
+如非本人操作，请忽略此邮件。
+
+CloudVM Pro 团队</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="config-actions">
+              <button class="btn-sm default" onclick="previewTemplate()">预览</button>
+              <button class="btn-sm primary" onclick="saveConfig('templates')">保存模板</button>
+            </div>
+          </div>
+
+          <!-- Verify -->
+          <div class="config-panel" id="verify">
+            <div class="config-section">
+              <div class="config-section-header">
+                <h3>实名认证接口</h3>
+                <p>配置第三方实名认证接口（身份证 + 人脸识别）</p>
+              </div>
+              <div class="config-section-body">
+                <div class="config-row">
+                  <div class="config-label"><strong>认证服务商</strong></div>
+                  <div class="config-input-wrap">
+                    <select class="form-input" id="verifyProvider">
+                      <option>阿里云实人认证</option>
+                      <option>腾讯云实名认证</option>
+                      <option>百度 AI 认证</option>
+                      <option>自建接口</option>
+                      <option>禁用实名认证</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>API Key</strong></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" placeholder="API Key / AccessKey ID"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>API Secret</strong></div>
+                  <div class="config-input-wrap"><input type="password" class="form-input" placeholder="API Secret / AccessKey Secret"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>认证要求</strong><span>哪些操作需要实名</span></div>
+                  <div class="config-input-wrap" style="display:flex;flex-direction:column;gap:8px">
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="accent-color:var(--accent)">购买产品</label>
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="accent-color:var(--accent)">充值金额超过 ¥500</label>
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="accent-color:var(--accent)">申请发票</label>
+                  </div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>自动审核</strong><span>通过接口自动审核</span></div>
+                  <div class="config-input-wrap">
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" checked style="accent-color:var(--accent)">启用自动审核</label>
+                    <p style="font-size:12px;color:var(--text-3);margin-top:4px">关闭则需管理员手动审核</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="config-actions">
+              <button class="btn-sm primary" onclick="saveConfig('verify')">保存配置</button>
+            </div>
+          </div>
+
+          <!-- Site -->
+          <div class="config-panel" id="site">
+            <div class="config-section">
+              <div class="config-section-header">
+                <h3>网站设置</h3>
+                <p>SEO、自定义 CSS/JS、维护模式等</p>
+              </div>
+              <div class="config-section-body">
+                <div class="config-row">
+                  <div class="config-label"><strong>维护模式</strong><span>开启后仅管理员可访问</span></div>
+                  <div class="config-input-wrap">
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="accent-color:var(--accent)">开启维护模式</label>
+                  </div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>SEO 标题</strong></div>
+                  <div class="config-input-wrap"><input type="text" class="form-input" value="CloudVM Pro — 高性能 PVE 虚拟机平台"></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>SEO 描述</strong></div>
+                  <div class="config-input-wrap"><textarea class="form-input" rows="3" placeholder="Meta description"></textarea></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>自定义 CSS</strong></div>
+                  <div class="config-input-wrap"><textarea class="form-input" rows="6" placeholder="/* 自定义样式 */" style="font-family:var(--mono);font-size:12px"></textarea></div>
+                </div>
+                <div class="config-row">
+                  <div class="config-label"><strong>统计代码</strong><span>如 Google Analytics</span></div>
+                  <div class="config-input-wrap"><textarea class="form-input" rows="4" placeholder="<!-- 统计脚本 -->" style="font-family:var(--mono);font-size:12px"></textarea></div>
+                </div>
+              </div>
+            </div>
+            <div class="config-actions"><button class="btn-sm primary" onclick="saveConfig('site')">保存设置</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); switchConfig('general'); });
+
+async function saveConfig(type) {
+  showNotification('保存中', '正在保存配置...', 'info');
+  await new Promise(r => setTimeout(r, 800));
+  showNotification('保存成功', '配置已保存', 'success');
+}
+
+async function testPayment() {
+  showNotification('测试中', '正在测试易支付接口连接...', 'info');
+  await new Promise(r => setTimeout(r, 1200));
+  showNotification('测试成功', '易支付接口连接正常', 'success');
+}
+
+async function testEmail() {
+  showNotification('发送中', '正在发送测试邮件...', 'info');
+  await new Promise(r => setTimeout(r, 1500));
+  showNotification('发送成功', '测试邮件已发送，请查收', 'success');
+}
+
+function switchTemplate(type) {
+  const templates = {
+    register: { subject: '【CloudVM Pro】请激活您的账号', body: '亲爱的 {username}，\n\n感谢注册！请点击激活链接：{link}\n\n链接 24 小时内有效。' },
+    reset: { subject: '【CloudVM Pro】密码重置', body: '您申请了密码重置。\n\n验证码：{code}\n\n30 分钟内有效，如非本人请忽略。' },
+    recharge: { subject: '【CloudVM Pro】充值成功通知', body: '您好 {username}，\n\n您已成功充值 ¥{amount}，余额已更新。' },
+    vm_create: { subject: '【CloudVM Pro】虚拟机开通成功', body: '您的虚拟机 {vm_name} 已成功开通！\n\n请登录控制台查看详情。' },
+    vm_expire: { subject: '【CloudVM Pro】服务即将到期提醒', body: '您好 {username}，\n\n您的虚拟机 {vm_name} 将于 {expire_date} 到期，请及时续费。' },
+    ticket: { subject: '【CloudVM Pro】工单回复通知', body: '您好 {username}，\n\n您的工单已有新回复，请登录查看。' }
+  };
+  const tpl = templates[type] || templates.register;
+  document.getElementById('tplSubject').value = tpl.subject;
+  document.getElementById('tplBody').value = tpl.body;
+}
+
+function previewTemplate() { showNotification('预览', '邮件模板预览功能已打开', 'info'); }
+</script>
+</body>
+</html>

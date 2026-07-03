@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>账号设置 - CloudVM Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <style>
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: var(--text-1); margin: 0; }
+    .page-header p { color: var(--text-3); font-size: 13px; margin: 4px 0 0; }
+
+    .tab-nav { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .tab-btn { padding: 10px 22px; border: none; background: none; color: var(--text-3); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; position: relative; border-radius: 8px 8px 0 0; }
+    .tab-btn:hover { color: var(--text-2); background: var(--bg-2); }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--accent); border-radius: 1px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .settings-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 28px; backdrop-filter: blur(12px); margin-bottom: 20px; }
+    .settings-card h3 { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-1); margin: 0 0 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-1); font-size: 14px; font-family: 'Outfit', sans-serif; transition: border-color 0.2s; box-sizing: border-box; }
+    .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
+    .form-hint { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+    .avatar-section { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+    .avatar-preview { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #8b5cf6); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; font-weight: 700; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; font-family: 'Outfit', sans-serif; }
+    .avatar-preview:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(37,99,235,0.3); }
+    .avatar-preview .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+    .avatar-preview:hover .overlay { opacity: 1; }
+    .avatar-info h4 { font-weight: 600; color: var(--text-1); margin: 0 0 4px; }
+    .avatar-info p { font-size: 12px; color: var(--text-3); margin: 0; }
+
+    .verify-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+    .verify-badge.verified { background: rgba(16,185,129,0.1); color: #10b981; }
+    .verify-badge.unverified { background: rgba(245,158,11,0.1); color: #f59e0b; }
+
+    .save-btn { padding: 10px 28px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+    .save-btn:hover { opacity: 0.9; box-shadow: 0 4px 15px rgba(37,99,235,0.3); }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info h4 { font-size: 14px; font-weight: 500; color: var(--text-1); margin: 0; }
+    .toggle-info p { font-size: 12px; color: var(--text-3); margin: 2px 0 0; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { display: none; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 12px; cursor: pointer; transition: 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    .qr-placeholder { width: 160px; height: 160px; background: var(--bg-2); border: 1px dashed var(--border); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-3); font-size: 12px; margin: 16px 0; }
+
+    .login-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .login-table th { text-align: left; padding: 10px 12px; color: var(--text-3); font-weight: 500; border-bottom: 1px solid var(--border); }
+    .login-table td { padding: 10px 12px; color: var(--text-2); border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    .api-key-display { display: flex; align-items: center; gap: 10px; background: var(--bg-2); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-2); word-break: break-all; margin-bottom: 16px; }
+    .api-key-display .key-text { flex: 1; }
+    .api-key-actions { display: flex; gap: 8px; }
+    .api-key-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; white-space: nowrap; }
+    .api-key-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .api-key-btn.danger:hover { border-color: #ef4444; color: #ef4444; }
+
+    .toast { position: fixed; top: 24px; right: 24px; padding: 14px 24px; background: #10b981; color: #fff; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0; transform: translateY(-10px); transition: all 0.3s; z-index: 2000; pointer-events: none; font-family: 'Outfit', sans-serif; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .tab-nav { flex-wrap: wrap; gap: 2px; }
+      .tab-btn { padding: 8px 14px; font-size: 13px; }
+      .settings-card { padding: 18px; }
+      .avatar-section { flex-direction: column; text-align: center; }
+      .login-table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-header">
+        <div class="nav-brand">
+          <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
+          <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">主菜单</div>
+          <a class="sidebar-item" href="dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>控制台</a>
+          <a class="sidebar-item" href="instances.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>我的虚拟机</a>
+          <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>购买产品</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">账户</div>
+          <a class="sidebar-item" href="billing.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>充值 & 账单</a>
+          <a class="sidebar-item" href="tickets.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单支持</a>
+          <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>系统公告</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">设置</div>
+          <a class="sidebar-item active" href="profile.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>账号设置</a>
+          <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名认证</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div><div style="font-size:12px;color:var(--text-3)">Balance</div><div style="font-size:16px;font-weight:600">¥ 1,280.00</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb"><a href="dashboard.html">控制台</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">账号设置</span></div>
+      <div class="topbar-actions"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button></div>
+    </header>
+    <div class="page-content">
+      <div class="page-header">
+        <h1>账号设置</h1>
+        <p>管理您的个人信息、安全设置和通知偏好</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('profile', this)">个人资料</button>
+        <button class="tab-btn" onclick="switchTab('security', this)">安全设置</button>
+        <button class="tab-btn" onclick="switchTab('notifications', this)">通知偏好</button>
+        <button class="tab-btn" onclick="switchTab('api', this)">API 密钥</button>
+      </div>
+
+      <!-- Profile Tab -->
+      <div class="tab-content active" id="tab-profile">
+        <div class="settings-card">
+          <h3>基本信息</h3>
+          <div class="avatar-section">
+            <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('avatarUpload').click()">
+              GZ
+              <div class="overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+            </div>
+            <input type="file" id="avatarUpload" accept="image/*" style="display:none" onchange="previewAvatar(event)">
+            <div class="avatar-info">
+              <h4>头像上传 <span class="verify-badge unverified">未认证</span></h4>
+              <p>支持 JPG、PNG 格式，大小不超过 2MB</p>
+              <a href="verify.html" style="font-size:12px;color:var(--accent);margin-top:4px;display:inline-block;">前往实名认证 →</a>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">用户名</label>
+            <input type="text" class="form-input" value="cloud_user_2026" disabled>
+            <div class="form-hint">用户名注册后不可修改</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">真实姓名</label>
+            <input type="text" class="form-input" value="张三" placeholder="请输入真实姓名">
+          </div>
+          <div class="form-group">
+            <label class="form-label">手机号码</label>
+            <input type="text" class="form-input" value="138****8888" placeholder="请输入手机号码">
+          </div>
+          <div class="form-group">
+            <label class="form-label">QQ 号码</label>
+            <input type="text" class="form-input" value="123456789" placeholder="请输入QQ号码">
+          </div>
+          <button class="save-btn" onclick="saveProfile()">保存修改</button>
+        </div>
+      </div>
+
+      <!-- Security Tab -->
+      <div class="tab-content" id="tab-security">
+        <div class="settings-card">
+          <h3>修改密码</h3>
+          <div class="form-group">
+            <label class="form-label">当前密码</label>
+            <input type="password" class="form-input" placeholder="请输入当前密码">
+          </div>
+          <div class="form-group">
+            <label class="form-label">新密码</label>
+            <input type="password" class="form-input" placeholder="请输入新密码（至少8位）">
+            <div class="form-hint">密码长度至少8位，需包含大小写字母和数字</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">确认新密码</label>
+            <input type="password" class="form-input" placeholder="请再次输入新密码">
+          </div>
+          <button class="save-btn" onclick="saveProfile()">更新密码</button>
+        </div>
+
+        <div class="settings-card">
+          <h3>两步验证 (2FA)</h3>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>启用两步验证</h4>
+              <p>使用 Google Authenticator 或类似应用扫描二维码</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="twofaToggle" onchange="toggle2FA()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div id="twofaQR" style="display:none;">
+            <div class="qr-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="11" y="11" width="2" height="2"/></svg>
+              <span>QR Code 占位</span>
+            </div>
+            <p style="font-size:12px;color:var(--text-3);">使用身份验证器应用扫描此二维码，然后输入生成的验证码以完成设置。</p>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>登录历史</h3>
+          <div style="overflow-x:auto;">
+            <table class="login-table">
+              <thead><tr><th>IP 地址</th><th>登录地点</th><th>登录时间</th><th>设备</th></tr></thead>
+              <tbody>
+                <tr><td>192.168.1.100</td><td>中国 · 上海</td><td>2026-07-01 09:23:15</td><td>Chrome / Windows</td></tr>
+                <tr><td>192.168.1.100</td><td>中国 · 上海</td><td>2026-06-30 14:12:08</td><td>Chrome / Windows</td></tr>
+                <tr><td>110.42.xxx.xx</td><td>中国 · 北京</td><td>2026-06-28 08:45:33</td><td>Safari / macOS</td></tr>
+                <tr><td>192.168.1.100</td><td>中国 · 上海</td><td>2026-06-25 16:30:22</td><td>Chrome / Windows</td></tr>
+                <tr><td>58.xxx.xxx.xx</td><td>中国 · 深圳</td><td>2026-06-20 11:08:47</td><td>Firefox / Linux</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Tab -->
+      <div class="tab-content" id="tab-notifications">
+        <div class="settings-card">
+          <h3>邮件通知设置</h3>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>虚拟机到期提醒</h4>
+              <p>在虚拟机到期前7天、3天、1天发送邮件提醒</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>支付成功通知</h4>
+              <p>订单支付成功后发送确认邮件</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>工单回复通知</h4>
+              <p>技术支持回复您的工单时发送邮件通知</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>系统公告推送</h4>
+              <p>新公告发布时发送邮件通知</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>产品更新通知</h4>
+              <p>新功能、新产品上线时发送邮件通知</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>营销活动通知</h4>
+              <p>促销、优惠活动时发送邮件通知</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button class="save-btn" style="margin-top:20px;" onclick="saveProfile()">保存通知设置</button>
+        </div>
+      </div>
+
+      <!-- API Tab -->
+      <div class="tab-content" id="tab-api">
+        <div class="settings-card">
+          <h3>API 密钥管理</h3>
+          <div class="api-key-display">
+            <span class="key-text">cvmp_live_••••••••••••••••••••••••••••••</span>
+          </div>
+          <div class="api-key-actions">
+            <button class="api-key-btn" onclick="generateKey()">生成新密钥</button>
+            <button class="api-key-btn" onclick="copyKey()">复制密钥</button>
+            <button class="api-key-btn danger" onclick="regenerateKey()">重新生成</button>
+          </div>
+          <div class="form-hint" style="margin-top:12px;">密钥仅创建时显示一次，请妥善保管。如泄露请立即重新生成。</div>
+        </div>
+
+        <div class="settings-card">
+          <h3>API 信息</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+            <div>
+              <div class="form-label">API 版本</div>
+              <div style="font-family:'JetBrains Mono',monospace;color:var(--text-1);">v3.2.1</div>
+            </div>
+            <div>
+              <div class="form-label">API 端点</div>
+              <div style="font-family:'JetBrains Mono',monospace;color:var(--text-1);font-size:12px;">https://api.cloudvm.pro/v3</div>
+            </div>
+            <div>
+              <div class="form-label">请求限制</div>
+              <div style="font-family:'JetBrains Mono',monospace;color:var(--text-1);">120 次/分钟</div>
+            </div>
+            <div>
+              <div class="form-label">今日调用</div>
+              <div style="font-family:'JetBrains Mono',monospace;color:var(--text-1);">247 次</div>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <a href="#" class="api-key-btn" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              查看 API 文档
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">保存成功!</div>
+
+<script src="../../js/main.js"></script>
+<script src="../../js/dashboard.js"></script>
+<script>
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tabId).classList.add('active');
+  }
+
+  function saveProfile() {
+    const toast = document.getElementById('toast');
+    toast.textContent = '保存成功!';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  function previewAvatar(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById('avatarPreview');
+        preview.style.backgroundImage = 'url(' + e.target.result + ')';
+        preview.style.backgroundSize = 'cover';
+        preview.textContent = '';
+        saveProfile();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function toggle2FA() {
+    const checked = document.getElementById('twofaToggle').checked;
+    document.getElementById('twofaQR').style.display = checked ? 'block' : 'none';
+    if (checked) {
+      const toast = document.getElementById('toast');
+      toast.textContent = '请扫描二维码完成两步验证设置';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+  }
+
+  function generateKey() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let key = 'cvmp_live_';
+    for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+    document.querySelector('.api-key-display .key-text').textContent = key;
+    const toast = document.getElementById('toast');
+    toast.textContent = '新 API 密钥已生成!';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  function copyKey() {
+    const key = document.querySelector('.api-key-display .key-text').textContent;
+    navigator.clipboard.writeText(key).then(() => {
+      const toast = document.getElementById('toast');
+      toast.textContent = '密钥已复制到剪贴板';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    });
+  }
+
+  function regenerateKey() {
+    if (confirm('重新生成密钥后，旧密钥将立即失效。确定继续？')) {
+      generateKey();
+    }
+  }
+</script>
+</body>
+</html>

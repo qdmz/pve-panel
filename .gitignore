@@ -1,0 +1,61 @@
+# Environment
+.env
+.env.production
+.env.local
+
+# Dependencies
+/vendor
+node_modules/
+
+# Laravel
+/bootstrap/cache/*
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+!storage/app/.gitkeep
+!storage/app/public/.gitkeep
+!storage/framework/cache/.gitkeep
+!storage/framework/sessions/.gitkeep
+!storage/framework/testing/.gitkeep
+!storage/framework/views/.gitkeep
+!storage/logs/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Deployment scripts (server-specific)
+*deploy*.py
+*fix*.py
+*check*.py
+*diag*.py
+*cleanup*.py
+*e2e*.py
+find_path.py
+verify_deploy.py
+verify_final.py
+verify_full.py
+final_fix.py
+final_fix2.py
+full_deploy.py
+fix_frontend.py
+fix_node_*.py
+debug_*.py
+ultimate*.py
+test_pve*.py
+sync_all.py
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Git
+.git/
