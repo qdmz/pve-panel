@@ -75,4 +75,28 @@ class Setting extends Model
     {
         return $query->where('group', $group);
     }
+
+    /**
+     * Get all settings for a group as key=>value pairs.
+     */
+    public static function getByGroup(string $group): array
+    {
+        return Cache::remember("settings.group.{$group}", 3600, function () use ($group) {
+            return static::where('group', $group)
+                ->get()
+                ->mapWithKeys(fn ($s) => [$s->key => $s->castValue()])
+                ->toArray();
+        });
+    }
+
+    /**
+     * Clear cache after settings update.
+     */
+    public static function booted(): void
+    {
+        static::saved(fn ($s) => Cache::forget("setting.{$s->key}"));
+        static::saved(fn ($s) => Cache::forget("settings.group.{$s->group}"));
+        static::deleted(fn ($s) => Cache::forget("setting.{$s->key}"));
+        static::deleted(fn ($s) => Cache::forget("settings.group.{$s->group}"));
+    }
 }

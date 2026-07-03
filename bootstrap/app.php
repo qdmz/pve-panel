@@ -30,6 +30,24 @@ return Application::configure(basePath: dirname(__DIR__))
             require base_path('routes/admin.php');
         });
 
+        // SMTP config bridge: read from DB settings, fall back to .env
+        try {
+            $mailSettings = \App\Models\Setting::whereIn('group', ['email', 'smtp'])->pluck('value', 'key');
+            if ($mailSettings->isNotEmpty()) {
+                config([
+                    'mail.mailers.smtp.host'       => $mailSettings->get('smtp_host') ?: env('MAIL_HOST'),
+                    'mail.mailers.smtp.port'       => $mailSettings->get('smtp_port') ?: env('MAIL_PORT'),
+                    'mail.mailers.smtp.username'   => $mailSettings->get('smtp_username') ?: env('MAIL_USERNAME'),
+                    'mail.mailers.smtp.password'   => $mailSettings->get('smtp_password') ?: env('MAIL_PASSWORD'),
+                    'mail.mailers.smtp.encryption' => $mailSettings->get('smtp_encryption') ?: env('MAIL_ENCRYPTION'),
+                    'mail.from.address'            => $mailSettings->get('mail_from_address') ?: env('MAIL_FROM_ADDRESS'),
+                    'mail.from.name'               => $mailSettings->get('mail_from_name') ?: env('MAIL_FROM_NAME'),
+                ]);
+            }
+        } catch (\Exception $e) {
+            // DB may not be available yet — graceful fallback
+        }
+
         // Rate limiting for auth endpoints
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
