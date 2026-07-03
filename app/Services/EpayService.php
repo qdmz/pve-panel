@@ -346,6 +346,51 @@ class EpayService
     }
 
     /**
+     * Check if Epay is fully configured.
+     */
+    public function isConfigured(): bool
+    {
+        return !empty($this->apiUrl) && !empty($this->merchantId) && !empty($this->merchantKey);
+    }
+
+    /**
+     * Test Epay API connection by querying order status.
+     */
+    public function testConnection(): array
+    {
+        if (!$this->isConfigured()) {
+            return ['success' => false, 'message' => 'Epay not configured'];
+        }
+
+        try {
+            $params = [
+                'act' => 'order',
+                'pid' => $this->merchantId,
+                'key' => $this->merchantKey,
+                'out_trade_no' => 'CONNECTION_TEST_' . time(),
+            ];
+
+            $queryUrl = $this->apiUrl . '/api.php';
+            $response = \Illuminate\Support\Facades\Http::asForm()
+                ->timeout(15)
+                ->post($queryUrl, $params);
+
+            $result = $this->parseResponse($response->body());
+
+            return [
+                'success' => true,
+                'message' => 'Epay API connection successful',
+                'api_url' => $this->apiUrl,
+                'merchant_id' => $this->merchantId,
+                'response' => $result,
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Epay testConnection failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Connection failed: ' . $e->getMessage()];
+        }
+    }
+
+    /**
      * Map internal payment method to Epay type string.
      */
     private function mapPaymentType(string $method): string
