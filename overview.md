@@ -1,50 +1,64 @@
-# PVE Panel Deployment — 部署完成报告
+# CloudVM Pro 部署完成报告
 
-## ✅ 已完成
-
-### 1. 路由修复（3 个文件改动）
-| 文件 | 问题 | 修复 |
-|------|------|------|
-| `routes/api.php` | `login` 路由未命名 → `Route [login] not defined` 500 错误 | 添加 `->name('login')` |
-| `routes/api.php` | `/api/products` 和 `/api/announcements` 被锁在 auth 中间件内 | 移到公开路由区 |
-| `bootstrap/app.php` | admin 路由未包裹 `api` 中间件 → 认证时重定向而非返回 401 | 添加 `Route::middleware('api')->prefix('api')` 包裹 |
-
-### 2. 数据库修复
-- `products.template_ids` → 改为 `NULL`（原 NOT NULL 无默认值）
-- `products.yearly_price` → 改为 `NULL`（同上）
-- 移除 `bootstrap/providers.php` 中的 `RouteServiceProvider`（避免路由双重注册）
-
-### 3. 示例产品创建
-| ID | 名称 | 类型 | CPU | RAM | 磁盘 | 月价 |
-|----|------|------|-----|-----|------|------|
-| 5 | 入门型 VPS | KVM | 1 | 1GB | 20GB | ¥19.90 |
-| 6 | 标准型 VPS | KVM | 2 | 2GB | 40GB | ¥39.90 |
-| 7 | 专业型 VPS | KVM | 4 | 4GB | 80GB | ¥79.90 |
-| 8 | 旗舰型 VPS | KVM | 8 | 8GB | 160GB | ¥159.90 |
-
-### 4. API 端点验证（全部 200 OK）
-| 端点 | 状态 |
-|------|------|
-| `GET /api/products` | ✅ 200 |
-| `GET /api/announcements` | ✅ 200 |
-| `POST /api/login` | ✅ 200 |
-| `GET /api/admin/dashboard` | ✅ 200 |
-| `GET /api/admin/nodes` | ✅ 200 |
-| `GET /api/admin/products` | ✅ 200 |
-| `GET /api/admin/users` | ✅ 200 |
-| `GET /api/admin/orders` | ✅ 200 |
-
-### 5. 帐号信息
-- **管理员**: admin@pve.ypvps.com / admin123
-- **测试用户**: test@pve.ypvps.com / test123
-- **节点**: pve-main (127.0.0.1:8006) — online, 16核/32GB/99GB
+**日期**: 2026-07-03 | **版本**: v0.01
 
 ---
 
-## ⏳ 待处理
+## ✅ 已完成
 
-### PVE 实例清理（81 个实例）
-- **26 QEMU VMs** — 4 running (u2-* 用户实例), 3 cloudinit templates (9000-9002), 19 stopped test VMs
-- **55 LXC CTs** — 4 running, 51 stopped
-- 建议保留: templates (9000-9002), u2-* 用户实例, hk3y-5486
-- 其余 ~70 个 test-* 命名的可安全清理
+### 1. 业务流验证
+| 步骤 | 状态 | 详情 |
+|------|------|------|
+| 注册 | ✅ | `flowtest@test.com` 注册成功 |
+| 邮箱验证 | ✅ | 修复 `email_verifications` 表缺失 |
+| 登录 | ✅ | Sanctum Token 认证 |
+| 浏览产品 | ✅ | 4 个 KVM 套餐可浏览 |
+| 创建订单 | ✅ | 201 Created |
+| 查看订单 | ✅ | 订单列表正常 |
+
+### 2. PVE 测试实例清理
+- 清理 **71 个** 测试 VM/CT (QEMU + LXC)
+- 保留 cloudinit 模板 (9000-9002)
+
+### 3. GitHub 仓库推送
+- 仓库: **https://github.com/qdmz/pve-panel**
+- 版本: **v0.01**
+- 162 文件, 23,588 行代码
+- README 含完整部署说明
+
+### 4. 部署修复
+- 修复 `email_verifications` 表缺失
+- 修复 `template_ids` 默认值问题
+- 修复路由冲突 (RouteServiceProvider 重复加载)
+- Nginx 配置冲突解决
+
+---
+
+## 当前线上状态
+
+| 服务 | 地址 | 状态 |
+|------|------|------|
+| 前端 | https://pve.ypvps.com/ | ✅ 200 |
+| API | https://pve.ypvps.com/api/ | ✅ |
+| 管理后台 | https://pve.ypvps.com/views/admin/index.html | ✅ |
+| PVE 节点 | pve-main (127.0.0.1:8006) | ✅ Online |
+
+## 产品列表
+
+| 名称 | 配置 | 月价 |
+|------|------|------|
+| 入门型 VPS | 1核/1G/20G | ¥19.90 |
+| 标准型 VPS | 2核/2G/40G | ¥39.90 |
+| 专业型 VPS | 4核/4G/80G | ¥79.90 |
+| 旗舰型 VPS | 8核/8G/160G | ¥159.90 |
+
+## 测试账号
+- 管理员: `admin@pve.ypvps.com` / `admin123`
+- 测试用户: `flowtest@test.com` / `Test123456`
+
+---
+
+## 待完成
+- 易支付配置 (Epay PID/Key)
+- SMTP 邮件服务配置
+- SSL 证书自动续期
