@@ -67,17 +67,20 @@
   const user = API.Auth.getUser();
   if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
+  let announcementsList = [];
+
   async function load() {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载中...</td></tr>';
     const res = await API.getAnnouncements();
     if (!res.success) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>'; return; }
-    const items = res.data.announcements || res.data || [];
-    if (items.length === 0) {
+    const raw = res.data || {};
+    announcementsList = Array.isArray(raw) ? raw : (raw.announcements || []);
+    if (announcementsList.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">暂无公告</td></tr>';
       return;
     }
-    tbody.innerHTML = items.map(a =>
+    tbody.innerHTML = announcementsList.map(a =>
       '<tr><td style="font-weight:600">' + esc(a.title) + '</td>' +
       '<td>' + UI.statusBadge(a.type || 'info', {info:['info','通知'],warning:['warning','警告'],success:['success','好消息'],danger:['danger','紧急']}) + '</td>' +
       '<td>' + (a.is_pinned ? '📌 置顶' : '-') + '</td>' +
@@ -91,7 +94,7 @@
       '</div></td></tr>'
     ).join('');
   }
-  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''; }
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
 
   window.openModal = function() {
     document.getElementById('editId').value = '';
@@ -104,11 +107,9 @@
     document.getElementById('modal').style.display = 'flex';
   };
 
-  window.edit = async function(id) {
-    const res = await (await fetch('/api/admin/announcements', {headers:{Authorization:'Bearer '+API.Auth.getToken(),Accept:'application/json'}})).json();
-    const items = res.data.announcements || res.data || [];
-    const a = items.find(x => x.id === id);
-    if (!a) return;
+  window.edit = function(id) {
+    const a = announcementsList.find(x => x.id === id);
+    if (!a) { UI.notify('未找到该公告', 'error'); return; }
     document.getElementById('editId').value = a.id;
     document.getElementById('modalTitle').textContent = '编辑公告';
     document.getElementById('title').value = a.title || '';

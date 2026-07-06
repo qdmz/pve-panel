@@ -65,7 +65,7 @@
       '</div></td></tr>').join('');
   }
 
-  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''; }
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
 
   window.createBackup = async function() {
     UI.notify('正在创建备份...','info');
@@ -81,9 +81,31 @@
     else UI.notify(r.message||'恢复失败','error');
   };
 
-  window.download = function(id) {
-    const token = API.Auth.getToken();
-    window.open('/api/admin/backups/'+id+'/download?token='+token, '_blank');
+  window.download = async function(id) {
+    const res = await API.downloadBackup(id);
+    if (res.success && res.data && res.data.url) {
+      window.open(res.data.url, '_blank');
+    } else {
+      // Fallback: direct download with auth header via fetch + blob
+      try {
+        const resp = await fetch('/api/admin/backups/' + id + '/download', {
+          headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+        });
+        if (resp.ok) {
+          const blob = await resp.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'backup-' + id + '.sql';
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } else {
+          UI.notify('下载失败', 'error');
+        }
+      } catch (e) {
+        UI.notify('下载失败: ' + e.message, 'error');
+      }
+    }
   };
 
   window.del = async function(id) {

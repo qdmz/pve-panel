@@ -61,15 +61,18 @@
   const user = API.Auth.getUser();
   if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
+  let couponsList = [];
+
   async function load() {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载中...</td></tr>';
     const res = await API.getCoupons();
     if (!res.success) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red)">加载失败</td></tr>'; return; }
-    const items = res.data.coupons || res.data || [];
-    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-3)">暂无优惠码</td></tr>'; return; }
+    const raw = res.data || {};
+    couponsList = Array.isArray(raw) ? raw : (raw.coupons || []);
+    if (couponsList.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-3)">暂无优惠码</td></tr>'; return; }
 
-    tbody.innerHTML = items.map(c => '<tr>' +
+    tbody.innerHTML = couponsList.map(c => '<tr>' +
       '<td style="font-family:var(--mono);font-weight:600;font-size:14px">' + esc(c.code) + '</td>' +
       '<td>' + (c.type === 'fixed' ? '💰 固定金额' : '📊 百分比') + '</td>' +
       '<td style="font-weight:600">' + (c.type === 'fixed' ? UI.formatMoney(c.value) : c.value + '%') + '</td>' +
@@ -78,11 +81,12 @@
       '<td style="font-size:12px">' + (c.expires_at ? '至 ' + c.expires_at : '永久') + '</td>' +
       '<td>' + UI.statusBadge(c.status||'active', {active:['success','启用'],inactive:['default','停用']}) + '</td>' +
       '<td><div style="display:flex;gap:4px">' +
+      '<button class="btn-sm default" onclick="editCoupon('+c.id+')" style="font-size:11px">编辑</button>' +
       '<button class="btn-sm default" onclick="toggleStatus('+c.id+')" style="font-size:11px">'+(c.status==='active'?'停用':'启用')+'</button>' +
       '<button class="btn-sm danger" onclick="del('+c.id+')" style="font-size:11px">删除</button></div></td></tr>').join('');
   }
 
-  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''; }
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
 
   window.openModal = function() {
     document.getElementById('editId').value = '';
@@ -95,7 +99,25 @@
     document.getElementById('modal').style.display = 'flex';
   };
 
+  window.editCoupon = function(id) {
+    const c = couponsList.find(x => x.id === id);
+    if (!c) { UI.notify('未找到该优惠码', 'error'); return; }
+    document.getElementById('editId').value = c.id;
+    document.getElementById('modalTitle').textContent = '编辑优惠码';
+    document.getElementById('code').value = c.code || '';
+    document.getElementById('cType').value = c.type || 'fixed';
+    document.getElementById('value').value = c.value || '';
+    document.getElementById('minAmount').value = c.min_amount || 0;
+    document.getElementById('maxUses').value = c.max_uses || 100;
+    document.getElementById('maxPerUser').value = c.max_per_user || 1;
+    document.getElementById('startsAt').value = c.starts_at || '';
+    document.getElementById('expiresAt').value = c.expires_at || '';
+    document.getElementById('msg').textContent = '';
+    document.getElementById('modal').style.display = 'flex';
+  };
+
   window.save = async function() {
+    const id = document.getElementById('editId').value;
     const data = {
       code: document.getElementById('code').value.trim(),
       type: document.getElementById('cType').value,
@@ -108,9 +130,9 @@
     };
     if (!data.code || !data.value) { document.getElementById('msg').textContent = '请填写优惠码和面值'; return; }
     document.getElementById('saveBtn').disabled = true;
-    const res = await API.createCoupon(data);
+    const res = id ? await API.updateCoupon(id, data) : await API.createCoupon(data);
     document.getElementById('saveBtn').disabled = false;
-    if (res.success) { document.getElementById('modal').style.display = 'none'; UI.notify('已创建','success'); load(); }
+    if (res.success) { document.getElementById('modal').style.display = 'none'; UI.notify(id?'已更新':'已创建','success'); load(); }
     else document.getElementById('msg').textContent = res.message;
   };
 

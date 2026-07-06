@@ -36,9 +36,9 @@
       <div style="margin-bottom:24px"><h1 style="font-size:22px;margin-bottom:4px">系统配置</h1><p style="font-size:14px;color:var(--text-3)">配置支付、邮件、站点基础参数</p></div>
 
       <div class="settings-tabs">
-        <button class="settings-tab active" onclick="switchTab('general')">站点设置</button>
-        <button class="settings-tab" onclick="switchTab('payment')">支付配置</button>
-        <button class="settings-tab" onclick="switchTab('smtp')">邮件 SMTP</button>
+        <button class="settings-tab active" data-tab="general" onclick="switchTab('general',this)">站点设置</button>
+        <button class="settings-tab" data-tab="payment" onclick="switchTab('payment',this)">支付配置</button>
+        <button class="settings-tab" data-tab="email" onclick="switchTab('email',this)">邮件 SMTP</button>
       </div>
 
       <div id="panel-general" class="table-wrapper settings-panel active">
@@ -60,7 +60,7 @@
         </div>
       </div>
 
-      <div id="panel-smtp" class="table-wrapper settings-panel">
+      <div id="panel-email" class="table-wrapper settings-panel">
         <div class="table-header"><h3>邮件 SMTP 配置</h3></div>
         <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div class="form-group"><label>SMTP 主机</label><input class="form-input" id="smtpHost"></div>
@@ -90,16 +90,17 @@
   const user = API.Auth.getUser();
   if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
-  window.switchTab = function(tab) {
+  window.switchTab = function(tab, el) {
     document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
-    event.target.classList.add('active');
+    if (el) el.classList.add('active');
+    else document.querySelector('[data-tab="'+tab+'"]').classList.add('active');
     document.getElementById('panel-'+tab).classList.add('active');
   };
 
   // Load existing settings
   async function loadSettings() {
-    const groups = ['general', 'payment', 'smtp'];
+    const groups = ['general', 'payment', 'email'];
     for (const g of groups) {
       const res = await API.getSettings(g);
       if (res.success && res.data) {
@@ -112,7 +113,7 @@
           document.getElementById('epayUrl').value = d.api_url || d.epay_url || '';
           document.getElementById('epayPid').value = d.pid || d.epay_pid || '';
           document.getElementById('epayKey').value = d.key || d.epay_key || '';
-        } else if (g === 'smtp') {
+        } else if (g === 'email') {
           document.getElementById('smtpHost').value = d.mail_host || d.host || '';
           document.getElementById('smtpPort').value = d.mail_port || d.port || 465;
           document.getElementById('smtpUser').value = d.mail_username || d.username || '';
@@ -136,7 +137,7 @@
         pid: document.getElementById('epayPid').value,
         key: document.getElementById('epayKey').value,
       },
-      smtp: {
+      email: {
         mail_host: document.getElementById('smtpHost').value,
         mail_port: document.getElementById('smtpPort').value,
         mail_username: document.getElementById('smtpUser').value,
