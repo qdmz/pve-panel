@@ -145,6 +145,40 @@ class NodeController extends Controller
     }
 
     /**
+     * Test connectivity to a new PVE node (before creation).
+     * Used by the frontend modal's "Test Connection" button.
+     */
+    public function testConnection(Request $request)
+    {
+        try {
+            $host = $request->input('host');
+            $port = $request->input('port', 8006);
+
+            if (!$host) {
+                return ApiResponse::error('Host address is required.', 422);
+            }
+
+            $proxmox = new ProxmoxService();
+            // Create a temporary node model for testing
+            $tempNode = new Node([
+                'host' => $host,
+                'port' => $port,
+                'auth_type' => 'api_token',
+            ]);
+            $result = $proxmox->testConnection($tempNode);
+
+            if ($result['success']) {
+                return ApiResponse::success($result, 'Connection successful.');
+            }
+
+            return ApiResponse::error('Connection failed: ' . ($result['message'] ?? 'Unknown error'), 400);
+        } catch (\Exception $e) {
+            \Log::error('Admin\\NodeController::testConnection failed', ['error' => $e->getMessage()]);
+            return ApiResponse::error('Connection test failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Sync VMs from PVE to local DB.
      */
     public function syncVms(Node $node)

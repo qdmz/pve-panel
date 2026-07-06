@@ -8,6 +8,20 @@
 <link rel="stylesheet" href="../../css/style.css">
 <link rel="stylesheet" href="../../css/dashboard.css">
 <link rel="stylesheet" href="../../css/admin.css">
+<style>
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+.product-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: var(--transition); }
+.product-card:hover { border-color: var(--orange); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(234,88,12,0.08); }
+.product-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.product-type-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.product-type-badge.kvm { background: rgba(37,99,235,0.1); color: #2563eb; }
+.product-type-badge.lxc { background: rgba(22,163,74,0.1); color: #16a34a; }
+.product-price { font-size: 28px; font-weight: 800; color: var(--orange); margin-bottom: 4px; }
+.product-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+.spec-item { font-size: 13px; color: var(--text-2); }
+.spec-value { font-weight: 600; color: var(--text); }
+.product-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
 </head>
 <body>
 <div class="admin-layout">
@@ -20,30 +34,17 @@
       <span class="admin-badge">Admin</span>
     </div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">概览</div>
-        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">节点管理</div>
-        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
-      </div>
+      <div class="sidebar-section"><a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">节点管理</div><a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a></div>
       <div class="sidebar-section">
         <div class="sidebar-section-label">业务管理</div>
-        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户管理</a>
+        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>用户管理</a>
         <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
         <a class="sidebar-item active" href="products.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
-        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>订单管理</a>
-        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">3</span></a>
+        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a>
+        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理</a>
       </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">财务</div>
-        <a class="sidebar-item" href="coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>优惠码 & 代金券</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">系统</div>
-        <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名审核</a>
-        <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>公告管理</a>
+      <div class="sidebar-section"><div class="sidebar-section-label">系统</div>
         <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
         <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
       </div>
@@ -51,7 +52,8 @@
     <div class="sidebar-footer">
       <div class="user-info">
         <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
-        <div><div class="user-name">超级管理员</div></div>
+        <div><div class="user-name" id="sidebarUserName">管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div>
+        <a href="#" onclick="API.Auth.logout();return false" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a>
       </div>
     </div>
   </aside>
@@ -59,361 +61,244 @@
   <div class="admin-main">
     <div class="admin-topbar">
       <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="breadcrumb">
-        <a href="index.html">首页</a><span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-current">产品管理</span>
-      </div>
+      <div class="breadcrumb"><a href="index.html">首页</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">产品管理</span></div>
       <div style="margin-left:auto;display:flex;gap:8px">
         <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-        <button class="btn-sm primary" style="background:var(--orange);border-color:var(--orange)" onclick="openProductModal()">+ 添加产品</button>
+        <button class="btn-sm primary" onclick="openProductModal()">+ 添加产品</button>
       </div>
     </div>
 
     <div class="admin-page">
       <div style="margin-bottom:24px">
         <h1 style="font-size:22px;margin-bottom:4px">产品管理</h1>
-        <p style="font-size:14px;color:var(--text-3)">管理虚拟机产品套餐，配置规格与定价</p>
+        <p style="font-size:14px;color:var(--text-3)">管理所有可销售的虚拟机产品方案</p>
       </div>
 
-      <!-- Product Cards Grid -->
-      <div class="product-grid">
-        <!-- Product 1 -->
-        <div class="product-card">
-          <div class="product-card-header">
-            <div>
-              <span class="node-type-tag tag-lxc" style="background:var(--green-soft);color:var(--green)">LXC</span>
-              <div class="product-card-name" style="margin-top:8px">LXC 入门版</div>
-            </div>
-            <div>
-              <div class="product-card-price">¥29<span>/月</span></div>
-              <div style="font-size:11px;color:var(--text-3);text-align:right">¥290/年</div>
-            </div>
-          </div>
-          <div class="product-specs">
-            <span class="spec-chip">1 vCPU</span>
-            <span class="spec-chip">2GB RAM</span>
-            <span class="spec-chip">30GB SSD</span>
-            <span class="spec-chip">5Mbps</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">库存</div>
-              <div style="font-size:14px;font-weight:700;color:var(--green)">充足</div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">节点</div>
-              <div style="font-size:13px;font-weight:600">广州 CN1</div>
-            </div>
-            <div class="table-actions">
-              <button class="btn-sm default" onclick="editProduct(1)">编辑</button>
-              <button class="btn-sm danger" onclick="openDeleteProduct(1,'LXC 入门版')">删除</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product 2 -->
-        <div class="product-card">
-          <div class="product-card-header">
-            <div>
-              <span class="node-type-tag tag-kvm">KVM</span>
-              <div class="product-card-name" style="margin-top:8px">KVM 标准版</div>
-            </div>
-            <div>
-              <div class="product-card-price">¥79<span>/月</span></div>
-              <div style="font-size:11px;color:var(--text-3);text-align:right">¥790/年</div>
-            </div>
-          </div>
-          <div class="product-specs">
-            <span class="spec-chip">2 vCPU</span>
-            <span class="spec-chip">4GB RAM</span>
-            <span class="spec-chip">60GB SSD</span>
-            <span class="spec-chip">10Mbps</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">库存</div>
-              <div style="font-size:14px;font-weight:700;color:var(--green)">118 可用</div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">节点</div>
-              <div style="font-size:13px;font-weight:600">广州 CN1</div>
-            </div>
-            <div class="table-actions">
-              <button class="btn-sm default" onclick="editProduct(2)">编辑</button>
-              <button class="btn-sm danger" onclick="openDeleteProduct(2,'KVM 标准版')">删除</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product 3 -->
-        <div class="product-card">
-          <div class="product-card-header">
-            <div>
-              <span class="node-type-tag tag-kvm">KVM</span>
-              <div class="product-card-name" style="margin-top:8px">KVM 专业版</div>
-            </div>
-            <div>
-              <div class="product-card-price">¥199<span>/月</span></div>
-              <div style="font-size:11px;color:var(--text-3);text-align:right">¥1,990/年</div>
-            </div>
-          </div>
-          <div class="product-specs">
-            <span class="spec-chip">4 vCPU</span>
-            <span class="spec-chip">8GB RAM</span>
-            <span class="spec-chip">120GB SSD</span>
-            <span class="spec-chip">30Mbps</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">库存</div>
-              <div style="font-size:14px;font-weight:700;color:var(--orange)">仅剩 12</div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">节点</div>
-              <div style="font-size:13px;font-weight:600">上海 CN2</div>
-            </div>
-            <div class="table-actions">
-              <button class="btn-sm default" onclick="editProduct(3)">编辑</button>
-              <button class="btn-sm danger" onclick="openDeleteProduct(3,'KVM 专业版')">删除</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product 4 -->
-        <div class="product-card">
-          <div class="product-card-header">
-            <div>
-              <span class="node-type-tag tag-kvm">KVM</span>
-              <div class="product-card-name" style="margin-top:8px">KVM 旗舰版</div>
-            </div>
-            <div>
-              <div class="product-card-price">¥499<span>/月</span></div>
-              <div style="font-size:11px;color:var(--text-3);text-align:right">¥4,990/年</div>
-            </div>
-          </div>
-          <div class="product-specs">
-            <span class="spec-chip">8 vCPU</span>
-            <span class="spec-chip">16GB RAM</span>
-            <span class="spec-chip">200GB SSD</span>
-            <span class="spec-chip">50Mbps</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">库存</div>
-              <div style="font-size:14px;font-weight:700;color:var(--green)">25 可用</div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">节点</div>
-              <div style="font-size:13px;font-weight:600">中国香港 HK1</div>
-            </div>
-            <div class="table-actions">
-              <button class="btn-sm default" onclick="editProduct(4)">编辑</button>
-              <button class="btn-sm danger" onclick="openDeleteProduct(4,'KVM 旗舰版')">删除</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product 5 -->
-        <div class="product-card">
-          <div class="product-card-header">
-            <div>
-              <span class="node-type-tag tag-lxc" style="background:var(--green-soft);color:var(--green)">LXC</span>
-              <div class="product-card-name" style="margin-top:8px">LXC 进阶版</div>
-            </div>
-            <div>
-              <div class="product-card-price">¥59<span>/月</span></div>
-              <div style="font-size:11px;color:var(--text-3);text-align:right">¥590/年</div>
-            </div>
-          </div>
-          <div class="product-specs">
-            <span class="spec-chip">2 vCPU</span>
-            <span class="spec-chip">4GB RAM</span>
-            <span class="spec-chip">60GB SSD</span>
-            <span class="spec-chip">15Mbps</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">库存</div>
-              <div style="font-size:14px;font-weight:700;color:var(--green)">充足</div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-3)">节点</div>
-              <div style="font-size:13px;font-weight:600">广州 CN1</div>
-            </div>
-            <div class="table-actions">
-              <button class="btn-sm default" onclick="editProduct(5)">编辑</button>
-              <button class="btn-sm danger" onclick="openDeleteProduct(5,'LXC 进阶版')">删除</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product 6 - Disabled -->
-        <div class="product-card" style="opacity:0.6">
-          <div class="product-card-header">
-            <div>
-              <span class="node-type-tag tag-kvm">KVM</span>
-              <div class="product-card-name" style="margin-top:8px">KVM 体验版</div>
-            </div>
-            <div>
-              <div class="product-card-price">¥9.9<span>/月</span></div>
-              <div style="font-size:11px;color:var(--text-3);text-align:right">¥99/年</div>
-            </div>
-          </div>
-          <div class="product-specs">
-            <span class="spec-chip">1 vCPU</span>
-            <span class="spec-chip">1GB RAM</span>
-            <span class="spec-chip">20GB SSD</span>
-            <span class="spec-chip">3Mbps</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-            <div><span class="badge badge-default">已下架</span></div>
-            <div class="table-actions">
-              <button class="btn-sm default" onclick="editProduct(6)">编辑</button>
-              <button class="btn-sm danger" onclick="openDeleteProduct(6,'KVM 体验版')">删除</button>
-            </div>
-          </div>
-        </div>
+      <div class="product-grid" id="productGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-3)"><div class="spinner" style="width:24px;height:24px;margin:0 auto 12px"></div>加载产品数据...</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Add/Edit Product Modal -->
-<div class="modal-overlay" id="productModal">
-  <div class="modal" style="max-width:640px">
-    <div class="modal-header"><h3 id="productModalTitle">添加产品</h3><button class="modal-close" onclick="ModalManager.close('productModal')">&times;</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label>产品名称 *</label><input type="text" class="form-input" id="prodName" placeholder="如: KVM 标准版"></div>
-      <div class="form-group"><label>描述</label><textarea class="form-input" id="prodDesc" rows="2" placeholder="产品简介..."></textarea></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>虚拟化类型 *</label>
-          <select class="form-input" id="prodVirtType">
-            <option value="kvm">KVM 虚拟机</option>
-            <option value="lxc">LXC 容器</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>节点分配</label>
-          <select class="form-input" id="prodNode">
-            <option>广州 CN1</option>
-            <option>上海 CN2</option>
-            <option>中国香港 HK1</option>
-          </select>
-        </div>
-      </div>
-      <div style="font-size:13px;font-weight:600;color:var(--text-2);margin:16px 0 8px">规格配置</div>
-      <div class="form-row">
-        <div class="form-group"><label>CPU 核心数</label><input type="number" class="form-input" id="prodCPU" placeholder="1" min="1" value="2" style="font-family:var(--mono)"></div>
-        <div class="form-group"><label>内存 (MB)</label><input type="number" class="form-input" id="prodRAM" placeholder="2048" min="256" value="4096" style="font-family:var(--mono)"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>磁盘 (GB)</label><input type="number" class="form-input" id="prodDisk" placeholder="30" min="5" value="60" style="font-family:var(--mono)"></div>
-        <div class="form-group"><label>带宽 (Mbps)</label><input type="number" class="form-input" id="prodBW" placeholder="10" min="1" value="10" style="font-family:var(--mono)"></div>
-      </div>
-      <div style="font-size:13px;font-weight:600;color:var(--text-2);margin:16px 0 8px">定价</div>
-      <div class="form-row">
-        <div class="form-group"><label>月付价格 (¥)</label><input type="number" class="form-input" id="prodPriceMonthly" placeholder="79" step="0.01" value="79" style="font-family:var(--mono)"></div>
-        <div class="form-group"><label>年付价格 (¥)</label><input type="number" class="form-input" id="prodPriceYearly" placeholder="790" step="0.01" value="790" style="font-family:var(--mono)"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>模板/OS</label>
-          <select class="form-input" id="prodTemplate">
-            <option>Debian 12</option>
-            <option>Ubuntu 22.04</option>
-            <option>Ubuntu 24.04</option>
-            <option>CentOS 9 Stream</option>
-            <option>AlmaLinux 9</option>
-            <option>Windows Server 2022</option>
-          </select>
-        </div>
-        <div class="form-group"><label>排序权重</label><input type="number" class="form-input" id="prodSort" value="0" style="font-family:var(--mono)"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>库存数量</label><input type="number" class="form-input" id="prodStock" placeholder="0=无限" value="0" style="font-family:var(--mono)"></div>
-        <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-            <span>上架状态</span>
-            <div class="toggle-switch"><input type="checkbox" id="prodStatus" checked><span class="toggle-slider"></span></div>
-          </label>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('productModal')">取消</button>
-      <button class="btn-sm primary" style="background:var(--orange);border-color:var(--orange)" onclick="saveProduct()">保存产品</button>
-    </div>
+<!-- Product Modal -->
+<div class="modal-overlay" id="productModal" style="display:none">
+<div class="modal-content" style="max-width:600px">
+  <div class="modal-header"><h2 id="productModalTitle">添加产品</h2><button class="modal-close" onclick="closeModal('productModal')">&times;</button></div>
+  <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <input type="hidden" id="editProductId">
+    <div class="form-group" style="grid-column:1/-1"><label>产品名称 *</label><input class="form-input" id="prodName" placeholder="例如：KVM 标准版"></div>
+    <div class="form-group"><label>类型</label><select class="form-input" id="prodType"><option value="kvm">KVM 虚拟机</option><option value="lxc">LXC 容器</option></select></div>
+    <div class="form-group"><label>状态</label><select class="form-input" id="prodStatus"><option value="active">上架</option><option value="inactive">下架</option></select></div>
+    <div class="form-group" style="grid-column:1/-1"><label>关联节点</label><select class="form-input" id="prodNodeId" onchange="onNodeChange()"><option value="">— 请选择节点 —</option></select></div>
+    <div class="form-group" style="grid-column:1/-1"><label>系统镜像 / 模板</label><select class="form-input" id="prodTemplateId"><option value="">— 请先选择节点 —</option></select></div>
+    <div class="form-group"><label>CPU 核心</label><input class="form-input" id="prodCpu" type="number" min="1"></div>
+    <div class="form-group"><label>内存 (MB)</label><input class="form-input" id="prodMemory" type="number" min="128"></div>
+    <div class="form-group"><label>磁盘 (GB)</label><input class="form-input" id="prodDisk" type="number" min="1"></div>
+    <div class="form-group"><label>带宽 (Mbps)</label><input class="form-input" id="prodBandwidth" type="number" min="1"></div>
+    <div class="form-group"><label>月付价格 (¥)</label><input class="form-input" id="prodMonthly" type="number" step="0.01"></div>
+    <div class="form-group"><label>年付价格 (¥)</label><input class="form-input" id="prodYearly" type="number" step="0.01"></div>
+    <div class="form-group"><label>流量限制 (GB)</label><input class="form-input" id="prodTraffic" type="number"></div>
+    <div class="form-group"><label>库存 (-1=无限)</label><input class="form-input" id="prodStock" type="number" value="-1"></div>
+    <div class="form-group" style="grid-column:1/-1"><label>描述</label><textarea class="form-input" id="prodDesc" rows="3"></textarea></div>
+  </div>
+  <div class="modal-footer">
+    <span id="prodModalMsg" style="color:var(--red);font-size:13px;margin-right:auto"></span>
+    <button class="btn default" onclick="closeModal('productModal')">取消</button>
+    <button class="btn primary" id="prodSaveBtn" onclick="saveProduct()">保存</button>
   </div>
 </div>
-
-<!-- Delete Product Modal -->
-<div class="modal-overlay" id="deleteProductModal">
-  <div class="modal" style="max-width:440px">
-    <div class="modal-header"><h3 style="color:var(--red)">删除产品</h3><button class="modal-close" onclick="ModalManager.close('deleteProductModal')">&times;</button></div>
-    <div class="modal-body">
-      <div style="padding:16px;background:rgba(220,38,38,0.06);border-radius:10px;margin-bottom:16px">
-        <p style="font-size:14px;font-weight:600;margin-bottom:4px">确定要删除产品 "<span id="deleteProductName" style="color:var(--red)"></span>"？</p>
-        <p style="font-size:13px;color:var(--text-2)">已购买此产品的用户不受影响，但新用户将无法选购。</p>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('deleteProductModal')">取消</button>
-      <button class="btn-sm danger" onclick="confirmDeleteProduct()">确认删除</button>
-    </div>
-  </div>
 </div>
 
 <script src="../../js/main.js"></script>
-<script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-let currentProductId = null;
-let isEditing = false;
+(function(){
+  'use strict';
+  if (!API.Auth.guard()) return;
+  document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
+  const user = API.Auth.getUser();
+  if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
+  window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; };
 
-document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
-
-function openProductModal(id) {
-  isEditing = !!id;
-  currentProductId = id || null;
-  document.getElementById('productModalTitle').textContent = isEditing ? '编辑产品' : '添加产品';
-  if (!isEditing) {
-    document.getElementById('prodName').value = '';
-    document.getElementById('prodDesc').value = '';
-    document.getElementById('prodCPU').value = '2';
-    document.getElementById('prodRAM').value = '4096';
-    document.getElementById('prodDisk').value = '60';
-    document.getElementById('prodBW').value = '10';
-    document.getElementById('prodPriceMonthly').value = '79';
-    document.getElementById('prodPriceYearly').value = '790';
-    document.getElementById('prodSort').value = '0';
-    document.getElementById('prodStock').value = '0';
-    document.getElementById('prodStatus').checked = true;
+  async function loadProducts() {
+    const grid = document.getElementById('productGrid');
+    const res = await API.getProducts();
+    if (!res.success) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--red)">加载失败: ' + (res.message||'') + '</div>';
+      return;
+    }
+    const products = res.data.products || [];
+    if (products.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-3)">暂无产品，点击"添加产品"开始</div>';
+      return;
+    }
+    grid.innerHTML = products.map(p =>
+      '<div class="product-card" id="prod-'+p.id+'">' +
+      '<div class="product-card-header">' +
+        '<div><h3 style="font-size:16px;margin-bottom:4px">' + esc(p.name) + '</h3>' +
+        (p.status === 'inactive' ? '<span style="font-size:11px;color:var(--text-3)">已下架</span>' : '') +
+        (p.node_name ? '<div style="font-size:11px;color:var(--text-2);margin-top:2px">节点: ' + esc(p.node_name) + '</div>' : '') + '</div>' +
+        '<span class="product-type-badge ' + p.type + '">' + (p.type==='kvm'?'KVM':'LXC') + '</span>' +
+      '</div>' +
+      '<div class="product-price">' + UI.formatMoney(p.monthly_price) + '<span style="font-size:14px;font-weight:400;color:var(--text-3)"> /月</span></div>' +
+      (p.yearly_price ? '<div style="font-size:13px;color:var(--text-2)">' + UI.formatMoney(p.yearly_price) + ' /年</div>' : '') +
+      '<div class="product-specs">' +
+        '<div><span class="spec-item">CPU</span><span class="spec-value"> ' + p.cpu + ' 核</span></div>' +
+        '<div><span class="spec-item">内存</span><span class="spec-value"> ' + (p.memory>=1024?(p.memory/1024).toFixed(1)+'G':p.memory+'M') + '</span></div>' +
+        '<div><span class="spec-item">磁盘</span><span class="spec-value"> ' + p.disk + 'G</span></div>' +
+        '<div><span class="spec-item">带宽</span><span class="spec-value"> ' + p.bandwidth + 'M</span></div>' +
+        (p.template_name ? '<div style="grid-column:1/-1"><span class="spec-item">镜像</span><span class="spec-value" style="font-size:11px"> ' + esc(p.template_name) + '</span></div>' : '') +
+      '</div>' +
+      (p.description ? '<p style="font-size:12px;color:var(--text-3);margin-bottom:8px">' + esc(p.description).substring(0,60) + '</p>' : '') +
+      '<div class="product-actions">' +
+        '<button class="btn-sm default" onclick="editProduct(' + p.id + ')">编辑</button>' +
+        '<button class="btn-sm default" onclick="toggleProdStatus(' + p.id + ')">' + (p.status==='active'?'下架':'上架') + '</button>' +
+        '<button class="btn-sm danger" onclick="deleteProduct(' + p.id + ')">删除</button>' +
+      '</div></div>'
+    ).join('');
   }
-  ModalManager.open('productModal');
-}
 
-function editProduct(id) {
-  openProductModal(id);
-}
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
 
-async function saveProduct() {
-  const name = document.getElementById('prodName').value.trim();
-  if (!name) { showNotification('错误', '请输入产品名称', 'error'); return; }
-  ModalManager.close('productModal');
-  showNotification('已保存', `产品"${name}"已${isEditing ? '更新' : '创建'}`, 'success');
-}
+  window.openProductModal = async function(id) {
+    document.getElementById('editProductId').value = id || '';
+    document.getElementById('productModalTitle').textContent = id ? '编辑产品' : '添加产品';
+    document.getElementById('prodModalMsg').textContent = '';
+    // Load node list
+    await loadNodeOptions();
+    if (!id) {
+      ['prodName','prodDesc'].forEach(f => document.getElementById(f).value='');
+      document.getElementById('prodType').value = 'kvm';
+      document.getElementById('prodStatus').value = 'active';
+      document.getElementById('prodNodeId').value = '';
+      document.getElementById('prodTemplateId').innerHTML = '<option value="">— 请先选择节点 —</option>';
+      document.getElementById('prodCpu').value = 1;
+      document.getElementById('prodMemory').value = 1024;
+      document.getElementById('prodDisk').value = 20;
+      document.getElementById('prodBandwidth').value = 10;
+      document.getElementById('prodTraffic').value = 500;
+      document.getElementById('prodMonthly').value = 29;
+      document.getElementById('prodYearly').value = 290;
+      document.getElementById('prodStock').value = -1;
+    }
+    document.getElementById('productModal').style.display = 'flex';
+  };
 
-function openDeleteProduct(id, name) {
-  currentProductId = id;
-  document.getElementById('deleteProductName').textContent = name;
-  ModalManager.open('deleteProductModal');
-}
+  window.editProduct = async function(id) {
+    const res = await API.getProduct(id);
+    if (!res.success) { UI.notify(res.message,'error'); return; }
+    const p = res.data.product;
+    document.getElementById('editProductId').value = p.id;
+    document.getElementById('prodName').value = p.name || '';
+    document.getElementById('prodType').value = p.type || 'kvm';
+    document.getElementById('prodStatus').value = p.status || 'active';
+    document.getElementById('prodCpu').value = p.cpu || 1;
+    document.getElementById('prodMemory').value = p.memory || 1024;
+    document.getElementById('prodDisk').value = p.disk || 20;
+    document.getElementById('prodBandwidth').value = p.bandwidth || 10;
+    document.getElementById('prodTraffic').value = p.traffic || 500;
+    document.getElementById('prodMonthly').value = p.monthly_price || 0;
+    document.getElementById('prodYearly').value = p.yearly_price || 0;
+    document.getElementById('prodStock').value = p.stock !== undefined ? p.stock : -1;
+    document.getElementById('prodDesc').value = p.description || '';
+    // Set node and templates
+    document.getElementById('prodNodeId').value = p.node_id || '';
+    if (p.node_id) { await loadTemplatesForNode(p.node_id, p.template_id); }
+    openProductModal(p.id);
+  };
 
-async function confirmDeleteProduct() {
-  ModalManager.close('deleteProductModal');
-  await new Promise(r => setTimeout(r, 500));
-  showNotification('已删除', '产品已成功删除', 'success');
-}
+  window.saveProduct = async function() {
+    const id = document.getElementById('editProductId').value;
+    const data = {
+      name: document.getElementById('prodName').value.trim(),
+      type: document.getElementById('prodType').value,
+      status: document.getElementById('prodStatus').value,
+      node_id: document.getElementById('prodNodeId').value || null,
+      template_id: document.getElementById('prodTemplateId').value || null,
+      cpu: parseInt(document.getElementById('prodCpu').value) || 1,
+      memory: parseInt(document.getElementById('prodMemory').value) || 1024,
+      disk: parseInt(document.getElementById('prodDisk').value) || 20,
+      bandwidth: parseInt(document.getElementById('prodBandwidth').value) || 10,
+      traffic: parseInt(document.getElementById('prodTraffic').value) || 0,
+      monthly_price: parseFloat(document.getElementById('prodMonthly').value) || 0,
+      yearly_price: parseFloat(document.getElementById('prodYearly').value) || 0,
+      stock: parseInt(document.getElementById('prodStock').value),
+      description: document.getElementById('prodDesc').value.trim(),
+    };
+    if (!data.name) { document.getElementById('prodModalMsg').textContent = '请输入产品名称'; return; }
+
+    document.getElementById('prodSaveBtn').disabled = true;
+    const res = id ? await API.updateProduct(id, data) : await API.createProduct(data);
+    document.getElementById('prodSaveBtn').disabled = false;
+
+    if (res.success) {
+      UI.notify(id ? '产品已更新' : '产品已创建', 'success');
+      document.getElementById('productModal').style.display = 'none';
+      loadProducts();
+    } else {
+      document.getElementById('prodModalMsg').textContent = res.message || '保存失败';
+    }
+  };
+
+  window.toggleProdStatus = async function(id) {
+    const res = await API.toggleProductStatus(id);
+    if (res.success) {
+      UI.notify('产品状态已切换', 'success');
+      loadProducts();
+    } else { UI.notify(res.message,'error'); }
+  };
+
+  window.deleteProduct = async function(id) {
+    if (!confirm('确定要删除此产品吗？')) return;
+    const res = await API.deleteProduct(id);
+    if (res.success) { UI.notify('产品已删除', 'success'); loadProducts(); }
+    else { UI.notify(res.message,'error'); }
+  };
+
+  // ===== Node-Template Linkage =====
+  async function loadNodeOptions() {
+    const sel = document.getElementById('prodNodeId');
+    const curVal = sel.value;
+    sel.innerHTML = '<option value="">— 加载中 —</option>';
+    const res = await API.getNodes();
+    if (res.success && res.data.nodes) {
+      sel.innerHTML = '<option value="">— 请选择节点 —</option>' +
+        res.data.nodes.map(n => '<option value="' + n.id + '"' + (n.id == curVal ? ' selected' : '') + '>' + esc(n.name) + ' (' + esc(n.host) + ')</option>').join('');
+    } else {
+      sel.innerHTML = '<option value="">— 加载失败 —</option>';
+    }
+  }
+
+  window.onNodeChange = async function() {
+    const nodeId = document.getElementById('prodNodeId').value;
+    await loadTemplatesForNode(nodeId);
+  };
+
+  async function loadTemplatesForNode(nodeId, selectedTemplateId) {
+    const sel = document.getElementById('prodTemplateId');
+    if (!nodeId) {
+      sel.innerHTML = '<option value="">— 请先选择节点 —</option>';
+      return;
+    }
+    sel.innerHTML = '<option value="">— 加载中 —</option>';
+    const res = await API.getNodeTemplates(nodeId);
+    if (res.success && res.data.templates) {
+      const tmpls = res.data.templates || [];
+      if (tmpls.length === 0) {
+        sel.innerHTML = '<option value="">— 该节点暂无镜像，请先同步 —</option>';
+      } else {
+        sel.innerHTML = '<option value="">— 选择镜像 —</option>' +
+          tmpls.map(t => '<option value="' + t.template_id + '"' + (t.template_id == selectedTemplateId ? ' selected' : '') + '>' +
+            (t.type === 'lxc' ? '[LXC] ' : '[KVM] ') + esc(t.name) + (t.size ? ' (' + (t.size / 1024 / 1024 / 1024).toFixed(1) + 'G)' : '') + '</option>').join('');
+      }
+    } else {
+      sel.innerHTML = '<option value="">— 加载失败 —</option>';
+    }
+  }
+
+  loadProducts();
+})();
 </script>
 </body>
 </html>

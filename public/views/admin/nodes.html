@@ -11,7 +11,6 @@
 </head>
 <body>
 <div class="admin-layout">
-  <!-- Sidebar (same structure as index) -->
   <aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-header">
       <div class="nav-brand">
@@ -21,9 +20,7 @@
       <span class="admin-badge">Admin</span>
     </div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">
-        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
-      </div>
+      <div class="sidebar-section"><a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a></div>
       <div class="sidebar-section">
         <div class="sidebar-section-label">节点管理</div>
         <a class="sidebar-item active" href="nodes.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
@@ -34,7 +31,7 @@
         <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
         <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
         <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a>
-        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">5</span></a>
+        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理</a>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-section-label">系统</div>
@@ -45,7 +42,8 @@
     <div class="sidebar-footer">
       <div class="user-info">
         <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
-        <div><div class="user-name">超级管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div>
+        <div><div class="user-name" id="sidebarUserName">管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div>
+        <a href="#" onclick="API.Auth.logout();return false" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a>
       </div>
     </div>
   </aside>
@@ -53,303 +51,341 @@
   <div class="admin-main">
     <div class="admin-topbar">
       <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="breadcrumb">
-        <a href="index.html">首页</a><span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-current">节点管理</span>
-      </div>
+      <div class="breadcrumb"><a href="index.html">首页</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">节点管理</span></div>
       <div style="margin-left:auto;display:flex;gap:8px">
         <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-        <button class="btn-sm primary" onclick="ModalManager.open('addNodeModal')">+ 添加节点</button>
-        <button class="btn-sm default" onclick="syncAllNodes()">↻ 同步全部节点</button>
+        <button class="btn-sm primary" onclick="openAddModal()">+ 添加节点</button>
+        <button class="btn-sm default" onclick="refreshAll()">↻ 刷新全部</button>
       </div>
     </div>
 
     <div class="admin-page">
       <div style="margin-bottom:24px">
         <h1 style="font-size:22px;margin-bottom:4px">节点管理</h1>
-        <p style="font-size:14px;color:var(--text-3)">管理所有 Proxmox VE 节点，测试连接，同步虚拟机数据和镜像</p>
+        <p style="font-size:14px;color:var(--text-3)">管理所有 Proxmox VE 节点，测试连接，同步虚拟机数据</p>
       </div>
 
       <!-- Node Cards -->
-      <div class="node-grid">
-        <!-- Node 1 -->
-        <div class="node-manage-card">
-          <div class="node-card-header">
-            <div class="node-ping-indicator online"></div>
-            <h4>广州 CN1</h4>
-            <span class="node-type-tag tag-both">KVM+LXC</span>
-          </div>
-          <div class="node-meta">
-            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">192.168.1.10</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">156</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">延迟</div><div class="node-meta-value" style="color:var(--green)">3ms</div></div>
-          </div>
-          <div class="node-usage">
-            <div class="node-usage-row">
-              <span class="node-usage-label">CPU</span>
-              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:45%"></div></div>
-              <span class="node-usage-pct">45%</span>
-            </div>
-            <div class="node-usage-row">
-              <span class="node-usage-label">内存</span>
-              <div class="node-usage-bar"><div class="node-usage-fill fill-green" style="width:62%"></div></div>
-              <span class="node-usage-pct">62%</span>
-            </div>
-            <div class="node-usage-row">
-              <span class="node-usage-label">存储</span>
-              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:70%"></div></div>
-              <span class="node-usage-pct">70%</span>
-            </div>
-          </div>
-          <div class="node-card-actions">
-            <button class="btn-sm default" onclick="testNode('cn1')">🔍 测试连接</button>
-            <button class="btn-sm default" onclick="syncNodeVMs('cn1')">↻ 同步 VM</button>
-            <button class="btn-sm default" onclick="syncNodeImages('cn1')">📀 同步镜像</button>
-            <button class="btn-sm default" onclick="editNode('cn1')">编辑</button>
-          </div>
+      <div class="node-grid" id="nodeGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-3)">
+          <div class="spinner" style="width:24px;height:24px;margin:0 auto 12px"></div>加载节点数据...
         </div>
-
-        <!-- Node 2 -->
-        <div class="node-manage-card">
-          <div class="node-card-header">
-            <div class="node-ping-indicator online"></div>
-            <h4>上海 CN2</h4>
-            <span class="node-type-tag tag-kvm">KVM</span>
-          </div>
-          <div class="node-meta">
-            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">192.168.2.10</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">98</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">延迟</div><div class="node-meta-value" style="color:var(--green)">5ms</div></div>
-          </div>
-          <div class="node-usage">
-            <div class="node-usage-row">
-              <span class="node-usage-label">CPU</span>
-              <div class="node-usage-bar"><div class="node-usage-fill" style="width:78%;background:var(--orange)"></div></div>
-              <span class="node-usage-pct">78%</span>
-            </div>
-            <div class="node-usage-row">
-              <span class="node-usage-label">内存</span>
-              <div class="node-usage-bar"><div class="node-usage-fill" style="width:85%;background:var(--orange)"></div></div>
-              <span class="node-usage-pct">85%</span>
-            </div>
-            <div class="node-usage-row">
-              <span class="node-usage-label">存储</span>
-              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:55%"></div></div>
-              <span class="node-usage-pct">55%</span>
-            </div>
-          </div>
-          <div class="node-card-actions">
-            <button class="btn-sm default" onclick="testNode('cn2')">🔍 测试</button>
-            <button class="btn-sm default" onclick="syncNodeVMs('cn2')">↻ 同步 VM</button>
-            <button class="btn-sm default" onclick="syncNodeImages('cn2')">📀 镜像</button>
-            <button class="btn-sm default" onclick="editNode('cn2')">编辑</button>
-          </div>
-        </div>
-
-        <!-- Node 3 - HK -->
-        <div class="node-manage-card">
-          <div class="node-card-header">
-            <div class="node-ping-indicator online"></div>
-            <h4>中国香港 HK1</h4>
-            <span class="node-type-tag tag-both">KVM+LXC</span>
-          </div>
-          <div class="node-meta">
-            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">192.168.3.10</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">133</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">延迟</div><div class="node-meta-value" style="color:var(--green)">8ms</div></div>
-          </div>
-          <div class="node-usage">
-            <div class="node-usage-row">
-              <span class="node-usage-label">CPU</span>
-              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:35%"></div></div>
-              <span class="node-usage-pct">35%</span>
-            </div>
-            <div class="node-usage-row">
-              <span class="node-usage-label">内存</span>
-              <div class="node-usage-bar"><div class="node-usage-fill fill-green" style="width:48%"></div></div>
-              <span class="node-usage-pct">48%</span>
-            </div>
-            <div class="node-usage-row">
-              <span class="node-usage-label">存储</span>
-              <div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:42%"></div></div>
-              <span class="node-usage-pct">42%</span>
-            </div>
-          </div>
-          <div class="node-card-actions">
-            <button class="btn-sm default" onclick="testNode('hk1')">🔍 测试</button>
-            <button class="btn-sm default" onclick="syncNodeVMs('hk1')">↻ 同步 VM</button>
-            <button class="btn-sm default" onclick="syncNodeImages('hk1')">📀 镜像</button>
-            <button class="btn-sm default" onclick="editNode('hk1')">编辑</button>
-          </div>
-        </div>
-
-        <!-- Node 4 - Offline -->
-        <div class="node-manage-card" style="opacity:0.7">
-          <div class="node-card-header">
-            <div class="node-ping-indicator offline"></div>
-            <h4>美西 LA1</h4>
-            <span class="node-type-tag tag-kvm">KVM</span>
-          </div>
-          <div class="node-meta">
-            <div class="node-meta-item"><div class="node-meta-label">PVE IP</div><div class="node-meta-value">10.0.4.10</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">端口</div><div class="node-meta-value">8006</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">—</div></div>
-            <div class="node-meta-item"><div class="node-meta-label">状态</div><div class="node-meta-value" style="color:var(--red)">离线</div></div>
-          </div>
-          <div style="padding:12px;background:rgba(220,38,38,0.08);border-radius:8px;font-size:13px;color:var(--red);margin-bottom:12px">
-            ⚠️ 节点无法连接，请检查 PVE 服务或网络
-          </div>
-          <div class="node-card-actions">
-            <button class="btn-sm danger" onclick="testNode('la1')">🔄 重试连接</button>
-            <button class="btn-sm default" onclick="editNode('la1')">编辑配置</button>
-            <button class="btn-sm danger" onclick="deleteNode('la1')">删除</button>
-          </div>
-        </div>
-
-        <!-- Add Node Placeholder -->
-        <div class="node-manage-card" style="border:2px dashed var(--border-2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240px" onclick="ModalManager.open('addNodeModal')">
-          <div style="font-size:32px;margin-bottom:12px;opacity:0.5">+</div>
-          <div style="font-size:15px;font-weight:600;color:var(--text-3)">添加新节点</div>
-          <div style="font-size:13px;color:var(--text-3);margin-top:4px">接入新的 PVE 节点</div>
-        </div>
-      </div>
-
-      <!-- NAT Config -->
-      <div class="table-wrapper" style="margin-top:24px">
-        <div class="table-header">
-          <h3>NAT 网络配置</h3>
-          <button class="btn-sm primary" onclick="ModalManager.open('natConfigModal')">+ 添加 NAT 池</button>
-        </div>
-        <table class="data-table">
-          <thead><tr><th>节点</th><th>公网 IP</th><th>端口范围</th><th>已用端口</th><th>最大端口数/实例</th><th>操作</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>广州 CN1</td>
-              <td style="font-family:var(--mono)">45.192.123.0/24</td>
-              <td style="font-family:var(--mono)">10000 - 65535</td>
-              <td>1,248 / 55,535</td>
-              <td>10</td>
-              <td><button class="btn-sm default" onclick="editNATConfig('cn1')">编辑</button></td>
-            </tr>
-            <tr>
-              <td>中国香港 HK1</td>
-              <td style="font-family:var(--mono)">154.9.237.0/24</td>
-              <td style="font-family:var(--mono)">20000 - 60000</td>
-              <td>890 / 40,000</td>
-              <td>15</td>
-              <td><button class="btn-sm default" onclick="editNATConfig('hk1')">编辑</button></td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Add Node Modal -->
-<div class="modal-overlay" id="addNodeModal">
-  <div class="modal" style="max-width:580px">
-    <div class="modal-header"><h3>添加 PVE 节点</h3><button class="modal-close" onclick="ModalManager.close('addNodeModal')">×</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label>节点名称 *</label><input type="text" class="form-input" placeholder="如: 广州 CN3"></div>
-        <div class="form-group"><label>地区</label><input type="text" class="form-input" placeholder="如: 广州"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>PVE 主机 IP *</label><input type="text" class="form-input" id="nodeIP" placeholder="192.168.1.10"></div>
-        <div class="form-group"><label>PVE 端口</label><input type="number" class="form-input" value="8006"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>API 用户名 *</label><input type="text" class="form-input" placeholder="root@pam"></div>
-        <div class="form-group"><label>API 密码 / Token</label><input type="password" class="form-input" placeholder="PVE API Token"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>虚拟化类型</label>
-          <select class="form-input">
-            <option>KVM + LXC</option>
-            <option>仅 KVM</option>
-            <option>仅 LXC</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>存储池</label>
-          <input type="text" class="form-input" placeholder="local-lvm">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>NAT 公网 IP</label>
-        <input type="text" class="form-input" placeholder="45.192.0.0/24（NAT 节点填写）">
-      </div>
-      <div class="form-group">
-        <label>NAT 端口范围</label>
-        <div class="form-row">
-          <input type="number" class="form-input" placeholder="10000" value="10000">
-          <input type="number" class="form-input" placeholder="65535" value="65535">
-        </div>
-      </div>
+<!-- Add/Edit Node Modal -->
+<div class="modal-overlay" id="nodeModal" style="display:none">
+<div class="modal-content" style="max-width:600px">
+  <div class="modal-header"><h2 id="nodeModalTitle">添加节点</h2><button class="modal-close" onclick="closeModal('nodeModal')">&times;</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="editNodeId">
+    <div class="form-group"><label>节点名称 *</label><input class="form-input" id="nodeName" placeholder="例如：广州 CN1"></div>
+    <div class="form-group"><label>PVE 主机地址 *</label><input class="form-input" id="nodeHost" placeholder="例如：192.168.1.10 或 pve.example.com"></div>
+    <div class="form-group"><label>端口</label><input class="form-input" id="nodePort" value="8006" type="number"></div>
+    <div class="form-group"><label>认证方式</label>
+      <select class="form-input" id="nodeAuthType"><option value="api_token">API Token</option><option value="username_password">用户名+密码</option></select>
     </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('addNodeModal')">取消</button>
-      <button class="btn-sm default" onclick="testNewNode()">🔍 测试连接</button>
-      <button class="btn-sm primary" onclick="addNode()">添加节点</button>
+    <div id="authApiToken">
+      <div class="form-group"><label>API Token *</label><input class="form-input" id="nodeApiToken" placeholder="root@pam!token=xxx"></div>
+    </div>
+    <div id="authUserPass" style="display:none">
+      <div class="form-group"><label>用户名</label><input class="form-input" id="nodeUsername" placeholder="root"></div>
+      <div class="form-group"><label>密码</label><input class="form-input" id="nodePassword" type="password" placeholder="PVE 密码"></div>
+    </div>
+    <div class="form-group"><label>虚拟化类型</label>
+      <select class="form-input" id="nodeVirtualization"><option value="both">KVM + LXC</option><option value="kvm">仅 KVM</option><option value="lxc">仅 LXC</option></select>
+    </div>
+    <div class="form-group"><label>存储</label><input class="form-input" id="nodeStorage" value="local" placeholder="例如：local-lvm"></div>
+    <div class="form-group"><label>网桥</label><input class="form-input" id="nodeBridge" value="vmbr0"></div>
+    <div class="form-group"><label>IPv6 网桥</label><input class="form-input" id="nodeIpv6Bridge" placeholder="vmbr2（可选）"></div>
+    <hr style="border-color:var(--border);margin:8px 0">
+    <h4 style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--orange)">NAT 端口转发配置</h4>
+    <div class="form-group"><label>NAT 内网 IP 段</label><input class="form-input" id="nodeNatNetwork" placeholder="172.16.1.0/24"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div class="form-group"><label>起始端口</label><input class="form-input" id="nodeNatStart" type="number" placeholder="10000"></div>
+      <div class="form-group"><label>结束端口</label><input class="form-input" id="nodeNatEnd" type="number" placeholder="60000"></div>
+      <div class="form-group"><label>每 VM 最大端口数</label><input class="form-input" id="nodeMaxPorts" type="number" value="5" min="1"></div>
     </div>
   </div>
+  <div class="modal-footer">
+    <span id="nodeModalMsg" style="color:var(--red);font-size:13px;margin-right:auto"></span>
+    <button class="btn default" onclick="closeModal('nodeModal')">取消</button>
+    <button class="btn default" id="nodeTestBtn" onclick="testNodeConnection()">🔗 测试连接</button>
+    <button class="btn primary" id="nodeSaveBtn" onclick="saveNode()">保存</button>
+    <button class="btn primary" id="nodeSaveLoading" style="display:none" disabled><div class="spinner" style="width:14px;height:14px;margin:0 auto"></div></button>
+  </div>
+</div>
 </div>
 
 <script src="../../js/main.js"></script>
-<script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
+(function(){
+  'use strict';
+  if (!API.Auth.guard()) return;
+  document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
 
-async function testNode(id) {
-  showNotification('测试中', `正在连接节点 ${id}...`, 'info');
-  await new Promise(r => setTimeout(r, 1500));
-  showNotification('连接成功', `节点 ${id} 响应正常，PVE 版本: 8.2.2`, 'success');
-}
+  // Init user display
+  const user = API.Auth.getUser();
+  if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
-async function syncNodeVMs(id) {
-  showNotification('同步中', `正在从节点 ${id} 同步虚拟机数据...`, 'info');
-  await new Promise(r => setTimeout(r, 2500));
-  showNotification('同步完成', `节点 ${id} VM 数据已同步`, 'success');
-}
+  // Auth type toggle
+  document.getElementById('nodeAuthType').addEventListener('change', function() {
+    document.getElementById('authApiToken').style.display = this.value === 'api_token' ? '' : 'none';
+    document.getElementById('authUserPass').style.display = this.value === 'username_password' ? '' : 'none';
+  });
 
-async function syncNodeImages(id) {
-  showNotification('同步中', `正在从节点 ${id} 同步镜像列表...`, 'info');
-  await new Promise(r => setTimeout(r, 2000));
-  showNotification('同步完成', `节点 ${id} 镜像列表已更新`, 'success');
-}
+  // ===== Load Nodes =====
+  async function loadNodes() {
+    const grid = document.getElementById('nodeGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-3)"><div class="spinner" style="width:24px;height:24px;margin:0 auto 12px"></div>加载节点数据...</div>';
 
-async function syncAllNodes() {
-  showNotification('同步中', '正在同步全部节点数据，请稍候...', 'info');
-  await new Promise(r => setTimeout(r, 3000));
-  showNotification('同步完成', '所有节点数据已同步', 'success');
-}
+    const res = await API.getNodes();
+    if (!res.success) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--red)">加载失败: ' + (res.message || '未知错误') + '</div>';
+      return;
+    }
+    const nodes = res.data.nodes || [];
 
-function editNode(id) { showNotification('提示', `编辑节点 ${id} 配置`, 'info'); }
-async function deleteNode(id) {
-  const ok = await VMOperations.confirm('删除节点', '确认删除该节点？此操作不可恢复。');
-  if (ok) showNotification('已删除', `节点 ${id} 已移除`, 'success');
-}
+    if (nodes.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-3)">暂无节点，点击"添加节点"开始</div>';
+      return;
+    }
 
-async function testNewNode() {
-  const ip = document.getElementById('nodeIP').value;
-  if (!ip) { showNotification('错误', '请输入节点 IP', 'error'); return; }
-  showNotification('测试中', `正在连接 ${ip}:8006...`, 'info');
-  await new Promise(r => setTimeout(r, 1500));
-  showNotification('连接成功', `PVE 节点连接正常`, 'success');
-}
+    grid.innerHTML = nodes.map(n => renderNodeCard(n)).join('');
+  }
 
-async function addNode() {
-  ModalManager.close('addNodeModal');
-  await new Promise(r => setTimeout(r, 500));
-  showNotification('成功', '节点已添加，正在同步初始数据...', 'success');
-}
+  function renderNodeCard(n) {
+    const cpuPct = n.cpu_total > 0 ? Math.round(n.cpu_used / n.cpu_total * 100) : 0;
+    const memPct = n.memory_total > 0 ? Math.round(n.memory_used / n.memory_total * 100) : 0;
+    const diskPct = n.disk_total > 0 ? Math.round(n.disk_used / n.disk_total * 100) : 0;
+    const statusIcon = n.status === 'online' ? '🟢' : n.status === 'maintenance' ? '🟡' : '🔴';
+    const statusText = n.status === 'online' ? '在线' : n.status === 'maintenance' ? '维护中' : '离线';
+    const virtLabel = n.virtualization === 'both' ? 'KVM+LXC' : n.virtualization === 'kvm' ? 'KVM' : 'LXC';
+    const virtTagClass = 'node-type-tag tag-' + n.virtualization;
 
-function editNATConfig(id) { showNotification('提示', `编辑节点 ${id} NAT 配置`, 'info'); }
+    return `<div class="node-manage-card" id="node-${n.id}">
+      <div class="node-card-header">
+        <div class="node-ping-indicator ${n.status}"></div>
+        <h4>${esc(n.name || 'Node #'+n.id)}</h4>
+        <span class="${virtTagClass}">${virtLabel}</span>
+      </div>
+      <div class="node-meta">
+        <div class="node-meta-item"><div class="node-meta-label">PVE 地址</div><div class="node-meta-value" style="font-family:var(--mono);font-size:12px">${esc(n.host)}:${n.port||8006}</div></div>
+        <div class="node-meta-item"><div class="node-meta-label">实例数</div><div class="node-meta-value">${n.virtual_machines_count||0}</div></div>
+        <div class="node-meta-item"><div class="node-meta-label">状态</div><div class="node-meta-value">${statusIcon} ${statusText}</div></div>
+        <div class="node-meta-item"><div class="node-meta-label">存储</div><div class="node-meta-value" style="font-family:var(--mono);font-size:11px">${esc(n.storage||'-')}</div></div>
+      </div>
+      <div class="node-usage">
+        <div class="node-usage-row"><span class="node-usage-label">CPU</span><div class="node-usage-bar"><div class="node-usage-fill fill-accent" style="width:${cpuPct}%"></div></div><span class="node-usage-pct">${cpuPct}%</span></div>
+        <div class="node-usage-row"><span class="node-usage-label">内存</span><div class="node-usage-bar"><div class="node-usage-fill fill-green" style="width:${memPct}%"></div></div><span class="node-usage-pct">${memPct}%</span></div>
+        <div class="node-usage-row"><span class="node-usage-label">存储</span><div class="node-usage-bar"><div class="node-usage-fill" style="width:${diskPct}%;background:#8b5cf6"></div></div><span class="node-usage-pct">${diskPct}%</span></div>
+      </div>
+      <div class="node-card-actions">
+        <button class="btn-sm default" onclick="testNode(${n.id})">🔗 测试连接</button>
+        <button class="btn-sm default" onclick="syncNode(${n.id})">🔄 同步 VM</button>
+        <button class="btn-sm default" onclick="syncNodeImages(${n.id})">📀 同步镜像</button>
+        <button class="btn-sm default" onclick="editNode(${n.id})">✏️ 编辑</button>
+        <button class="btn-sm danger" onclick="deleteNode(${n.id})">🗑 删除</button>
+      </div>
+    </div>`;
+  }
+
+  function esc(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ===== Node Actions =====
+  window.testNode = async function(id) {
+    const card = document.getElementById('node-'+id);
+    if (card) card.style.opacity = '0.6';
+    UI.notify('正在测试节点连接...', 'info');
+    const res = await API.testNode(id);
+    if (res.success) {
+      UI.notify(res.message || '连接成功！', 'success');
+    } else {
+      UI.notify(res.message || '连接失败', 'error');
+    }
+    setTimeout(loadNodes, 500);
+  };
+
+  window.syncNode = async function(id) {
+    const card = document.getElementById('node-'+id);
+    if (card) card.style.opacity = '0.6';
+    UI.notify('正在同步 VM 数据...', 'info');
+    const res = await API.syncNodeVms(id);
+    if (res.success) {
+      const d = res.data;
+      UI.notify('同步成功！共 ' + (d.total_pve_vms || d.synced || '?') + ' 台 VM', 'success');
+    } else {
+      UI.notify(res.message || '同步失败', 'error');
+    }
+    setTimeout(loadNodes, 500);
+  };
+
+  window.syncNodeImages = async function(id) {
+    const card = document.getElementById('node-'+id);
+    if (card) card.style.opacity = '0.6';
+    UI.notify('正在同步节点镜像列表...', 'info');
+    const res = await API.syncNodeTemplates(id);
+    if (res.success) {
+      const count = res.data && res.data.templates_count ? res.data.templates_count : 0;
+      UI.notify('同步成功！获取到 ' + count + ' 个镜像模板', 'success');
+    } else {
+      UI.notify(res.message || '镜像同步失败', 'error');
+    }
+    setTimeout(loadNodes, 500);
+  };
+
+  window.testNodeConnection = async function() {
+    const host = document.getElementById('nodeHost').value.trim();
+    const port = document.getElementById('nodePort').value || 8006;
+    if (!host) { document.getElementById('nodeModalMsg').textContent = '请先填写主机地址'; return; }
+    document.getElementById('nodeModalMsg').style.color = '';
+    document.getElementById('nodeModalMsg').textContent = '正在连接 ' + host + ':' + port + '...';
+    document.getElementById('nodeTestBtn').disabled = true;
+    try {
+      const token = API.Auth.getToken();
+      const res = await fetch('/api/admin/nodes/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ host, port: parseInt(port) })
+      });
+      const data = await res.json();
+      document.getElementById('nodeTestBtn').disabled = false;
+      if (data.success) {
+        document.getElementById('nodeModalMsg').style.color = 'var(--green)';
+        document.getElementById('nodeModalMsg').textContent = '连接成功！PVE 节点正常响应';
+      } else {
+        document.getElementById('nodeModalMsg').style.color = 'var(--red)';
+        document.getElementById('nodeModalMsg').textContent = data.message || '连接失败';
+      }
+    } catch(e) {
+      document.getElementById('nodeTestBtn').disabled = false;
+      document.getElementById('nodeModalMsg').style.color = 'var(--red)';
+      document.getElementById('nodeModalMsg').textContent = '网络错误: ' + e.message;
+    }
+    setTimeout(() => {
+      document.getElementById('nodeModalMsg').style.color = '';
+      document.getElementById('nodeModalMsg').textContent = '';
+    }, 5000);
+  };
+
+  window.editNode = async function(id) {
+    const res = await API.getNode(id);
+    if (!res.success) { UI.notify(res.message, 'error'); return; }
+    const n = res.data.node;
+    document.getElementById('editNodeId').value = n.id;
+    document.getElementById('nodeModalTitle').textContent = '编辑节点';
+    document.getElementById('nodeName').value = n.name || '';
+    document.getElementById('nodeHost').value = n.host || '';
+    document.getElementById('nodePort').value = n.port || 8006;
+    document.getElementById('nodeAuthType').value = n.auth_type || 'api_token';
+    document.getElementById('nodeApiToken').value = n.api_token || '';
+    document.getElementById('nodeUsername').value = n.username || '';
+    document.getElementById('nodePassword').value = '';
+    document.getElementById('nodeVirtualization').value = n.virtualization || 'both';
+    document.getElementById('nodeStorage').value = n.storage || 'local';
+    document.getElementById('nodeBridge').value = n.bridge || 'vmbr0';
+    document.getElementById('nodeIpv6Bridge').value = n.ipv6_bridge || '';
+    document.getElementById('nodeNatNetwork').value = n.nat_network || '';
+    document.getElementById('nodeNatStart').value = n.nat_start_port || '';
+    document.getElementById('nodeNatEnd').value = n.nat_end_port || '';
+    document.getElementById('nodeMaxPorts').value = n.max_ports_per_vm || 5;
+    document.getElementById('nodeAuthType').dispatchEvent(new Event('change'));
+    openModal('nodeModal');
+  };
+
+  window.deleteNode = async function(id) {
+    if (!confirm('确定要删除此节点吗？如果节点上有活动 VM 将无法删除。')) return;
+    const res = await API.deleteNode(id);
+    if (res.success) {
+      UI.notify('节点已删除', 'success');
+      loadNodes();
+    } else {
+      UI.notify(res.message || '删除失败', 'error');
+    }
+  };
+
+  window.openAddModal = function() {
+    document.getElementById('editNodeId').value = '';
+    document.getElementById('nodeModalTitle').textContent = '添加节点';
+    ['nodeName','nodeHost','nodeApiToken','nodeUsername','nodePassword'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('nodePort').value = '8006';
+    document.getElementById('nodeAuthType').value = 'api_token';
+    document.getElementById('nodeVirtualization').value = 'both';
+    document.getElementById('nodeStorage').value = 'local';
+    document.getElementById('nodeBridge').value = 'vmbr0';
+    document.getElementById('nodeIpv6Bridge').value = '';
+    document.getElementById('nodeNatNetwork').value = '';
+    document.getElementById('nodeNatStart').value = '';
+    document.getElementById('nodeNatEnd').value = '';
+    document.getElementById('nodeMaxPorts').value = '5';
+    document.getElementById('nodeAuthType').dispatchEvent(new Event('change'));
+    document.getElementById('nodeModalMsg').textContent = '';
+    openModal('nodeModal');
+  };
+
+  window.saveNode = async function() {
+    const id = document.getElementById('editNodeId').value;
+    const data = {
+      name: document.getElementById('nodeName').value.trim(),
+      host: document.getElementById('nodeHost').value.trim(),
+      port: parseInt(document.getElementById('nodePort').value) || 8006,
+      auth_type: document.getElementById('nodeAuthType').value,
+      virtualization: document.getElementById('nodeVirtualization').value,
+      storage: document.getElementById('nodeStorage').value.trim() || 'local',
+      bridge: document.getElementById('nodeBridge').value.trim() || 'vmbr0',
+      ipv6_bridge: document.getElementById('nodeIpv6Bridge').value.trim() || null,
+      nat_network: document.getElementById('nodeNatNetwork').value.trim() || null,
+      nat_start_port: parseInt(document.getElementById('nodeNatStart').value) || null,
+      nat_end_port: parseInt(document.getElementById('nodeNatEnd').value) || null,
+      max_ports_per_vm: parseInt(document.getElementById('nodeMaxPorts').value) || 5,
+    };
+
+    if (!data.name || !data.host) {
+      document.getElementById('nodeModalMsg').textContent = '请填写节点名称和主机地址';
+      return;
+    }
+
+    if (data.auth_type === 'api_token') {
+      data.api_token = document.getElementById('nodeApiToken').value.trim();
+      if (!data.api_token) { document.getElementById('nodeModalMsg').textContent = '请填写 API Token'; return; }
+    } else {
+      data.username = document.getElementById('nodeUsername').value.trim();
+      data.password = document.getElementById('nodePassword').value;
+      if (!data.username || !data.password) { document.getElementById('nodeModalMsg').textContent = '请填写用户名和密码'; return; }
+    }
+
+    // Show loading
+    document.getElementById('nodeSaveBtn').style.display = 'none';
+    document.getElementById('nodeSaveLoading').style.display = '';
+    document.getElementById('nodeModalMsg').textContent = '';
+
+    const isEdit = !!id;
+    const res = isEdit ? await API.updateNode(id, data) : await API.createNode(data);
+
+    document.getElementById('nodeSaveBtn').style.display = '';
+    document.getElementById('nodeSaveLoading').style.display = 'none';
+
+    if (res.success) {
+      UI.notify(isEdit ? '节点已更新' : '节点添加成功', 'success');
+      closeModal('nodeModal');
+      loadNodes();
+    } else {
+      document.getElementById('nodeModalMsg').textContent = res.message || '保存失败';
+    }
+  };
+
+  window.refreshAll = function() { loadNodes(); };
+
+  // Modal helpers
+  window.openModal = function(id) { document.getElementById(id).style.display = 'flex'; };
+  window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; };
+
+  // Init
+  loadNodes();
+})();
 </script>
 </body>
 </html>

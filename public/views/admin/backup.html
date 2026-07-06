@@ -3,423 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>数据备份 — CloudVM Pro 后台</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>数据备份 — CloudVM Pro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/style.css">
 <link rel="stylesheet" href="../../css/dashboard.css">
 <link rel="stylesheet" href="../../css/admin.css">
-<style>
-.config-section { background:var(--bg-2);border:1px solid var(--border);border-radius:16px;margin-bottom:20px;overflow:hidden; }
-.config-section-header { padding:18px 24px;border-bottom:1px solid var(--border);background:var(--bg-3); }
-.config-section-header h3 { font-size:15px;font-weight:700;margin-bottom:3px; }
-.config-section-header p { font-size:13px;color:var(--text-3); }
-.config-section-body { padding:24px; }
-.config-row { display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border); }
-.config-row:last-child { border-bottom:none;margin-bottom:0;padding-bottom:0; }
-.config-label { padding-top:6px; }
-.config-label strong { display:block;font-size:14px;margin-bottom:3px; }
-.config-label span { font-size:12px;color:var(--text-3); }
-.config-value { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
-.toggle-switch { position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0; }
-.toggle-switch input { opacity:0;width:0;height:0; }
-.toggle-slider { position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border-2);border-radius:26px;transition:var(--transition); }
-.toggle-slider:before { content:"";position:absolute;height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:var(--transition); }
-.toggle-switch input:checked+.toggle-slider { background:var(--accent); }
-.toggle-switch input:checked+.toggle-slider:before { transform:translateX(22px); }
-.backup-status-success { background:var(--green-soft);color:var(--green); }
-.backup-status-failed { background:rgba(220,38,38,0.1);color:var(--red); }
-.backup-status-inprogress { background:rgba(245,158,11,0.1);color:#d97706; }
-.storage-card { background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;flex:1;min-width:140px; }
-.storage-card .storage-icon { font-size:28px;margin-bottom:8px; }
-.storage-card .storage-val { font-size:20px;font-weight:800;margin-bottom:4px; }
-.storage-card .storage-label { font-size:12px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em; }
-.warning-big { padding:20px;background:rgba(220,38,38,0.06);border:2px solid rgba(220,38,38,0.25);border-radius:14px;text-align:center;margin-bottom:20px; }
-.warning-big .warn-icon { font-size:36px;margin-bottom:10px; }
-.warning-big h3 { color:var(--red);font-size:16px;margin-bottom:6px; }
-.warning-big p { color:var(--red);font-size:13px;opacity:0.85; }
-.progress-bar-wrap { background:var(--bg-3);border-radius:100px;height:8px;overflow:hidden;width:120px;flex-shrink:0; }
-.progress-bar-fill { height:100%;background:var(--accent);border-radius:100px;transition:width 0.3s; }
-.download-row { display:flex;align-items:center;gap:12px; }
-</style>
 </head>
 <body>
 <div class="admin-layout">
   <aside class="admin-sidebar" id="adminSidebar">
-    <div class="sidebar-header">
-      <div class="nav-brand">
-        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
-        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
-      </div>
-      <span class="admin-badge">Admin</span>
-    </div>
+    <div class="sidebar-header"><div class="nav-brand"><div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div><span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span></div><span class="admin-badge">Admin</span></div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">概览</div>
-        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">节点管理</div>
-        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">业务管理</div>
-        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户管理</a>
-        <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
-        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
-        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>订单管理</a>
-        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">3</span></a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">财务</div>
-        <a class="sidebar-item" href="coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>优惠码 &amp; 代金券</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">系统</div>
-        <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名审核</a>
-        <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>公告管理</a>
-        <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
-        <a class="sidebar-item active" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
-      </div>
+      <div class="sidebar-section"><a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">节点管理</div><a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">业务管理</div><a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>用户管理</a><a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a><a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a><a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a><a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">系统</div><a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a><a class="sidebar-item active" href="backup.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a></div>
     </nav>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
-        <div><div class="user-name">超级管理员</div></div>
-      </div>
-    </div>
+    <div class="sidebar-footer"><div class="user-info"><div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div><div><div class="user-name" id="sidebarUserName">管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div><a href="#" onclick="API.Auth.logout();return false" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a></div></div>
   </aside>
 
   <div class="admin-main">
-    <div class="admin-topbar">
-      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="breadcrumb">
-        <span class="breadcrumb-current">数据备份</span>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <button class="topbar-btn" onclick="ThemeManager.toggle()" title="切换主题">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-        <a href="../user/dashboard.html" class="btn-sm default" style="font-size:12px">切换用户视图</a>
-      </div>
-    </div>
+    <div class="admin-topbar"><button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="breadcrumb"><a href="index.html">首页</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">数据备份</span></div><div style="margin-left:auto"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button><button class="btn-sm primary" onclick="createBackup()">🔄 立即备份</button></div></div>
 
     <div class="admin-page">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-        <div>
-          <h1 style="font-size:22px;margin-bottom:4px">数据备份管理</h1>
-          <p style="font-size:14px;color:var(--text-3)">管理数据库与文件系统备份，保障数据安全</p>
-        </div>
-        <button class="btn-sm primary" onclick="openCreateBackupModal()" style="padding:10px 20px;font-size:14px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>
-          立即备份
-        </button>
+      <div style="margin-bottom:24px"><h1 style="font-size:22px;margin-bottom:4px">数据备份</h1><p style="font-size:14px;color:var(--text-3)">管理数据库和文件备份，支持创建、恢复、删除</p></div>
+      <div class="table-wrapper">
+        <table class="data-table"><thead><tr><th>备份文件</th><th>类型</th><th>大小</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="tableBody"></tbody></table>
       </div>
-
-      <!-- Storage Info Cards -->
-      <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-        <div class="storage-card">
-          <div class="storage-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/></svg></div>
-          <div class="storage-val" style="color:var(--accent)">16</div>
-          <div class="storage-label">备份总数</div>
-        </div>
-        <div class="storage-card">
-          <div class="storage-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
-          <div class="storage-val" style="color:#f59e0b">8.4 GB</div>
-          <div class="storage-label">总存储占用</div>
-        </div>
-        <div class="storage-card">
-          <div class="storage-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="storage-val" style="color:var(--green)">2025-07-01 03:00</div>
-          <div class="storage-label">上次备份时间</div>
-        </div>
-        <div class="storage-card">
-          <div class="storage-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <div class="storage-val" style="color:#8b5cf6">2025-07-02 03:00</div>
-          <div class="storage-label">下次计划备份</div>
-        </div>
-      </div>
-
-      <!-- Backup History Table -->
-      <div class="table-wrapper" style="margin-bottom:24px">
-        <div class="table-header">
-          <h3>备份历史</h3>
-          <input type="text" class="search-input" id="backupSearch" placeholder="搜索文件名...">
-        </div>
-        <table class="data-table" id="backupTable">
-          <thead><tr><th>ID</th><th>文件名</th><th>大小</th><th>类型</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
-          <tbody id="backupTableBody"></tbody>
-        </table>
-      </div>
-
-      <!-- Auto Backup Schedule Settings -->
-      <div class="config-section">
-        <div class="config-section-header">
-          <h3>自动备份设置</h3>
-          <p>配置定期自动备份策略</p>
-        </div>
-        <div class="config-section-body">
-          <div class="config-row">
-            <div class="config-label"><strong>启用自动备份</strong><span>开启后按计划自动备份</span></div>
-            <div class="config-value">
-              <label class="toggle-switch">
-                <input type="checkbox" id="autoBackupToggle" checked onchange="updateBackupStatus()">
-                <span class="toggle-slider"></span>
-              </label>
-              <span id="autoBackupLabel" style="font-size:13px;color:var(--green);font-weight:600">已启用</span>
-            </div>
-          </div>
-          <div class="config-row">
-            <div class="config-label"><strong>备份频率</strong><span>选择自动备份周期</span></div>
-            <div class="config-value">
-              <select class="form-input" id="backupFrequency" style="width:180px">
-                <option value="daily" selected>每天</option>
-                <option value="weekly">每周</option>
-                <option value="monthly">每月</option>
-              </select>
-            </div>
-          </div>
-          <div class="config-row">
-            <div class="config-label"><strong>执行时间</strong><span>每日备份时间点</span></div>
-            <div class="config-value">
-              <input type="time" class="form-input" id="backupTime" value="03:00" style="width:160px">
-            </div>
-          </div>
-          <div class="config-row">
-            <div class="config-label"><strong>保留策略</strong><span>自动清理旧备份</span></div>
-            <div class="config-value" style="flex-direction:column;align-items:flex-start;gap:8px">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:13px;color:var(--text-2)">保留最近</span>
-                <select class="form-input" id="retentionCount" style="width:100px">
-                  <option value="5">5</option>
-                  <option value="10" selected>10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-                <span style="font-size:13px;color:var(--text-2)">个备份</span>
-              </div>
-              <span style="font-size:12px;color:var(--text-3)">超出保留数量的旧备份将自动清除</span>
-            </div>
-          </div>
-          <div class="config-row">
-            <div class="config-label"><strong>备份类型</strong><span>选择备份数据范围</span></div>
-            <div class="config-value">
-              <select class="form-input" id="backupType" style="width:180px">
-                <option value="full" selected>完整备份</option>
-                <option value="db">仅数据库</option>
-                <option value="files">仅文件</option>
-              </select>
-            </div>
-          </div>
-          <div style="padding-top:8px">
-            <button class="btn-sm primary" onclick="saveBackupSettings()">保存设置</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Create Backup Now Modal -->
-<div class="modal-overlay" id="createBackupModal">
-  <div class="modal" style="max-width:500px">
-    <div class="modal-header"><h3>立即创建备份</h3><button class="modal-close" onclick="ModalManager.close('createBackupModal')">&times;</button></div>
-    <div class="modal-body">
-      <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-3);border-radius:10px;margin-bottom:16px">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <div style="font-size:13px;color:var(--text-2)">
-          <div>预计备份大小：<strong style="color:var(--text);font-family:var(--mono)">~520 MB</strong></div>
-          <div style="font-size:12px;color:var(--text-3)">备份类型：完整备份（数据库+文件系统）</div>
-        </div>
-      </div>
-      <div class="form-group"><label>备份备注（可选）</label>
-        <input type="text" class="form-input" id="backupNote" placeholder="例如：升级前手动备份" style="width:100%">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('createBackupModal')">取消</button>
-      <button class="btn-sm primary" onclick="startBackup()">开始备份</button>
-    </div>
-  </div>
-</div>
-
-<!-- Restore Confirmation Modal -->
-<div class="modal-overlay" id="restoreModal">
-  <div class="modal" style="max-width:500px">
-    <div class="modal-header"><h3>恢复备份</h3><button class="modal-close" onclick="ModalManager.close('restoreModal')">&times;</button></div>
-    <div class="modal-body">
-      <div class="warning-big">
-        <div class="warn-icon">&#9888;</div>
-        <h3>警告：此操作将覆盖当前数据</h3>
-        <p>恢复备份将完全覆盖现有数据库和文件。当前所有数据将被替换为备份时间点的数据。此操作不可撤销！</p>
-      </div>
-      <p style="font-size:13px;color:var(--text-2);margin-bottom:8px">将要恢复的备份：</p>
-      <div id="restoreInfo" style="padding:12px;background:var(--bg-3);border-radius:10px;font-size:13px;color:var(--text-2)"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('restoreModal')">取消</button>
-      <button class="btn-sm danger" onclick="confirmRestore()">确认恢复，我了解风险</button>
-    </div>
-  </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal-overlay" id="deleteBackupModal">
-  <div class="modal" style="max-width:400px">
-    <div class="modal-header"><h3>删除备份</h3><button class="modal-close" onclick="ModalManager.close('deleteBackupModal')">&times;</button></div>
-    <div class="modal-body">
-      <p style="color:var(--red);font-size:14px;line-height:1.6">确定要删除该备份文件吗？删除后无法恢复。</p>
-      <div id="deleteInfo" style="margin-top:12px;padding:10px 14px;background:var(--bg-3);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text-2)"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('deleteBackupModal')">取消</button>
-      <button class="btn-sm danger" onclick="confirmDeleteBackup()">确认删除</button>
     </div>
   </div>
 </div>
 
 <script src="../../js/main.js"></script>
-<script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-var backups = [
-  { id:'BKP-20250701-001', filename:'cloudvm_full_20250701_030000.sql.gz', size:'524 MB', type:'full', status:'success', created:'2025-07-01 03:00:15' },
-  { id:'BKP-20250630-001', filename:'cloudvm_full_20250630_030000.sql.gz', size:'518 MB', type:'full', status:'success', created:'2025-06-30 03:00:12' },
-  { id:'BKP-20250629-001', filename:'cloudvm_db_20250629_030000.sql.gz', size:'142 MB', type:'db', status:'success', created:'2025-06-29 03:00:08' },
-  { id:'BKP-20250628-001', filename:'cloudvm_full_20250628_030000.sql.gz', size:'510 MB', type:'full', status:'success', created:'2025-06-28 03:00:20' },
-  { id:'BKP-20250627-001', filename:'cloudvm_files_20250627_150000.tar.gz', size:'356 MB', type:'files', status:'success', created:'2025-06-27 15:00:05' },
-  { id:'BKP-20250626-001', filename:'cloudvm_full_20250626_030000.sql.gz', size:'505 MB', type:'full', status:'failed', created:'2025-06-26 03:00:00', error:'磁盘空间不足，备份写入失败' },
-  { id:'BKP-20250625-001', filename:'cloudvm_db_20250625_030000.sql.gz', size:'140 MB', type:'db', status:'success', created:'2025-06-25 03:00:10' },
-  { id:'BKP-20250624-001', filename:'cloudvm_full_20250624_030000.sql.gz', size:'498 MB', type:'full', status:'success', created:'2025-06-24 03:00:18' }
-];
+(function(){
+  'use strict';
+  if (!API.Auth.guard()) return;
+  document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
+  const user = API.Auth.getUser();
+  if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
-var restoreTargetId = null;
-var deleteTargetId = null;
+  async function load() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载中...</td></tr>';
+    const res = await API.getBackups();
+    if (!res.success) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>'; return; }
+    const items = res.data.backups || res.data || [];
+    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">暂无备份记录，点击"立即备份"创建</td></tr>'; return; }
 
-function getTypeLabel(t) {
-  return t==='full'?'完整备份':t==='db'?'仅数据库':'仅文件';
-}
-function getStatusHTML(s, err) {
-  if (s==='success') return '<span class="badge backup-status-success">&#10003; 成功</span>';
-  if (s==='failed') return '<span class="badge backup-status-failed" title="'+(err||'')+'">&#10007; 失败</span>';
-  if (s==='in_progress') return '<span class="badge backup-status-inprogress"><span class="spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px"></span>进行中</span>';
-  return s;
-}
+    tbody.innerHTML = items.map(b =>
+      '<tr><td style="font-family:var(--mono);font-size:12px">' + esc(b.filename||b.name||'backup-'+b.id) + '</td>' +
+      '<td>' + (b.type||'database') + '</td>' +
+      '<td>' + (b.size ? (b.size > 1048576 ? (b.size/1048576).toFixed(1)+' MB' : (b.size/1024).toFixed(1)+' KB') : '-') + '</td>' +
+      '<td>' + UI.statusBadge(b.status||'completed', {completed:['success','完成'],in_progress:['warning','进行中'],failed:['danger','失败']}) + '</td>' +
+      '<td style="font-size:12px">' + UI.formatDate(b.created_at) + '</td>' +
+      '<td><div style="display:flex;gap:4px">' +
+      '<button class="btn-sm default" onclick="restore('+b.id+')" style="font-size:11px">恢复</button>' +
+      '<button class="btn-sm default" onclick="download('+b.id+')" style="font-size:11px">下载</button>' +
+      '<button class="btn-sm danger" onclick="del('+b.id+')" style="font-size:11px">删除</button>' +
+      '</div></td></tr>').join('');
+  }
 
-function renderTable() {
-  var body = document.getElementById('backupTableBody');
-  var q = document.getElementById('backupSearch').value.toLowerCase();
-  var html = '';
-  backups.forEach(function(b){
-    if (q && !b.filename.toLowerCase().includes(q)) return;
-    html += '<tr>';
-    html += '<td style="font-family:var(--mono);font-size:12px">'+b.id+'</td>';
-    html += '<td style="font-family:var(--mono);font-size:12px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+b.filename+'">'+b.filename+'</td>';
-    html += '<td style="font-family:var(--mono);font-size:13px">'+b.size+'</td>';
-    html += '<td><span class="badge badge-default">'+getTypeLabel(b.type)+'</span></td>';
-    html += '<td>'+getStatusHTML(b.status, b.error)+'</td>';
-    html += '<td style="font-size:13px;color:var(--text-2)">'+b.created+'</td>';
-    html += '<td><div class="table-actions">';
-    if (b.status==='success') {
-      html += '<button class="btn-sm default" onclick="downloadBackup(\''+b.id+'\')">下载</button>';
-      html += '<button class="btn-sm default" onclick="openRestoreModal(\''+b.id+'\')">恢复</button>';
-    }
-    html += '<button class="btn-sm danger" onclick="openDeleteBackupModal(\''+b.id+'\')">删除</button>';
-    html += '</div></td></tr>';
-  });
-  if (!html) html = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-3)">没有找到匹配的备份记录</td></tr>';
-  body.innerHTML = html;
-}
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
 
-function openCreateBackupModal() {
-  document.getElementById('backupNote').value = '';
-  ModalManager.open('createBackupModal');
-}
-
-function startBackup() {
-  ModalManager.close('createBackupModal');
-  showNotification('备份中', '正在创建备份，请稍候...', 'info');
-
-  var newId = 'BKP-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-00'+String(backups.length+1);
-  var newBkp = {
-    id: newId,
-    filename: 'cloudvm_full_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'_'+String(new Date().getHours()).padStart(2,'0')+String(new Date().getMinutes()).padStart(2,'0')+String(new Date().getSeconds()).padStart(2,'0')+'.sql.gz',
-    size: String(Math.round(500+Math.random()*40))+' MB',
-    type: 'full',
-    status: 'in_progress',
-    created: new Date().toISOString().slice(0,19).replace('T',' ')
+  window.createBackup = async function() {
+    UI.notify('正在创建备份...','info');
+    const r = await API.createBackup();
+    if (r.success) { UI.notify('备份创建成功','success'); load(); }
+    else UI.notify(r.message||'创建失败','error');
   };
-  backups.unshift(newBkp);
-  renderTable();
 
-  setTimeout(function(){
-    newBkp.status = 'success';
-    showNotification('备份完成', '备份 '+newBkp.filename+' 创建成功', 'success');
-    renderTable();
-  }, 3000);
-}
+  window.restore = async function(id) {
+    if (!confirm('确定要恢复此备份吗？当前数据将被覆盖！')) return;
+    const r = await API.restoreBackup(id);
+    if (r.success) { UI.notify('恢复成功','success'); load(); }
+    else UI.notify(r.message||'恢复失败','error');
+  };
 
-function downloadBackup(id) {
-  var b = backups.find(function(x){return x.id===id;});
-  if (!b) return;
-  showNotification('开始下载', '正在准备下载 '+b.filename+'...', 'info');
+  window.download = async function(id) {
+    const res = await API.downloadBackup(id);
+    if (res.success && res.data && res.data.url) {
+      window.open(res.data.url, '_blank');
+    } else {
+      // Fallback: direct download with auth header via fetch + blob
+      try {
+        const resp = await fetch('/api/admin/backups/' + id + '/download', {
+          headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+        });
+        if (resp.ok) {
+          const blob = await resp.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'backup-' + id + '.sql';
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } else {
+          UI.notify('下载失败', 'error');
+        }
+      } catch (e) {
+        UI.notify('下载失败: ' + e.message, 'error');
+      }
+    }
+  };
 
-  setTimeout(function(){
-    showNotification('下载完成', b.filename+' 已保存到本地', 'success');
-  }, 2000);
-}
+  window.del = async function(id) {
+    if (!confirm('确定删除此备份？')) return;
+    const r = await API.deleteBackup(id);
+    if (r.success) { UI.notify('已删除','success'); load(); }
+    else UI.notify(r.message,'error');
+  };
 
-function openRestoreModal(id) {
-  restoreTargetId = id;
-  var b = backups.find(function(x){return x.id===id;});
-  if (!b) return;
-  document.getElementById('restoreInfo').innerHTML = '<strong>'+b.filename+'</strong><br>大小：'+b.size+' &middot; 类型：'+getTypeLabel(b.type)+' &middot; 时间：'+b.created;
-  ModalManager.open('restoreModal');
-}
-
-function confirmRestore() {
-  if (!restoreTargetId) return;
-  ModalManager.close('restoreModal');
-  var b = backups.find(function(x){return x.id===restoreTargetId;});
-  showNotification('恢复中', '正在从 '+b.filename+' 恢复数据，请勿关闭页面...', 'info');
-
-  setTimeout(function(){
-    showNotification('恢复完成', '系统数据已恢复至 '+b.created+' 的状态', 'success');
-  }, 3000);
-}
-
-function openDeleteBackupModal(id) {
-  deleteTargetId = id;
-  var b = backups.find(function(x){return x.id===id;});
-  if (!b) return;
-  document.getElementById('deleteInfo').textContent = b.filename;
-  ModalManager.open('deleteBackupModal');
-}
-
-function confirmDeleteBackup() {
-  if (!deleteTargetId) return;
-  backups = backups.filter(function(x){return x.id!==deleteTargetId;});
-  deleteTargetId = null;
-  ModalManager.close('deleteBackupModal');
-  showNotification('已删除', '备份文件已永久删除', 'success');
-  renderTable();
-}
-
-function updateBackupStatus() {
-  var checked = document.getElementById('autoBackupToggle').checked;
-  var label = document.getElementById('autoBackupLabel');
-  label.textContent = checked ? '已启用' : '已禁用';
-  label.style.color = checked ? 'var(--green)' : 'var(--text-3)';
-}
-
-function saveBackupSettings() {
-  showNotification('已保存', '自动备份设置已更新', 'success');
-}
-
-document.addEventListener('DOMContentLoaded', function(){
-  ThemeManager.init();
-  renderTable();
-  document.getElementById('backupSearch').addEventListener('input', renderTable);
-  updateBackupStatus();
-});
+  load();
+})();
 </script>
 </body>
 </html>

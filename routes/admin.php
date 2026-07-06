@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NodeController;
+use App\Http\Controllers\Admin\NodeTemplateController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SettingController;
@@ -46,6 +47,7 @@ Route::middleware(['auth:sanctum', 'admin', \Illuminate\Routing\Middleware\Subst
 
     // Nodes
     Route::get('nodes', [NodeController::class, 'index']);
+    Route::post('nodes/test-connection', [NodeController::class, 'testConnection']);
     Route::get('nodes/{node}', [NodeController::class, 'show']);
     Route::post('nodes', [NodeController::class, 'store']);
     Route::put('nodes/{node}', [NodeController::class, 'update']);
@@ -53,6 +55,7 @@ Route::middleware(['auth:sanctum', 'admin', \Illuminate\Routing\Middleware\Subst
     Route::post('nodes/{node}/test', [NodeController::class, 'test']);
     Route::post('nodes/{node}/sync-vms', [NodeController::class, 'syncVms']);
     Route::post('nodes/{node}/sync-templates', [NodeController::class, 'syncTemplates']);
+    Route::get('nodes/{node}/templates', [NodeTemplateController::class, 'index']);
     Route::put('nodes/{node}/nat-config', [NodeController::class, 'updateNatConfig']);
 
     // Products
