@@ -61,6 +61,11 @@ class Order extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function vm(): BelongsTo
+    {
+        return $this->belongsTo(VirtualMachine::class, 'vm_id');
+    }
+
     public function virtualMachine(): BelongsTo
     {
         return $this->belongsTo(VirtualMachine::class, 'vm_id');

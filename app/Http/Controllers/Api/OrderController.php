@@ -6,13 +6,13 @@ use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CreateOrderRequest;
 use App\Http\Requests\Api\PayOrderRequest;
-use App\Jobs\ProvisionVmJob;
 use App\Models\Coupon;
 use App\Models\Node;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Services\EpayService;
+use App\Services\VmProvisioningService;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -100,12 +100,12 @@ class OrderController extends Controller
             // If using balance, auto-deduct and provision
             if ($finalAmount <= 0) {
                 $order->update([
-                    'status'         => 'paid',
+                    'payment_status' => 'paid',
                     'payment_method' => 'balance',
                     'paid_at'        => now(),
                 ]);
 
-                $this->provisionVm($order);
+                app(VmProvisioningService::class)->provisionFromOrder($order);
             }
 
             return ApiResponse::success(['order' => $order], 'Order created successfully.', 201);
@@ -138,7 +138,7 @@ class OrderController extends Controller
                 return ApiResponse::error('Unauthorized.', 403);
             }
 
-            if ($order->status !== 'pending') {
+            if ($order->payment_status !== 'pending') {
                 return ApiResponse::error('Order is not in pending status.', 400);
             }
 
@@ -165,12 +165,12 @@ class OrderController extends Controller
                 ]);
 
                 $order->update([
-                    'status'         => 'paid',
+                    'payment_status' => 'paid',
                     'payment_method' => 'balance',
                     'paid_at'        => now(),
                 ]);
 
-                $this->provisionVm($order);
+                app(VmProvisioningService::class)->provisionFromOrder($order);
 
                 return ApiResponse::success(['order' => $order], 'Payment successful. VM is being provisioned.');
             }
@@ -182,14 +182,13 @@ class OrderController extends Controller
                 return ApiResponse::error('Payment gateway is not configured.', 500);
             }
 
-            $paymentUrl = $epay->getPaymentUrl([
-                'out_trade_no' => $order->order_no,
-                'name'         => "Order #{$order->order_no}",
-                'money'        => $order->amount,
-                'type'         => $request->get('payment_channel', 'alipay'),
-            ]);
+            $result = $epay->createOrder($order, $request->get('payment_channel', 'alipay'));
 
-            return ApiResponse::success(['payment_url' => $paymentUrl], 'Payment URL generated.');
+            return ApiResponse::success([
+                'order'       => $order,
+                'payment_url' => $result['pay_url'] ?? '',
+                'params'      => $result['params'] ?? [],
+            ], 'Payment URL generated.');
         } catch (\Exception $e) {
             \Log::error('OrderController::pay failed', ['error' => $e->getMessage()]);
             return ApiResponse::error('Payment failed.', 500);
@@ -203,11 +202,11 @@ class OrderController extends Controller
                 return ApiResponse::error('Unauthorized.', 403);
             }
 
-            if ($order->status !== 'pending') {
+            if ($order->payment_status !== 'pending') {
                 return ApiResponse::error('Only pending orders can be cancelled.', 400);
             }
 
-            $order->update(['status' => 'cancelled']);
+            $order->update(['payment_status' => 'cancelled']);
 
             return ApiResponse::success(['order' => $order], 'Order cancelled.');
         } catch (\Exception $e) {
@@ -218,46 +217,6 @@ class OrderController extends Controller
 
     protected function provisionVm(Order $order): void
     {
-        $product   = $order->product;
-        $availableNode = Node::where('status', 'online')->first();
-
-        if (!$availableNode) {
-            \Log::error('OrderController::provisionVm: No online nodes available', [
-                'order_no' => $order->order_no,
-            ]);
-            return;
-        }
-
-        $nextVmid = VirtualMachine::max('vmid') + 1;
-
-        $expiresAt = match ($order->billing_cycle) {
-            'monthly'   => now()->addMonth(),
-            'quarterly' => now()->addMonths(3),
-            'yearly'    => now()->addYear(),
-            default     => now()->addMonth(),
-        };
-
-        $vm = VirtualMachine::create([
-            'user_id'       => $order->user_id,
-            'node_id'       => $availableNode->id,
-            'product_id'    => $product->id,
-            'order_id'      => $order->id,
-            'name'          => $product->name . '-' . rand(1000, 9999),
-            'type'          => $product->type ?? 'kvm',
-            'status'        => 'creating',
-            'vm_id'         => (string) $nextVmid,
-            'cpu'           => $product->cpu,
-            'memory'        => $product->memory,
-            'disk'          => $product->disk,
-            'bandwidth'     => $product->bandwidth ?? 100,
-            'traffic_limit' => $product->traffic_limit ?? 0,
-            'traffic_used'  => 0,
-            'os_template'   => 'auto',
-            'expires_at'    => $expiresAt,
-        ]);
-
-        $order->update(['vm_id' => $vm->id]);
-
-        ProvisionVmJob::dispatch($vm);
+        app(VmProvisioningService::class)->provisionFromOrder($order);
     }
 }

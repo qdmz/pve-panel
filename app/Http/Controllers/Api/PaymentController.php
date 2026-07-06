@@ -6,9 +6,11 @@ use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\RechargeRequest;
 use App\Models\Coupon;
+use App\Models\Node;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Services\EpayService;
+use App\Services\VmProvisioningService;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -56,17 +58,13 @@ class PaymentController extends Controller
 
             $epay = new EpayService();
 
-            $paymentUrl = $epay->getPaymentUrl([
-                'out_trade_no' => $orderNo,
-                'name'         => 'Account Recharge',
-                'money'        => $actualPay,
-                'type'         => $request->get('payment_channel', 'alipay'),
-            ]);
+            $result = $epay->createRecharge($user->id, $actualPay, $request->get('payment_channel', 'alipay'));
 
             return ApiResponse::success([
-                'payment_url'  => $paymentUrl,
-                'transaction'  => $transaction,
-                'order_no'     => $orderNo,
+                'payment_url'   => $result['pay_url'] ?? '',
+                'params'        => $result['params'] ?? [],
+                'transaction'   => $transaction,
+                'order_no'      => $orderNo,
                 'actual_amount' => $actualPay,
             ], 'Payment URL generated.');
         } catch (\Exception $e) {
@@ -119,9 +117,9 @@ class PaymentController extends Controller
                 // Order payment
                 $order = Order::where('order_no', $orderNo)->first();
 
-                if ($order && $order->status === 'pending') {
+                if ($order && $order->payment_status === 'pending') {
                     $order->update([
-                        'status'         => 'paid',
+                        'payment_status' => 'paid',
                         'payment_method' => 'epay',
                         'transaction_id' => $tradeNo,
                         'paid_at'        => now(),
@@ -139,6 +137,13 @@ class PaymentController extends Controller
                         'reference_id'   => $order->id,
                         'transaction_id' => $tradeNo,
                     ]);
+
+                    // Trigger VM provisioning via shared service
+                    \Log::info('Dispatching VM provisioning after Epay callback', [
+                        'order_no' => $orderNo,
+                        'product_id' => $order->product_id,
+                    ]);
+                    app(VmProvisioningService::class)->provisionFromOrder($order);
                 }
             }
 
