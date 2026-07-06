@@ -3,337 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>工单管理 — CloudVM Pro 后台</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>工单管理 — CloudVM Pro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/style.css">
 <link rel="stylesheet" href="../../css/dashboard.css">
 <link rel="stylesheet" href="../../css/admin.css">
-<style>
-.priority-urgent { background: rgba(220,38,38,0.1); color: #dc2626; font-weight:700; }
-.priority-high { background: rgba(249,115,22,0.1); color: #f97316; font-weight:700; }
-.priority-medium { background: rgba(245,158,11,0.1); color: #d97706; font-weight:600; }
-.priority-low { background: rgba(107,114,128,0.1); color: #6b7280; }
-.status-open { background: var(--accent-soft); color: var(--accent); }
-.status-progress { background: rgba(245,158,11,0.1); color: #d97706; }
-.status-resolved { background: var(--green-soft); color: var(--green); }
-.status-closed { background: var(--bg-3); color: var(--text-3); }
-.filter-tab { padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg-3); color:var(--text-2); transition:var(--transition); }
-.filter-tab:hover { background:var(--bg); color:var(--text); }
-.filter-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-.ticket-row { cursor:pointer; transition:background 0.15s; }
-.ticket-row:hover { background:var(--bg-3); }
-.ticket-row.expanded { background:var(--accent-soft); }
-.ticket-expand { display:none; }
-.ticket-expand.show { display:table-row; }
-.ticket-expand td { padding:0; }
-.ticket-detail-inline { padding:24px 28px; border-top:2px solid var(--accent); background:var(--bg); }
-.ticket-thread { margin-bottom:20px; }
-.ticket-thread-msg { display:flex; gap:12px; margin-bottom:14px; }
-.ticket-thread-msg .thread-avatar { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0; }
-.thread-admin { background:linear-gradient(135deg,var(--orange),#f59e0b); }
-.thread-user { background:linear-gradient(135deg,var(--accent),#818cf8); }
-.thread-body { flex:1; }
-.thread-meta { font-size:12px; color:var(--text-3); margin-bottom:4px; display:flex; align-items:center; gap:8px; }
-.thread-content { font-size:14px; color:var(--text); line-height:1.6; background:var(--bg-2); padding:12px 16px; border-radius:10px; border:1px solid var(--border); }
-.ticket-inline-reply { display:flex; gap:10px; align-items:flex-start; }
-.ticket-inline-reply textarea { flex:1; min-height:60px; padding:10px 14px; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; font-size:14px; color:var(--text); font-family:var(--font); resize:vertical; outline:none; transition:var(--transition); }
-.ticket-inline-reply textarea:focus { border-color:var(--accent); }
-.ticket-actions-inline { display:flex; gap:8px; align-items:center; }
-.stat-mini { background:var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; text-align:center; flex:1; }
-.stat-mini-val { font-size:22px;font-weight:800; }
-.stat-mini-label { font-size:11px;color:var(--text-3);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em; }
-.warning-box { padding:16px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2); border-radius:10px; font-size:13px; color:#d97706; margin-bottom:16px; }
-</style>
 </head>
 <body>
 <div class="admin-layout">
   <aside class="admin-sidebar" id="adminSidebar">
-    <div class="sidebar-header">
-      <div class="nav-brand">
-        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
-        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
-      </div>
-      <span class="admin-badge">Admin</span>
-    </div>
+    <div class="sidebar-header"><div class="nav-brand"><div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div><span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span></div><span class="admin-badge">Admin</span></div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">概览</div>
-        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">节点管理</div>
-        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">业务管理</div>
-        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户管理</a>
-        <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
-        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
-        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>订单管理</a>
-        <a class="sidebar-item active" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">3</span></a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">财务</div>
-        <a class="sidebar-item" href="coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>优惠码 &amp; 代金券</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">系统</div>
-        <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名审核</a>
-        <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>公告管理</a>
-        <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
-        <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
-      </div>
+      <div class="sidebar-section"><a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">节点管理</div><a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">业务管理</div><a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>用户管理</a><a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a><a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a><a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a><a class="sidebar-item active" href="tickets-admin.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">系统</div><a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a><a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a></div>
     </nav>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
-        <div><div class="user-name">超级管理员</div></div>
-      </div>
-    </div>
+    <div class="sidebar-footer"><div class="user-info"><div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div><div><div class="user-name" id="sidebarUserName">管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div><a href="#" onclick="API.Auth.logout();return false" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a></div></div>
   </aside>
 
   <div class="admin-main">
-    <div class="admin-topbar">
-      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="breadcrumb">
-        <span class="breadcrumb-current">工单管理</span>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <button class="topbar-btn" onclick="ThemeManager.toggle()" title="切换主题">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-        <a href="../user/dashboard.html" class="btn-sm default" style="font-size:12px">切换用户视图</a>
-      </div>
-    </div>
+    <div class="admin-topbar"><button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="breadcrumb"><a href="index.html">首页</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">工单管理</span></div><div style="margin-left:auto"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button></div></div>
 
     <div class="admin-page">
-      <div style="margin-bottom:24px">
-        <h1 style="font-size:22px;margin-bottom:4px">工单管理</h1>
-        <p style="font-size:14px;color:var(--text-3)">处理用户提交的技术支持与业务咨询工单</p>
-      </div>
-
-      <!-- Stats -->
-      <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-        <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent)">47</div><div class="stat-mini-label">总工单</div></div>
-        <div class="stat-mini"><div class="stat-mini-val" style="color:#f97316">3</div><div class="stat-mini-label">待处理</div></div>
-        <div class="stat-mini"><div class="stat-mini-val" style="color:var(--green)">5</div><div class="stat-mini-label">今日已解决</div></div>
-        <div class="stat-mini"><div class="stat-mini-val" style="color:#8b5cf6">2.4h</div><div class="stat-mini-label">平均响应时间</div></div>
-      </div>
-
-      <!-- Filters -->
+      <div style="margin-bottom:24px"><h1 style="font-size:22px;margin-bottom:4px">工单管理</h1><p style="font-size:14px;color:var(--text-3)">处理用户提交的工单，支持回复、关闭、优先级调整</p></div>
       <div class="table-wrapper">
-        <div class="table-header" style="flex-wrap:wrap;gap:10px">
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <span class="filter-tab active" onclick="filterTickets('all',this)">全部</span>
-            <span class="filter-tab" onclick="filterTickets('open',this)">待处理</span>
-            <span class="filter-tab" onclick="filterTickets('in_progress',this)">处理中</span>
-            <span class="filter-tab" onclick="filterTickets('resolved',this)">已解决</span>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap">
-            <select class="select-filter" onchange="filterByPriority(this.value)">
-              <option value="all">所有优先级</option>
-              <option value="urgent">紧急</option>
-              <option value="high">高</option>
-              <option value="medium">中</option>
-              <option value="low">低</option>
-            </select>
-            <input type="text" class="search-input" id="ticketSearch" placeholder="搜索工单...">
-          </div>
-        </div>
-        <table class="data-table" id="ticketTable">
-          <thead><tr><th>ID</th><th>用户</th><th>主题</th><th>部门</th><th>优先级</th><th>状态</th><th>最后回复</th><th>创建日期</th></tr></thead>
-          <tbody id="ticketTableBody">
-          </tbody>
-        </table>
+        <table class="data-table"><thead><tr><th>ID</th><th>标题</th><th>用户</th><th>优先级</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="tableBody"></tbody></table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Close with Note Modal -->
-<div class="modal-overlay" id="closeModal">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header"><h3>关闭工单</h3><button class="modal-close" onclick="ModalManager.close('closeModal')">&times;</button></div>
-    <div class="modal-body">
-      <div class="warning-box">关闭后用户将收到通知，且工单不可重新开启。</div>
-      <div class="form-group"><label>关闭备注</label><textarea class="form-input" id="closeNote" rows="3" placeholder="请输入关闭原因..." style="width:100%;resize:vertical;font-family:var(--font)"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('closeModal')">取消</button>
-      <button class="btn-sm danger" onclick="confirmClose()">确认关闭</button>
-    </div>
+<div class="modal-overlay" id="modal" style="display:none"><div class="modal-content" style="max-width:600px">
+  <div class="modal-header"><h2>工单详情</h2><button class="modal-close" onclick="document.getElementById('modal').style.display='none'">&times;</button></div>
+  <div class="modal-body">
+    <div id="ticketDetail"></div>
+    <div class="form-group" style="margin-top:16px"><label>回复</label><textarea class="form-input" id="replyContent" rows="3" placeholder="输入回复内容..."></textarea></div>
   </div>
-</div>
+  <div class="modal-footer">
+    <button class="btn default" onclick="updateTicketStatus('closed')">关闭工单</button>
+    <button class="btn primary" onclick="submitReply()">发送回复</button>
+  </div>
+</div></div>
 
 <script src="../../js/main.js"></script>
-<script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-var tickets = [
-  { id:'#TK-1001', user:'张三', subject:'VM-101 无法 SSH 连接，报连接超时', department:'Technical', priority:'urgent', status:'open', lastReply:'5分钟前', created:'2025-07-01', replies:[{from:'admin',name:'超级管理员',time:'2025-07-01 14:22',msg:'我们在排查中，请确认防火墙是否放行了22端口？'},{from:'user',name:'张三',time:'2025-07-01 14:18',msg:'SSH连接后一直超时，重启过实例也没用。ping是通的，端口扫描22端口是closed状态。'}] },
-  { id:'#TK-1002', user:'李四', subject:'NAT 端口转发规则数量咨询', department:'Technical', priority:'medium', status:'in_progress', lastReply:'1小时前', created:'2025-06-30', replies:[{from:'admin',name:'超级管理员',time:'2025-06-30 15:10',msg:'目前标准套餐支持10条NAT转发规则，专业套餐支持50条。您可以先升级套餐。'},{from:'user',name:'李四',time:'2025-06-30 14:55',msg:'我的NAT转发规则已经达到上限，想增加更多端口转发，请问如何操作？'}] },
-  { id:'#TK-1003', user:'王五', subject:'申请开具增值税专用发票', department:'Billing', priority:'low', status:'open', lastReply:'-', created:'2025-06-29', replies:[{from:'user',name:'王五',time:'2025-06-29 09:30',msg:'本月消费合计¥1,480元，需要开具增值税专用发票。税号：91110108XXXXXXXX。'}] },
-  { id:'#TK-1004', user:'赵六', subject:'[紧急] VM-205 磁盘 IO 持续 100%', department:'Technical', priority:'high', status:'in_progress', lastReply:'30分钟前', created:'2025-06-28', replies:[{from:'admin',name:'超级管理员',time:'2025-06-28 16:45',msg:'已经将您的实例迁移至高IO节点，请观察一下效果。'},{from:'user',name:'赵六',time:'2025-06-28 16:20',msg:'WordPress网站突然变得非常慢，top查看iowait持续100%。'}] },
-  { id:'#TK-1005', user:'孙七', subject:'续费折扣咨询 - 年付优惠', department:'Sales', priority:'medium', status:'open', lastReply:'2小时前', created:'2025-06-27', replies:[{from:'user',name:'孙七',time:'2025-06-27 11:00',msg:'我的KVM专业版即将到期，年付续费有什么折扣活动吗？'}] },
-  { id:'#TK-1006', user:'周八', subject:'数据迁移协助请求', department:'Technical', priority:'medium', status:'resolved', lastReply:'3天前', created:'2025-06-26', replies:[{from:'admin',name:'超级管理员',time:'2025-06-26 18:30',msg:'迁移已完成，已将所有数据从旧节点迁移至广州CN1节点，请验收。'},{from:'user',name:'周八',time:'2025-06-26 17:00',msg:'我需要把服务器从上海节点迁移到广州节点，能不能提供数据同步服务？'}] },
-  { id:'#TK-1007', user:'吴九', subject:'控制台面板无法打开', department:'Technical', priority:'high', status:'resolved', lastReply:'1天前', created:'2025-06-25', replies:[{from:'admin',name:'超级管理员',time:'2025-06-25 10:15',msg:'已修复，是CDN缓存问题导致的，已刷新缓存。'},{from:'user',name:'吴九',time:'2025-06-25 09:50',msg:'登录后点击虚拟机控制台，页面一直白屏加载不出来。'}] },
-  { id:'#TK-1008', user:'郑十', subject:'账户余额充值未到账', department:'Billing', priority:'high', status:'closed', lastReply:'4天前', created:'2025-06-24', replies:[{from:'admin',name:'超级管理员',time:'2025-06-24 16:00',msg:'已核实，支付系统存在延迟，现已到账。非常抱歉给您带来不便。'},{from:'user',name:'郑十',time:'2025-06-24 15:30',msg:'昨天充值了¥500，支付宝已扣款，但账户余额没变化。'}] }
-];
+(function(){
+  'use strict';
+  if (!API.Auth.guard()) return;
+  document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
+  const user = API.Auth.getUser();
+  if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
-var currentTicketId = null;
-var statusFilter = 'all';
-var priorityFilter = 'all';
+  let currentTicketId = null;
 
-function getPriorityBadge(p) {
-  var map = {urgent:'紧急',high:'高',medium:'中',low:'低'};
-  return '<span class="badge priority-'+p+'">'+map[p]+'</span>';
-}
-function getStatusBadge(s) {
-  var map = {open:'待处理',in_progress:'处理中',resolved:'已解决',closed:'已关闭'};
-  var cls = {open:'status-open',in_progress:'status-progress',resolved:'status-resolved',closed:'status-closed'};
-  return '<span class="badge '+cls[s]+'">'+map[s]+'</span>';
-}
-function getDeptBadge(d) {
-  var map = {Technical:'技术支持',Billing:'财务账单',Sales:'销售咨询',Other:'其他'};
-  return map[d]||d;
-}
+  async function load() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载中...</td></tr>';
+    const res = await API.getTickets();
+    if (!res.success) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red)">加载失败</td></tr>'; return; }
+    const items = res.data.tickets || res.data || [];
+    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3)">暂无工单 🎉</td></tr>'; return; }
 
-function getThreadHTML(replies) {
-  var h = '<div class="ticket-thread">';
-  replies.forEach(function(r){
-    var cls = r.from==='admin'?'thread-admin':'thread-user';
-    var abbr = r.name.charAt(0);
-    h += '<div class="ticket-thread-msg"><div class="thread-avatar '+cls+'">'+abbr+'</div>';
-    h += '<div class="thread-body"><div class="thread-meta"><strong>'+r.name+'</strong><span>'+r.time+'</span></div>';
-    h += '<div class="thread-content">'+r.msg+'</div></div></div>';
-  });
-  h += '</div>';
-  return h;
-}
-
-function renderTable() {
-  var body = document.getElementById('ticketTableBody');
-  var q = document.getElementById('ticketSearch').value.toLowerCase();
-  var html = '';
-  tickets.forEach(function(t,i){
-    if (statusFilter!=='all' && t.status!==statusFilter) return;
-    if (priorityFilter!=='all' && t.priority!==priorityFilter) return;
-    if (q && !(t.id.toLowerCase()+t.user+t.subject+t.department).toLowerCase().includes(q)) return;
-    var expanded = currentTicketId===t.id;
-    html += '<tr class="ticket-row'+(expanded?' expanded':'')+'" onclick="toggleTicket(\''+t.id+'\')">';
-    html += '<td style="font-family:var(--mono);font-size:13px">'+t.id+'</td>';
-    html += '<td style="font-weight:600">'+t.user+'</td>';
-    html += '<td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.subject+'</td>';
-    html += '<td>'+getDeptBadge(t.department)+'</td>';
-    html += '<td>'+getPriorityBadge(t.priority)+'</td>';
-    html += '<td>'+getStatusBadge(t.status)+'</td>';
-    html += '<td style="font-size:13px;color:var(--text-3)">'+t.lastReply+'</td>';
-    html += '<td style="font-size:13px;color:var(--text-2)">'+t.created+'</td></tr>';
-    html += '<tr class="ticket-expand'+(expanded?' show':'')+'" id="expand-'+t.id+'"><td colspan="8"><div class="ticket-detail-inline">';
-    html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">';
-    html += '<strong style="font-size:15px">'+t.subject+'</strong>';
-    html += '<span style="font-size:12px;color:var(--text-3)">工单 '+t.id+' &middot; 创建 '+t.created+'</span>';
-    html += '<div style="margin-left:auto;display:flex;gap:8px">';
-    html += buildStatusSelect(t);
-    html += '<button class="btn-sm danger" onclick="event.stopPropagation();openCloseModal(\''+t.id+'\')">关闭工单</button>';
-    html += '</div></div>';
-    html += getThreadHTML(t.replies);
-    if (t.status!=='closed' && t.status!=='resolved') {
-      html += '<div class="ticket-inline-reply"><textarea placeholder="输入回复..." id="replyText-'+t.id+'" rows="2"></textarea>';
-      html += '<button class="btn-sm primary" onclick="event.stopPropagation();submitReply(\''+t.id+'\')">发送回复</button></div>';
-    }
-    html += '</div></td></tr>';
-  });
-  if (!html) html = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-3)">没有符合筛选条件的工单</td></tr>';
-  body.innerHTML = html;
-}
-
-function buildStatusSelect(t) {
-  var options = [{val:'open',label:'待处理'},{val:'in_progress',label:'处理中'},{val:'resolved',label:'已解决'},{val:'closed',label:'已关闭'}];
-  var sel = '<select class="select-filter" onchange="event.stopPropagation();changeStatus(\''+t.id+'\',this.value)" style="font-size:12px">';
-  options.forEach(function(o){
-    sel += '<option value="'+o.val+'"'+(t.status===o.val?' selected':'')+'>'+o.label+'</option>';
-  });
-  sel += '</select>';
-  return sel;
-}
-
-function toggleTicket(id) {
-  if (currentTicketId===id) { currentTicketId=null; } else { currentTicketId=id; }
-  renderTable();
-}
-
-function changeStatus(id, newStatus) {
-  var t = tickets.find(function(x){return x.id===id;});
-  if (!t) return;
-  t.status = newStatus;
-  if (newStatus==='closed') { currentTicketId=null; }
-  showNotification('状态已更新', '工单 '+id+' 状态已变更为 '+(newStatus==='open'?'待处理':newStatus==='in_progress'?'处理中':newStatus==='resolved'?'已解决':'已关闭'), 'success');
-  renderTable();
-}
-
-function submitReply(id) {
-  var ta = document.getElementById('replyText-'+id);
-  if (!ta || !ta.value.trim()) {
-    showNotification('提示', '请输入回复内容', 'error');
-    return;
+    tbody.innerHTML = items.map(t =>
+      '<tr><td>' + t.id + '</td><td style="font-weight:600;cursor:pointer;color:var(--accent)" onclick="viewTicket('+t.id+')">' + esc(t.title||t.subject) + '</td>' +
+      '<td>' + esc(t.user ? t.user.name : '-') + '</td>' +
+      '<td>' + UI.statusBadge(t.priority||'medium', {high:['danger','紧急'],medium:['warning','中'],low:['info','低']}) + '</td>' +
+      '<td>' + UI.statusBadge(t.status||'open', {open:['warning','开启'],closed:['success','已关闭']}) + '</td>' +
+      '<td style="font-size:12px">' + UI.formatDate(t.created_at) + '</td>' +
+      '<td><div style="display:flex;gap:4px">' +
+      '<button class="btn-sm default" onclick="viewTicket('+t.id+')" style="font-size:11px">查看/回复</button>' +
+      (t.status !== 'closed' ? '<button class="btn-sm default" onclick="closeTicket('+t.id+')" style="font-size:11px">关闭</button>' : '') +
+      '</div></td></tr>'
+    ).join('');
   }
-  var t = tickets.find(function(x){return x.id===id;});
-  if (!t) return;
-  var now = new Date();
-  var ts = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  t.replies.push({from:'admin',name:'超级管理员',time:ts,msg:ta.value.trim()});
-  if (t.status==='open') t.status='in_progress';
-  t.lastReply = '刚刚';
-  showNotification('回复成功', '回复已发送，用户将收到通知', 'success');
-  renderTable();
-}
 
-function openCloseModal(id) {
-  currentTicketId = id;
-  ModalManager.open('closeModal');
-}
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''; }
 
-function confirmClose() {
-  var note = document.getElementById('closeNote').value.trim();
-  if (!currentTicketId) return;
-  var t = tickets.find(function(x){return x.id===currentTicketId;});
-  if (!t) return;
-  if (note) {
-    var now = new Date();
-    var ts = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    t.replies.push({from:'admin',name:'超级管理员',time:ts,msg:'[系统关闭] '+note});
-  }
-  t.status = 'closed';
-  t.lastReply = '刚刚';
-  document.getElementById('closeNote').value = '';
-  ModalManager.close('closeModal');
-  currentTicketId = null;
-  showNotification('工单已关闭', '工单 '+t.id+' 已关闭', 'success');
-  renderTable();
-}
+  window.viewTicket = async function(id) {
+    currentTicketId = id;
+    const res = await API.getTicket(id);
+    if (!res.success) { UI.notify(res.message,'error'); return; }
+    const t = res.data.ticket || res.data;
+    document.getElementById('ticketDetail').innerHTML = '<div style="background:var(--bg-3);padding:16px;border-radius:8px;margin-bottom:12px">' +
+      '<h3>' + esc(t.title||t.subject) + '</h3>' +
+      '<p style="font-size:13px;color:var(--text-2);margin-top:8px;white-space:pre-wrap">' + esc(t.content||t.description||'') + '</p>' +
+      '<div style="margin-top:12px;font-size:12px;color:var(--text-3)">用户: ' + esc(t.user?.name||'-') + ' · ' + UI.formatDate(t.created_at) + '</div></div>' +
+      (t.replies && t.replies.length ? '<div style="margin-bottom:12px">' + t.replies.map(r => '<div style="padding:8px 12px;margin-bottom:4px;background:var(--bg-2);border-radius:6px;font-size:13px">' +
+        '<strong>' + (r.user?.name||'客服') + ':</strong> ' + esc(r.content||r.message) +
+        '<span style="display:block;font-size:11px;color:var(--text-3)">' + UI.formatDate(r.created_at) + '</span></div>').join('') + '</div>' : '');
+    document.getElementById('replyContent').value = '';
+    document.getElementById('modal').style.display = 'flex';
+  };
 
-function filterTickets(status, el) {
-  document.querySelectorAll('.filter-tab').forEach(function(x){x.classList.remove('active');});
-  el.classList.add('active');
-  statusFilter = status;
-  currentTicketId = null;
-  renderTable();
-}
+  window.submitReply = async function() {
+    const content = document.getElementById('replyContent').value.trim();
+    if (!content) { UI.notify('请输入回复内容','warning'); return; }
+    const res = await API.replyTicket(currentTicketId, { content, message: content });
+    if (res.success) { UI.notify('回复已发送','success'); document.getElementById('replyContent').value = ''; load(); }
+    else UI.notify(res.message,'error');
+  };
 
-function filterByPriority(val) {
-  priorityFilter = val;
-  currentTicketId = null;
-  renderTable();
-}
+  window.updateTicketStatus = async function(status) {
+    if (!currentTicketId) return;
+    const res = await API.updateTicketStatus(currentTicketId, { status });
+    if (res.success) { UI.notify('状态已更新','success'); document.getElementById('modal').style.display = 'none'; load(); }
+    else UI.notify(res.message,'error');
+  };
 
-document.addEventListener('DOMContentLoaded', function(){
-  ThemeManager.init();
-  renderTable();
-  document.getElementById('ticketSearch').addEventListener('input', function(){
-    currentTicketId = null;
-    renderTable();
-  });
-});
+  window.closeTicket = async function(id) {
+    const res = await API.updateTicketStatus(id, { status: 'closed' });
+    if (res.success) { UI.notify('已关闭','success'); load(); }
+    else UI.notify(res.message,'error');
+  };
+
+  load();
+})();
 </script>
 </body>
 </html>

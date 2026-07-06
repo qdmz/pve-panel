@@ -3,307 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>实名认证审核 — CloudVM Pro 后台</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>实名认证审核 — CloudVM Pro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/style.css">
 <link rel="stylesheet" href="../../css/dashboard.css">
 <link rel="stylesheet" href="../../css/admin.css">
-<style>
-.stat-mini { background:var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; text-align:center; flex:1; min-width:120px; }
-.stat-mini-val { font-size:22px;font-weight:800; }
-.stat-mini-label { font-size:11px;color:var(--text-3);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em; }
-.filter-tab { padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg-3); color:var(--text-2); transition:var(--transition); }
-.filter-tab:hover { background:var(--bg); color:var(--text); }
-.filter-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-.masked { font-family:var(--mono); letter-spacing:0.1em; }
-.id-thumb { width:60px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;border:1px solid var(--border);transition:var(--transition); }
-.id-thumb:hover { transform:scale(1.1);border-color:var(--accent); }
-.verify-status-pending { background:rgba(245,158,11,0.1);color:#d97706; }
-.verify-status-approved { background:var(--green-soft);color:var(--green); }
-.verify-status-rejected { background:rgba(220,38,38,0.1);color:var(--red); }
-.image-viewer { text-align:center;padding:0; }
-.image-viewer img { max-width:100%;max-height:70vh;border-radius:12px; }
-.manual-verify-card { background:var(--bg-2);border:1px solid var(--border);border-radius:16px;padding:24px; }
-.manual-verify-card h3 { font-size:16px;margin-bottom:4px; }
-.manual-verify-card p { font-size:13px;color:var(--text-3);margin-bottom:20px; }
-.form-row-inline { display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap; }
-.form-row-inline .form-group { flex:1;min-width:150px; }
-.reject-reason-box { padding:14px;background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.15);border-radius:10px;font-size:13px;color:var(--red);margin-bottom:16px; }
-</style>
 </head>
 <body>
 <div class="admin-layout">
   <aside class="admin-sidebar" id="adminSidebar">
-    <div class="sidebar-header">
-      <div class="nav-brand">
-        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
-        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
-      </div>
-      <span class="admin-badge">Admin</span>
-    </div>
+    <div class="sidebar-header"><div class="nav-brand"><div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div><span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span></div><span class="admin-badge">Admin</span></div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">概览</div>
-        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">节点管理</div>
-        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">业务管理</div>
-        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户管理</a>
-        <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
-        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
-        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>订单管理</a>
-        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">3</span></a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">财务</div>
-        <a class="sidebar-item" href="coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>优惠码 &amp; 代金券</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">系统</div>
-        <a class="sidebar-item active" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名审核</a>
-        <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>公告管理</a>
-        <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
-        <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
-      </div>
+      <div class="sidebar-section"><a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">节点管理</div><a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">业务管理</div><a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>用户管理</a><a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a><a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a><a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a><a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">系统</div><a class="sidebar-item active" href="verify.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名认证审核</a><a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a><a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a></div>
     </nav>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
-        <div><div class="user-name">超级管理员</div></div>
-      </div>
-    </div>
+    <div class="sidebar-footer"><div class="user-info"><div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div><div><div class="user-name" id="sidebarUserName">管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div><a href="#" onclick="API.Auth.logout();return false" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a></div></div>
   </aside>
 
   <div class="admin-main">
-    <div class="admin-topbar">
-      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="breadcrumb">
-        <span class="breadcrumb-current">实名认证审核</span>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <button class="topbar-btn" onclick="ThemeManager.toggle()" title="切换主题">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-        <a href="../user/dashboard.html" class="btn-sm default" style="font-size:12px">切换用户视图</a>
-      </div>
-    </div>
+    <div class="admin-topbar"><button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="breadcrumb"><a href="index.html">首页</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">实名认证审核</span></div><div style="margin-left:auto"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button></div></div>
 
     <div class="admin-page">
-      <div style="margin-bottom:24px">
-        <h1 style="font-size:22px;margin-bottom:4px">实名认证审核</h1>
-        <p style="font-size:14px;color:var(--text-3)">审核用户提交的实名认证申请，确保符合合规要求</p>
-      </div>
-
-      <!-- Stats -->
-      <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-        <div class="stat-mini"><div class="stat-mini-val" style="color:#d97706">4</div><div class="stat-mini-label">待审核</div></div>
-        <div class="stat-mini"><div class="stat-mini-val" style="color:var(--green)">12</div><div class="stat-mini-label">今日通过</div></div>
-        <div class="stat-mini"><div class="stat-mini-val" style="color:var(--red)">2</div><div class="stat-mini-label">今日驳回</div></div>
-        <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent)">386</div><div class="stat-mini-label">已认证用户</div></div>
-      </div>
-
-      <!-- Filters -->
+      <div style="margin-bottom:24px"><h1 style="font-size:22px;margin-bottom:4px">实名认证审核</h1><p style="font-size:14px;color:var(--text-3)">审核用户提交的实名认证申请</p></div>
       <div class="table-wrapper">
-        <div class="table-header" style="flex-wrap:wrap;gap:10px">
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <span class="filter-tab active" onclick="filterVerify('all',this)">全部 <span style="font-weight:400;opacity:0.8">(24)</span></span>
-            <span class="filter-tab" onclick="filterVerify('pending',this)">待审核 <span style="font-weight:400;opacity:0.8">(4)</span></span>
-            <span class="filter-tab" onclick="filterVerify('approved',this)">已通过 <span style="font-weight:400;opacity:0.8">(18)</span></span>
-            <span class="filter-tab" onclick="filterVerify('rejected',this)">已驳回 <span style="font-weight:400;opacity:0.8">(2)</span></span>
-          </div>
-          <input type="text" class="search-input" id="verifySearch" placeholder="搜索用户名或真实姓名..." style="margin-left:auto">
-        </div>
-        <table class="data-table" id="verifyTable">
-          <thead><tr><th>用户</th><th>真实姓名</th><th>身份证号</th><th>身份证照片</th><th>提交日期</th><th>状态</th><th>操作</th></tr></thead>
-          <tbody id="verifyTableBody"></tbody>
-        </table>
+        <table class="data-table"><thead><tr><th>用户</th><th>真实姓名</th><th>身份证号</th><th>状态</th><th>提交时间</th><th>操作</th></tr></thead><tbody id="tableBody"></tbody></table>
       </div>
-
-      <!-- Manual Verification -->
-      <div class="manual-verify-card" style="margin-top:24px">
-        <h3>手动实名认证</h3>
-        <p>适用于管理员线下核验后手动为用户完成实名认证的情况。</p>
-        <div class="form-row-inline">
-          <div class="form-group"><label>用户ID或用户名</label><input type="text" class="form-input" id="manualUser" placeholder="输入用户ID或用户名"></div>
-          <div class="form-group"><label>真实姓名</label><input type="text" class="form-input" id="manualName" placeholder="输入真实姓名"></div>
-          <div class="form-group"><label>身份证号</label><input type="text" class="form-input" id="manualId" placeholder="输入身份证号"></div>
-          <div class="form-group"><label>审核备注</label><input type="text" class="form-input" id="manualNote" placeholder="线下核验备注"></div>
-          <button class="btn-sm primary" onclick="manualVerify()" style="height:42px;flex-shrink:0">确认认证</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Reject Modal -->
-<div class="modal-overlay" id="rejectModal">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header"><h3>驳回实名认证</h3><button class="modal-close" onclick="ModalManager.close('rejectModal')">&times;</button></div>
-    <div class="modal-body">
-      <div class="reject-reason-box">驳回后用户将收到通知，可重新提交认证资料。</div>
-      <div class="form-group"><label>驳回原因 <span style="color:var(--red)">*</span></label>
-      <textarea class="form-input" id="rejectReason" rows="3" placeholder="请输入驳回原因，以便用户重新提交..." style="width:100%;resize:vertical;font-family:var(--font)"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('rejectModal')">取消</button>
-      <button class="btn-sm danger" onclick="confirmReject()">确认驳回</button>
-    </div>
-  </div>
-</div>
-
-<!-- Image Viewer Modal -->
-<div class="modal-overlay" id="imageViewerModal">
-  <div class="modal" style="max-width:700px">
-    <div class="modal-header"><h3 id="imageViewerTitle">身份证照片</h3><button class="modal-close" onclick="ModalManager.close('imageViewerModal')">&times;</button></div>
-    <div class="modal-body image-viewer">
-      <img id="imageViewerImg" src="" alt="身份证照片">
     </div>
   </div>
 </div>
 
 <script src="../../js/main.js"></script>
-<script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-var verifications = [
-  { id:'V001', user:'张三', realName:'张伟明', idNumber:'110101199001011234', idFront:'../../assets/samples/id-front-1.jpg', idBack:'../../assets/samples/id-back-1.jpg', status:'pending', submitted:'2025-07-01 14:30' },
-  { id:'V002', user:'李四', realName:'李芳华', idNumber:'320106198512155678', idFront:'../../assets/samples/id-front-2.jpg', idBack:'../../assets/samples/id-back-2.jpg', status:'pending', submitted:'2025-07-01 11:15' },
-  { id:'V003', user:'王五', realName:'王志强', idNumber:'440105199203209012', idFront:'../../assets/samples/id-front-3.jpg', idBack:'../../assets/samples/id-back-3.jpg', status:'pending', submitted:'2025-07-01 09:00' },
-  { id:'V004', user:'赵六', realName:'赵建国', idNumber:'510107198807211234', idFront:'../../assets/samples/id-front-4.jpg', idBack:'../../assets/samples/id-back-4.jpg', status:'pending', submitted:'2025-06-30 20:45' },
-  { id:'V005', user:'孙七', realName:'孙美玲', idNumber:'110108199505063456', idFront:'../../assets/samples/id-front-5.jpg', idBack:'../../assets/samples/id-back-5.jpg', status:'approved', submitted:'2025-06-30 16:20', reviewer:'超级管理员', reviewedAt:'2025-06-30 17:05' },
-  { id:'V006', user:'周八', realName:'周志远', idNumber:'320501198810107890', idFront:'../../assets/samples/id-front-6.jpg', idBack:'../../assets/samples/id-back-6.jpg', status:'approved', submitted:'2025-06-29 10:30', reviewer:'超级管理员', reviewedAt:'2025-06-29 11:00' },
-  { id:'V007', user:'吴九', realName:'吴晓峰', idNumber:'410102199408154321', idFront:'../../assets/samples/id-front-7.jpg', idBack:'../../assets/samples/id-back-7.jpg', status:'rejected', submitted:'2025-06-29 08:15', reviewer:'超级管理员', reviewedAt:'2025-06-29 09:00', rejectReason:'身份证照片模糊，请重新拍摄清晰照片上传' },
-  { id:'V008', user:'郑十', realName:'郑海燕', idNumber:'330106198706225678', idFront:'../../assets/samples/id-front-8.jpg', idBack:'../../assets/samples/id-back-8.jpg', status:'rejected', submitted:'2025-06-28 22:30', reviewer:'超级管理员', reviewedAt:'2025-06-28 23:00', rejectReason:'姓名与身份证信息不匹配，请核实后重新提交' }
-];
+(function(){
+  'use strict';
+  if (!API.Auth.guard()) return;
+  document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
+  const user = API.Auth.getUser();
+  if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
-var currentFilter = 'all';
-var currentRejectId = null;
+  async function load() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载中...</td></tr>';
+    const res = await API.getVerifications();
+    if (!res.success) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>'; return; }
+    const items = res.data.verifications || res.data || [];
+    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">暂无认证申请</td></tr>'; return; }
 
-function maskIdNumber(s) {
-  if (s.length <= 4) return s;
-  return s.substr(0,3) + '****' + s.substr(-4);
-}
-
-function getStatusBadge(s) {
-  if (s==='pending') return '<span class="badge verify-status-pending">待审核</span>';
-  if (s==='approved') return '<span class="badge verify-status-approved">已通过</span>';
-  if (s==='rejected') return '<span class="badge verify-status-rejected">已驳回</span>';
-  return s;
-}
-
-function renderTable() {
-  var body = document.getElementById('verifyTableBody');
-  var q = document.getElementById('verifySearch').value.toLowerCase();
-  var html = '';
-  verifications.forEach(function(v){
-    if (currentFilter!=='all' && v.status!==currentFilter) return;
-    if (q && !(v.user+v.realName+v.idNumber).toLowerCase().includes(q)) return;
-    html += '<tr>';
-    html += '<td style="font-weight:600">'+v.user+'</td>';
-    html += '<td>'+v.realName+'</td>';
-    html += '<td class="masked">'+maskIdNumber(v.idNumber)+'</td>';
-    html += '<td><div style="display:flex;gap:8px">';
-    html += '<img class="id-thumb" src="'+v.idFront+'" alt="正面" onclick="event.stopPropagation();viewImage(\''+v.idFront+'\',\''+v.realName+' - 身份证正面\')" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2240%22%3E%3Crect width=%2260%22 height=%2240%22 fill=%22%23e5e5e5%22/%3E%3Ctext x=%2212%22 y=%2226%22 font-size=%2211%22 fill=%22%23999%22%3E正面%3C/text%3E%3C/svg%3E\'">';
-    html += '<img class="id-thumb" src="'+v.idBack+'" alt="反面" onclick="event.stopPropagation();viewImage(\''+v.idBack+'\',\''+v.realName+' - 身份证反面\')" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2240%22%3E%3Crect width=%2260%22 height=%2240%22 fill=%22%23e5e5e5%22/%3E%3Ctext x=%2212%22 y=%2226%22 font-size=%2211%22 fill=%22%23999%22%3E反面%3C/text%3E%3C/svg%3E\'">';
-    html += '</div></td>';
-    html += '<td style="font-size:13px;color:var(--text-2)">'+v.submitted+'</td>';
-    html += '<td>'+getStatusBadge(v.status)+'</td>';
-    html += '<td><div class="table-actions">';
-    if (v.status==='pending') {
-      html += '<button class="btn-sm success" onclick="approveVerify(\''+v.id+'\')">通过</button>';
-      html += '<button class="btn-sm danger" onclick="openRejectModal(\''+v.id+'\')">驳回</button>';
-    } else if (v.status==='approved') {
-      html += '<span style="font-size:12px;color:var(--text-3)">'+v.reviewer+' · '+v.reviewedAt+'</span>';
-    } else if (v.status==='rejected') {
-      html += '<span style="font-size:12px;color:var(--text-3)" title="'+v.rejectReason+'">'+v.rejectReason.substr(0,15)+'...</span>';
-    }
-    html += '</div></td></tr>';
-  });
-  if (!html) html = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-3)">没有符合筛选条件的记录</td></tr>';
-  body.innerHTML = html;
-}
-
-function filterVerify(status, el) {
-  document.querySelectorAll('.filter-tab').forEach(function(x){x.classList.remove('active');});
-  el.classList.add('active');
-  currentFilter = status;
-  renderTable();
-}
-
-function approveVerify(id) {
-  var v = verifications.find(function(x){return x.id===id;});
-  if (!v) return;
-  v.status = 'approved';
-  v.reviewer = '超级管理员';
-  var now = new Date();
-  v.reviewedAt = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  showNotification('审核通过', v.realName+' 的实名认证已通过', 'success');
-  renderTable();
-}
-
-function openRejectModal(id) {
-  currentRejectId = id;
-  ModalManager.open('rejectModal');
-}
-
-function confirmReject() {
-  var reason = document.getElementById('rejectReason').value.trim();
-  if (!reason) {
-    showNotification('提示','请填写驳回原因','error');
-    return;
+    const statusMap = { pending: ['warning', '待审核'], approved: ['success', '已通过'], rejected: ['danger', '已驳回'] };
+    tbody.innerHTML = items.map(v =>
+      '<tr><td>' + esc(v.user ? v.user.name : '#') + '</td>' +
+      '<td>' + esc(v.real_name || v.name) + '</td>' +
+      '<td style="font-family:var(--mono);font-size:12px">' + esc(v.id_number || v.id_card || v.card_number || '***') + '</td>' +
+      '<td>' + UI.statusBadge(v.status||'pending', statusMap) + '</td>' +
+      '<td style="font-size:12px">' + UI.formatDate(v.created_at) + '</td>' +
+      '<td><div style="display:flex;gap:4px">' +
+      (v.status === 'pending'
+        ? '<button class="btn-sm primary" onclick="approve('+v.id+')" style="font-size:11px">✅ 通过</button><button class="btn-sm danger" onclick="reject('+v.id+')" style="font-size:11px">❌ 驳回</button>'
+        : '已处理') +
+      '</div></td></tr>').join('');
   }
-  var v = verifications.find(function(x){return x.id===currentRejectId;});
-  if (!v) return;
-  v.status = 'rejected';
-  v.rejectReason = reason;
-  v.reviewer = '超级管理员';
-  var now = new Date();
-  v.reviewedAt = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('rejectReason').value = '';
-  ModalManager.close('rejectModal');
-  showNotification('已驳回', v.realName+' 的申请已驳回', 'success');
-  renderTable();
-}
 
-function viewImage(src, title) {
-  document.getElementById('imageViewerTitle').textContent = title;
-  document.getElementById('imageViewerImg').src = src;
-  ModalManager.open('imageViewerModal');
-}
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''; }
 
-function manualVerify() {
-  var user = document.getElementById('manualUser').value.trim();
-  var name = document.getElementById('manualName').value.trim();
-  var idNum = document.getElementById('manualId').value.trim();
-  if (!user || !name || !idNum) {
-    showNotification('提示','请填写所有必填字段','error');
-    return;
-  }
-  var note = document.getElementById('manualNote').value.trim();
-  verifications.unshift({
-    id: 'V'+(verifications.length+1).toString().padStart(3,'0'),
-    user: user, realName: name, idNumber: idNum,
-    idFront: '../../assets/samples/id-front-1.jpg', idBack: '../../assets/samples/id-back-1.jpg',
-    status: 'approved', submitted: new Date().toISOString().slice(0,16).replace('T',' '),
-    reviewer: '超级管理员（手动认证）', reviewedAt: new Date().toISOString().slice(0,16).replace('T',' '),
-    manualNote: note || undefined
-  });
-  document.getElementById('manualUser').value = '';
-  document.getElementById('manualName').value = '';
-  document.getElementById('manualId').value = '';
-  document.getElementById('manualNote').value = '';
-  showNotification('认证成功', name+' 已通过线下核验完成实名认证', 'success');
-  renderTable();
-}
+  window.approve = async function(id) {
+    if (!confirm('确认通过此认证申请？')) return;
+    const r = await API.approveVerification(id);
+    if (r.success) { UI.notify('已通过','success'); load(); } else UI.notify(r.message,'error');
+  };
 
-document.addEventListener('DOMContentLoaded', function(){
-  ThemeManager.init();
-  renderTable();
-  document.getElementById('verifySearch').addEventListener('input', renderTable);
-});
+  window.reject = async function(id) {
+    if (!confirm('确认驳回此认证申请？')) return;
+    const r = await API.rejectVerification(id);
+    if (r.success) { UI.notify('已驳回','success'); load(); } else UI.notify(r.message,'error');
+  };
+
+  load();
+})();
 </script>
 </body>
 </html>

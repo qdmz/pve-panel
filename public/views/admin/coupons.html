@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>优惠码 & 代金券 — CloudVM Pro Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>优惠码管理 — CloudVM Pro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/style.css">
 <link rel="stylesheet" href="../../css/dashboard.css">
 <link rel="stylesheet" href="../../css/admin.css">
@@ -12,638 +12,113 @@
 <body>
 <div class="admin-layout">
   <aside class="admin-sidebar" id="adminSidebar">
-    <div class="sidebar-header">
-      <div class="nav-brand">
-        <div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
-        <span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span>
-      </div>
-      <span class="admin-badge">Admin</span>
-    </div>
+    <div class="sidebar-header"><div class="nav-brand"><div class="brand-icon" style="background:var(--orange)"><svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div><span class="brand-name">CloudVM<span class="brand-pro" style="color:var(--orange)">管理</span></span></div><span class="admin-badge">Admin</span></div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">概览</div>
-        <a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">节点管理</div>
-        <a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">业务管理</div>
-        <a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户管理</a>
-        <a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a>
-        <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a>
-        <a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>订单管理</a>
-        <a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理<span class="sidebar-badge">3</span></a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">财务</div>
-        <a class="sidebar-item active" href="coupons.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>优惠码 & 代金券</a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">系统</div>
-        <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名审核</a>
-        <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>公告管理</a>
-        <a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a>
-        <a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a>
-      </div>
+      <div class="sidebar-section"><a class="sidebar-item" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">节点管理</div><a class="sidebar-item" href="nodes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>节点列表</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">业务管理</div><a class="sidebar-item" href="users.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>用户管理</a><a class="sidebar-item" href="vms.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>虚拟机管理</a><a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>产品管理</a><a class="sidebar-item" href="orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>订单管理</a><a class="sidebar-item" href="tickets-admin.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单管理</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">财务</div><a class="sidebar-item active" href="coupons.html" style="background:rgba(234,88,12,0.1);color:var(--orange)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>优惠码 & 代金券</a></div>
+      <div class="sidebar-section"><div class="sidebar-section-label">系统</div><a class="sidebar-item" href="settings.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>系统配置</a><a class="sidebar-item" href="backup.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg>数据备份</a></div>
     </nav>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div>
-        <div><div class="user-name">超级管理员</div></div>
-      </div>
-    </div>
+    <div class="sidebar-footer"><div class="user-info"><div class="user-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b)">A</div><div><div class="user-name" id="sidebarUserName">管理员</div><div class="user-balance" style="color:var(--orange)">Admin</div></div><a href="#" onclick="API.Auth.logout();return false" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a></div></div>
   </aside>
 
   <div class="admin-main">
-    <div class="admin-topbar">
-      <button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="breadcrumb">
-        <a href="index.html">首页</a><span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-current">优惠码 & 代金券</span>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px">
-        <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-      </div>
-    </div>
+    <div class="admin-topbar"><button class="topbar-btn" onclick="document.getElementById('adminSidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="breadcrumb"><a href="index.html">首页</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">优惠码管理</span></div><div style="margin-left:auto"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button><button class="btn-sm primary" onclick="openModal()">+ 创建优惠码</button></div></div>
 
     <div class="admin-page">
-      <div style="margin-bottom:24px">
-        <h1 style="font-size:22px;margin-bottom:4px">优惠码 & 代金券</h1>
-        <p style="font-size:14px;color:var(--text-3)">管理促销优惠码与代金券，提升用户转化与留存</p>
-      </div>
-
-      <!-- Stats Cards -->
-      <div class="overview-grid" style="grid-template-columns:repeat(3, 1fr)">
-        <div class="overview-card green">
-          <div class="ov-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg></div>
-          <div class="ov-label">有效优惠码</div>
-          <div class="ov-value">24</div>
-          <div class="ov-change up">8 张全站券</div>
-        </div>
-        <div class="overview-card orange">
-          <div class="ov-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-          <div class="ov-label">今日使用</div>
-          <div class="ov-value">37</div>
-          <div class="ov-change up">↑ 较昨日 +8</div>
-        </div>
-        <div class="overview-card purple">
-          <div class="ov-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-          <div class="ov-label">本月核销</div>
-          <div class="ov-value">1,024</div>
-          <div class="ov-change up">节省 ¥8,420</div>
-        </div>
-      </div>
-
-      <!-- Tab Switcher -->
-      <div style="display:flex;gap:4px;background:var(--bg-3);padding:4px;border-radius:10px;margin-bottom:20px;width:fit-content">
-        <button class="coupon-tab active" onclick="switchTab('coupons')" id="tabCoupons" style="padding:8px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);background:var(--bg-2);color:var(--text);transition:var(--transition)">优惠码</button>
-        <button class="coupon-tab" onclick="switchTab('giftcards')" id="tabGiftCards" style="padding:8px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text-2);transition:var(--transition)">代金券</button>
-      </div>
-
-      <!-- ==================== COUPONS TAB ==================== -->
-      <div id="couponsPanel">
-        <div class="table-wrapper">
-          <div class="table-header">
-            <h3>优惠码列表</h3>
-            <input type="text" class="search-input" placeholder="搜索优惠码..." oninput="filterCoupons()">
-            <button class="btn-sm primary" style="background:var(--orange);border-color:var(--orange)" onclick="openCouponModal()">+ 创建优惠码</button>
-            <button class="btn-sm default" onclick="openBulkCouponModal()">批量生成</button>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>优惠码</th>
-                  <th>类型</th>
-                  <th>优惠值</th>
-                  <th>最低消费</th>
-                  <th>已用/上限</th>
-                  <th>每人限用</th>
-                  <th>有效期</th>
-                  <th>适用产品</th>
-                  <th>状态</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">SUMMER2025</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('SUMMER2025')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-info">百分比</span></td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--orange)">15%</td>
-                  <td style="font-family:var(--mono)">¥50</td>
-                  <td style="font-family:var(--mono);font-size:12px">234 / 500</td>
-                  <td style="font-family:var(--mono);text-align:center">1</td>
-                  <td style="font-size:12px">2025-08-31</td>
-                  <td><span class="badge badge-success">全部产品</span></td>
-                  <td>
-                    <div class="toggle-switch" onclick="toggleCouponStatus(event)" style="cursor:pointer"><input type="checkbox" checked><span class="toggle-slider"></span></div>
-                  </td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editCoupon(1)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteCoupon(1,'SUMMER2025')">删除</button>
-                  </div></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">NEWUSER50</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('NEWUSER50')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-info">固定金额</span></td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--orange)">¥50</td>
-                  <td style="font-family:var(--mono)">¥99</td>
-                  <td style="font-family:var(--mono);font-size:12px">1,248 / —</td>
-                  <td style="font-family:var(--mono);text-align:center">1</td>
-                  <td style="font-size:12px">2025-12-31</td>
-                  <td><span class="badge badge-info">KVM系列</span></td>
-                  <td>
-                    <div class="toggle-switch" onclick="toggleCouponStatus(event)" style="cursor:pointer"><input type="checkbox" checked><span class="toggle-slider"></span></div>
-                  </td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editCoupon(2)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteCoupon(2,'NEWUSER50')">删除</button>
-                  </div></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">VIP20OFF</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('VIP20OFF')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-info">百分比</span></td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--orange)">20%</td>
-                  <td style="font-family:var(--mono)">¥200</td>
-                  <td style="font-family:var(--mono);font-size:12px">89 / 200</td>
-                  <td style="font-family:var(--mono);text-align:center">1</td>
-                  <td style="font-size:12px">2025-09-15</td>
-                  <td><span class="badge badge-info">专业版及以上</span></td>
-                  <td>
-                    <div class="toggle-switch" onclick="toggleCouponStatus(event)" style="cursor:pointer"><input type="checkbox" checked><span class="toggle-slider"></span></div>
-                  </td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editCoupon(3)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteCoupon(3,'VIP20OFF')">删除</button>
-                  </div></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">ALLFREE10</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('ALLFREE10')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-info">固定金额</span></td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--orange)">¥10</td>
-                  <td style="font-family:var(--mono);color:var(--text-3)">无</td>
-                  <td style="font-family:var(--mono);font-size:12px">3,440 / —</td>
-                  <td style="font-family:var(--mono);text-align:center">2</td>
-                  <td style="font-size:12px">2026-01-31</td>
-                  <td><span class="badge badge-success">全部产品</span></td>
-                  <td>
-                    <div class="toggle-switch" onclick="toggleCouponStatus(event)" style="cursor:pointer"><input type="checkbox" checked><span class="toggle-slider"></span></div>
-                  </td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editCoupon(4)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteCoupon(4,'ALLFREE10')">删除</button>
-                  </div></td>
-                </tr>
-                <tr style="opacity:0.6">
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px;text-decoration:line-through">WINTER2024</span>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-info">百分比</span></td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--text-3)">10%</td>
-                  <td style="font-family:var(--mono)">¥100</td>
-                  <td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">500/500(满)</td>
-                  <td style="font-family:var(--mono);text-align:center">1</td>
-                  <td style="font-size:12px;color:var(--red)">2025-01-31</td>
-                  <td><span class="badge badge-default">全部产品</span></td>
-                  <td>
-                    <div class="toggle-switch" onclick="toggleCouponStatus(event)" style="cursor:pointer"><input type="checkbox"><span class="toggle-slider"></span></div>
-                  </td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editCoupon(5)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteCoupon(5,'WINTER2024')">删除</button>
-                  </div></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pagination">
-            <button class="page-btn" disabled>&lt;</button>
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">&gt;</button>
-            <span style="margin-left:8px;font-size:13px;color:var(--text-3)">共 36 条</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ==================== GIFT CARDS TAB ==================== -->
-      <div id="giftcardsPanel" style="display:none">
-        <div class="table-wrapper">
-          <div class="table-header">
-            <h3>代金券列表</h3>
-            <input type="text" class="search-input" placeholder="搜索代金券码..." oninput="filterGiftCards()">
-            <button class="btn-sm primary" style="background:var(--orange);border-color:var(--orange)" onclick="openGiftCardModal()">+ 创建代金券</button>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>券码</th>
-                  <th>面额</th>
-                  <th>余额</th>
-                  <th>使用用户</th>
-                  <th>状态</th>
-                  <th>有效期</th>
-                  <th>创建时间</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">GCARD-A8X9K2</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('GCARD-A8X9K2')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥100.00</td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥45.00</td>
-                  <td style="font-weight:600">张三</td>
-                  <td><span class="badge badge-success">使用中</span></td>
-                  <td style="font-size:12px">2025-12-31</td>
-                  <td style="font-size:13px;color:var(--text-3)">2025-06-15</td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editGiftCard(1)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteGiftCard(1,'GCARD-A8X9K2')">删除</button>
-                  </div></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">GCARD-B3M7L1</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('GCARD-B3M7L1')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥200.00</td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥200.00</td>
-                  <td style="color:var(--text-3)">—</td>
-                  <td><span class="badge badge-info">未使用</span></td>
-                  <td style="font-size:12px">2025-12-31</td>
-                  <td style="font-size:13px;color:var(--text-3)">2025-06-20</td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editGiftCard(2)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteGiftCard(2,'GCARD-B3M7L1')">删除</button>
-                  </div></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">GCARD-C5N2R9</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('GCARD-C5N2R9')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥500.00</td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--text-3)">¥0.00</td>
-                  <td style="font-weight:600">李四</td>
-                  <td><span class="badge badge-default">已用完</span></td>
-                  <td style="font-size:12px;color:var(--red)">2025-06-30</td>
-                  <td style="font-size:13px;color:var(--text-3)">2025-05-01</td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editGiftCard(3)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteGiftCard(3,'GCARD-C5N2R9')">删除</button>
-                  </div></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">GCARD-D7K4P2</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('GCARD-D7K4P2')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥50.00</td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥50.00</td>
-                  <td style="color:var(--text-3)">—</td>
-                  <td><span class="badge badge-info">未使用</span></td>
-                  <td style="font-size:12px">2026-03-31</td>
-                  <td style="font-size:13px;color:var(--text-3)">2025-06-28</td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editGiftCard(4)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteGiftCard(4,'GCARD-D7K4P2')">删除</button>
-                  </div></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-family:var(--mono);font-weight:700;font-size:14px">GCARD-E2V8H6</span>
-                      <button class="btn-sm default" style="padding:3px 6px;font-size:10px;min-width:auto;border-radius:4px" onclick="copyCode('GCARD-E2V8H6')" title="复制">复制</button>
-                    </div>
-                  </td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥1,000.00</td>
-                  <td style="font-family:var(--mono);font-weight:700;color:var(--green)">¥680.00</td>
-                  <td style="font-weight:600">赵六</td>
-                  <td><span class="badge badge-success">使用中</span></td>
-                  <td style="font-size:12px">2025-12-31</td>
-                  <td style="font-size:13px;color:var(--text-3)">2025-04-10</td>
-                  <td><div class="table-actions">
-                    <button class="btn-sm default" onclick="editGiftCard(5)">编辑</button>
-                    <button class="btn-sm danger" onclick="deleteGiftCard(5,'GCARD-E2V8H6')">删除</button>
-                  </div></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pagination">
-            <button class="page-btn" disabled>&lt;</button>
-            <button class="page-btn active">1</button>
-            <button class="page-btn">&gt;</button>
-            <span style="margin-left:8px;font-size:13px;color:var(--text-3)">共 28 条</span>
-          </div>
-        </div>
+      <div style="margin-bottom:24px"><h1 style="font-size:22px;margin-bottom:4px">优惠码管理</h1><p style="font-size:14px;color:var(--text-3)">管理优惠码和代金券，支持固定金额、百分比折扣</p></div>
+      <div class="table-wrapper">
+        <table class="data-table"><thead><tr><th>优惠码</th><th>类型</th><th>面值</th><th>使用/限制</th><th>最低消费</th><th>有效期</th><th>状态</th><th>操作</th></tr></thead><tbody id="tableBody"></tbody></table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Create/Edit Coupon Modal -->
-<div class="modal-overlay" id="couponModal">
-  <div class="modal" style="max-width:580px">
-    <div class="modal-header"><h3 id="couponModalTitle">创建优惠码</h3><button class="modal-close" onclick="ModalManager.close('couponModal')">&times;</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label>优惠码 *</label>
-          <input type="text" class="form-input" id="couponCode" placeholder="如: SUMMER2025" style="font-family:var(--mono);text-transform:uppercase">
-        </div>
-        <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px">
-          <button class="btn-sm default" onclick="autoGenCode()" style="height:42px">自动生成</button>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>优惠类型 *</label>
-          <select class="form-input" id="couponType" onchange="toggleDiscountType()">
-            <option value="percent">百分比折扣</option>
-            <option value="fixed">固定金额</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label id="discountLabel">折扣比例 (%)</label>
-          <input type="number" class="form-input" id="couponValue" placeholder="15" min="0" max="100" value="15" style="font-family:var(--mono)">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>最低消费金额 (¥)</label><input type="number" class="form-input" id="couponMinOrder" placeholder="留空表示无限制" style="font-family:var(--mono)"></div>
-        <div class="form-group"><label>最大使用次数</label><input type="number" class="form-input" id="couponMaxUses" placeholder="留空表示无限制" style="font-family:var(--mono)"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>每人限用次数</label><input type="number" class="form-input" id="couponPerUser" placeholder="1" value="1" min="1" style="font-family:var(--mono)"></div>
-        <div class="form-group"><label>到期日期 *</label><input type="date" class="form-input" id="couponExpiry" value="2025-12-31"></div>
-      </div>
-      <div class="form-group">
-        <label>适用产品</label>
-        <select class="form-input" id="couponProducts" multiple style="min-height:100px">
-          <option value="all" selected>全部产品</option>
-          <option value="kvm-standard">KVM 标准版</option>
-          <option value="kvm-pro">KVM 专业版</option>
-          <option value="kvm-flagship">KVM 旗舰版</option>
-          <option value="lxc-starter">LXC 入门版</option>
-          <option value="lxc-advanced">LXC 进阶版</option>
-        </select>
-        <span style="font-size:11px;color:var(--text-3)">Ctrl/Cmd + 点击多选</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600">
-          <span>启用状态</span>
-          <div class="toggle-switch"><input type="checkbox" id="couponActive" checked><span class="toggle-slider"></span></div>
-        </label>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('couponModal')">取消</button>
-      <button class="btn-sm primary" style="background:var(--orange);border-color:var(--orange)" onclick="saveCoupon()">保存</button>
-    </div>
+<div class="modal-overlay" id="modal" style="display:none"><div class="modal-content" style="max-width:550px">
+  <div class="modal-header"><h2 id="modalTitle">创建优惠码</h2><button class="modal-close" onclick="document.getElementById('modal').style.display='none'">&times;</button></div>
+  <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <input type="hidden" id="editId">
+    <div class="form-group"><label>优惠码 *</label><input class="form-input" id="code" placeholder="例如：NEWUSER2025"></div>
+    <div class="form-group"><label>类型</label><select class="form-input" id="cType"><option value="fixed">固定金额</option><option value="percentage">百分比折扣</option></select></div>
+    <div class="form-group"><label>面值 *</label><input class="form-input" id="value" type="number" step="0.01" placeholder="固定金额¥或百分比%"></div>
+    <div class="form-group"><label>最低消费</label><input class="form-input" id="minAmount" type="number" step="0.01" value="0"></div>
+    <div class="form-group"><label>使用次数上限</label><input class="form-input" id="maxUses" type="number" value="100"></div>
+    <div class="form-group"><label>每人限用</label><input class="form-input" id="maxPerUser" type="number" value="1"></div>
+    <div class="form-group"><label>开始日期</label><input class="form-input" id="startsAt" type="date"></div>
+    <div class="form-group"><label>结束日期</label><input class="form-input" id="expiresAt" type="date"></div>
   </div>
-</div>
-
-<!-- Bulk Generate Coupons Modal -->
-<div class="modal-overlay" id="bulkCouponModal">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header"><h3>批量生成优惠码</h3><button class="modal-close" onclick="ModalManager.close('bulkCouponModal')">&times;</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label>生成数量 *</label><input type="number" class="form-input" id="bulkQuantity" placeholder="10" value="10" min="1" max="100" style="font-family:var(--mono)"></div>
-      <div class="form-group"><label>前缀 (可选)</label><input type="text" class="form-input" id="bulkPrefix" placeholder="如: PROMO" style="font-family:var(--mono);text-transform:uppercase"></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>优惠类型</label>
-          <select class="form-input" id="bulkType">
-            <option value="percent">百分比折扣</option>
-            <option value="fixed">固定金额</option>
-          </select>
-        </div>
-        <div class="form-group"><label>优惠值</label><input type="number" class="form-input" id="bulkValue" value="10" style="font-family:var(--mono)"></div>
-      </div>
-      <div class="form-group"><label>到期日期</label><input type="date" class="form-input" id="bulkExpiry" value="2025-12-31"></div>
-      <div style="padding:12px;background:var(--bg-3);border-radius:8px;font-size:13px;color:var(--text-2);margin-top:8px">
-        将生成 <strong style="font-family:var(--mono)" id="bulkPreviewCount">10</strong> 个优惠码，示例: <strong style="font-family:var(--mono);color:var(--accent)" id="bulkPreviewCode">PROMO-A3B7</strong>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('bulkCouponModal')">取消</button>
-      <button class="btn-sm primary" style="background:var(--orange);border-color:var(--orange)" onclick="bulkGenerate()">批量生成</button>
-    </div>
-  </div>
-</div>
-
-<!-- Create/Edit Gift Card Modal -->
-<div class="modal-overlay" id="giftCardModal">
-  <div class="modal" style="max-width:440px">
-    <div class="modal-header"><h3 id="giftCardModalTitle">创建代金券</h3><button class="modal-close" onclick="ModalManager.close('giftCardModal')">&times;</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label>券码 *</label>
-          <input type="text" class="form-input" id="gcCode" placeholder="如: GCARD-XXXXXX" style="font-family:var(--mono);text-transform:uppercase">
-        </div>
-        <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px">
-          <button class="btn-sm default" onclick="autoGenGCCode()" style="height:42px">自动生成</button>
-        </div>
-      </div>
-      <div class="form-group"><label>初始余额 (¥) *</label><input type="number" class="form-input" id="gcBalance" placeholder="100" step="0.01" value="100" style="font-family:var(--mono)"></div>
-      <div class="form-group"><label>到期日期</label><input type="date" class="form-input" id="gcExpiry" value="2025-12-31"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm default" onclick="ModalManager.close('giftCardModal')">取消</button>
-      <button class="btn-sm primary" style="background:var(--orange);border-color:var(--orange)" onclick="saveGiftCard()">保存</button>
-    </div>
-  </div>
-</div>
+  <div class="modal-footer"><span id="msg" style="color:var(--red);font-size:13px;margin-right:auto"></span><button class="btn default" onclick="document.getElementById('modal').style.display='none'">取消</button><button class="btn primary" id="saveBtn" onclick="save()">保存</button></div>
+</div></div>
 
 <script src="../../js/main.js"></script>
-<script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
+(function(){
+  'use strict';
+  if (!API.Auth.guard()) return;
+  document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
+  const user = API.Auth.getUser();
+  if (user) document.getElementById('sidebarUserName').textContent = user.name || '管理员';
 
-// Tab switching
-function switchTab(tab) {
-  const tabs = document.querySelectorAll('.coupon-tab');
-  tabs.forEach(t => { t.style.background = 'transparent'; t.style.color = 'var(--text-2)'; });
-  document.getElementById('tab' + (tab === 'coupons' ? 'Coupons' : 'GiftCards')).style.background = 'var(--bg-2)';
-  document.getElementById('tab' + (tab === 'coupons' ? 'Coupons' : 'GiftCards')).style.color = 'var(--text)';
-  document.getElementById('couponsPanel').style.display = tab === 'coupons' ? '' : 'none';
-  document.getElementById('giftcardsPanel').style.display = tab === 'giftcards' ? '' : 'none';
-}
+  async function load() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载中...</td></tr>';
+    const res = await API.getCoupons();
+    if (!res.success) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red)">加载失败</td></tr>'; return; }
+    const items = res.data.coupons || res.data || [];
+    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-3)">暂无优惠码</td></tr>'; return; }
 
-// Copy code
-async function copyCode(code) {
-  try {
-    await navigator.clipboard.writeText(code);
-    showNotification('已复制', `优惠码 ${code} 已复制到剪贴板`, 'success');
-  } catch(e) {
-    showNotification('复制失败', '请手动复制', 'error');
+    tbody.innerHTML = items.map(c => '<tr>' +
+      '<td style="font-family:var(--mono);font-weight:600;font-size:14px">' + esc(c.code) + '</td>' +
+      '<td>' + (c.type === 'fixed' ? '💰 固定金额' : '📊 百分比') + '</td>' +
+      '<td style="font-weight:600">' + (c.type === 'fixed' ? UI.formatMoney(c.value) : c.value + '%') + '</td>' +
+      '<td>' + (c.used_count||0) + ' / ' + (c.max_uses||'∞') + '</td>' +
+      '<td>' + (c.min_amount > 0 ? UI.formatMoney(c.min_amount) : '无限制') + '</td>' +
+      '<td style="font-size:12px">' + (c.expires_at ? '至 ' + c.expires_at : '永久') + '</td>' +
+      '<td>' + UI.statusBadge(c.status||'active', {active:['success','启用'],inactive:['default','停用']}) + '</td>' +
+      '<td><div style="display:flex;gap:4px">' +
+      '<button class="btn-sm default" onclick="toggleStatus('+c.id+')" style="font-size:11px">'+(c.status==='active'?'停用':'启用')+'</button>' +
+      '<button class="btn-sm danger" onclick="del('+c.id+')" style="font-size:11px">删除</button></div></td></tr>').join('');
   }
-}
 
-// Toggle coupon status
-function toggleCouponStatus(e) {
-  e.stopPropagation();
-  const input = e.currentTarget.querySelector('input');
-  input.checked = !input.checked;
-  showNotification('状态已更新', input.checked ? '优惠码已启用' : '优惠码已禁用', 'info');
-}
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''; }
 
-// Auto generate code
-function autoGenCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  document.getElementById('couponCode').value = code;
-}
+  window.openModal = function() {
+    document.getElementById('editId').value = '';
+    document.getElementById('modalTitle').textContent = '创建优惠码';
+    ['code','value','minAmount','maxUses','maxPerUser','startsAt','expiresAt'].forEach(f => document.getElementById(f).value = '');
+    document.getElementById('cType').value = 'fixed';
+    document.getElementById('maxUses').value = '100';
+    document.getElementById('maxPerUser').value = '1';
+    document.getElementById('msg').textContent = '';
+    document.getElementById('modal').style.display = 'flex';
+  };
 
-function autoGenGCCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = 'GCARD-';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  document.getElementById('gcCode').value = code;
-}
+  window.save = async function() {
+    const data = {
+      code: document.getElementById('code').value.trim(),
+      type: document.getElementById('cType').value,
+      value: parseFloat(document.getElementById('value').value) || 0,
+      min_amount: parseFloat(document.getElementById('minAmount').value) || 0,
+      max_uses: parseInt(document.getElementById('maxUses').value) || 100,
+      max_per_user: parseInt(document.getElementById('maxPerUser').value) || 1,
+      starts_at: document.getElementById('startsAt').value || null,
+      expires_at: document.getElementById('expiresAt').value || null,
+    };
+    if (!data.code || !data.value) { document.getElementById('msg').textContent = '请填写优惠码和面值'; return; }
+    document.getElementById('saveBtn').disabled = true;
+    const res = await API.createCoupon(data);
+    document.getElementById('saveBtn').disabled = false;
+    if (res.success) { document.getElementById('modal').style.display = 'none'; UI.notify('已创建','success'); load(); }
+    else document.getElementById('msg').textContent = res.message;
+  };
 
-// Discount type toggle
-function toggleDiscountType() {
-  const type = document.getElementById('couponType').value;
-  const label = document.getElementById('discountLabel');
-  const input = document.getElementById('couponValue');
-  if (type === 'percent') { label.textContent = '折扣比例 (%)'; input.placeholder = '15'; input.max = '100'; }
-  else { label.textContent = '固定金额 (¥)'; input.placeholder = '50'; input.max = ''; }
-}
+  window.toggleStatus = async function(id) { const r = await API.toggleCouponStatus(id); if (r.success) { UI.notify('已切换','success'); load(); } else UI.notify(r.message,'error'); };
+  window.del = async function(id) { if (!confirm('确定删除？')) return; const r = await API.deleteCoupon(id); if (r.success) { UI.notify('已删除','success'); load(); } else UI.notify(r.message,'error'); };
 
-// Coupon modal
-function openCouponModal() {
-  document.getElementById('couponModalTitle').textContent = '创建优惠码';
-  document.getElementById('couponCode').value = '';
-  document.getElementById('couponValue').value = '15';
-  document.getElementById('couponMinOrder').value = '';
-  document.getElementById('couponMaxUses').value = '';
-  document.getElementById('couponPerUser').value = '1';
-  document.getElementById('couponExpiry').value = '2025-12-31';
-  document.getElementById('couponActive').checked = true;
-  document.getElementById('couponType').value = 'percent';
-  toggleDiscountType();
-  ModalManager.open('couponModal');
-}
-
-function editCoupon(id) {
-  document.getElementById('couponModalTitle').textContent = '编辑优惠码';
-  ModalManager.open('couponModal');
-}
-
-async function saveCoupon() {
-  const code = document.getElementById('couponCode').value.trim();
-  if (!code) { showNotification('错误', '请输入优惠码', 'error'); return; }
-  ModalManager.close('couponModal');
-  showNotification('已保存', `优惠码 ${code} 已创建`, 'success');
-}
-
-async function deleteCoupon(id, code) {
-  const ok = await VMOperations.confirm('删除优惠码', `确定删除优惠码 "${code}"？此操作不可恢复。`);
-  if (ok) showNotification('已删除', `优惠码 ${code} 已删除`, 'success');
-}
-
-// Bulk coupon
-function openBulkCouponModal() {
-  ModalManager.open('bulkCouponModal');
-  updateBulkPreview();
-  document.getElementById('bulkQuantity').addEventListener('input', updateBulkPreview);
-  document.getElementById('bulkPrefix').addEventListener('input', updateBulkPreview);
-}
-
-function updateBulkPreview() {
-  const qty = document.getElementById('bulkQuantity').value || 0;
-  const prefix = document.getElementById('bulkPrefix').value || 'PROMO';
-  document.getElementById('bulkPreviewCount').textContent = qty;
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let rnd = '';
-  for (let i = 0; i < 4; i++) rnd += chars[Math.floor(Math.random() * chars.length)];
-  document.getElementById('bulkPreviewCode').textContent = `${prefix}-${rnd}`;
-}
-
-async function bulkGenerate() {
-  const qty = parseInt(document.getElementById('bulkQuantity').value) || 0;
-  if (qty < 1) { showNotification('错误', '请输入生成数量', 'error'); return; }
-  ModalManager.close('bulkCouponModal');
-  showNotification('生成成功', `已批量生成 ${qty} 个优惠码`, 'success');
-}
-
-// Gift card modal
-function openGiftCardModal() {
-  document.getElementById('giftCardModalTitle').textContent = '创建代金券';
-  document.getElementById('gcCode').value = '';
-  document.getElementById('gcBalance').value = '100';
-  document.getElementById('gcExpiry').value = '2025-12-31';
-  ModalManager.open('giftCardModal');
-}
-
-function editGiftCard(id) {
-  document.getElementById('giftCardModalTitle').textContent = '编辑代金券';
-  ModalManager.open('giftCardModal');
-}
-
-async function saveGiftCard() {
-  const code = document.getElementById('gcCode').value.trim();
-  if (!code) { showNotification('错误', '请输入券码', 'error'); return; }
-  ModalManager.close('giftCardModal');
-  showNotification('已保存', `代金券 ${code} 已创建`, 'success');
-}
-
-async function deleteGiftCard(id, code) {
-  const ok = await VMOperations.confirm('删除代金券', `确定删除代金券 "${code}"？未使用的余额将作废。`);
-  if (ok) showNotification('已删除', `代金券 ${code} 已删除`, 'success');
-}
-
-// Filter functions
-function filterCoupons() {
-  const search = document.querySelector('#couponsPanel .search-input').value.toLowerCase();
-  const rows = document.querySelectorAll('#couponsPanel .data-table tbody tr');
-  rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none'; });
-}
-
-function filterGiftCards() {
-  const search = document.querySelector('#giftcardsPanel .search-input').value.toLowerCase();
-  const rows = document.querySelectorAll('#giftcardsPanel .data-table tbody tr');
-  rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none'; });
-}
+  load();
+})();
 </script>
 </body>
 </html>
