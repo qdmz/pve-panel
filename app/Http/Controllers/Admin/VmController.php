@@ -29,8 +29,8 @@ class VmController extends Controller
                 ->when($request->search, function ($query, $search) {
                     return $query->where(function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%")
-                          ->orWhere('hostname', 'like', "%{$search}%")
-                          ->orWhere('ip_address', 'like', "%{$search}%");
+                          ->orWhere('vm_id', 'like', "%{$search}%")
+                          ->orWhere('ip', 'like', "%{$search}%");
                     });
                 })
                 ->when($request->status, function ($query, $status) {
@@ -91,7 +91,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->startVm($vm->node->name, $vm->vmid);
+            $proxmox->startVm($vm);
             $vm->update(['status' => 'running']);
 
             return ApiResponse::success(['vm' => $vm], 'VM started.');
@@ -109,7 +109,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->stopVm($vm->node->name, $vm->vmid);
+            $proxmox->stopVm($vm);
             $vm->update(['status' => 'stopped']);
 
             return ApiResponse::success(['vm' => $vm], 'VM stopped.');
@@ -123,7 +123,7 @@ class VmController extends Controller
     {
         try {
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->restartVm($vm->node->name, $vm->vmid);
+            $proxmox->restartVm($vm);
             $vm->update(['status' => 'running']);
 
             return ApiResponse::success(['vm' => $vm], 'VM restarted.');
@@ -141,7 +141,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->suspendVm($vm->node->name, $vm->vmid);
+            $proxmox->suspendVm($vm);
             $vm->update(['status' => 'suspended']);
 
             return ApiResponse::success(['vm' => $vm], 'VM suspended.');
@@ -159,7 +159,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->resumeVm($vm->node->name, $vm->vmid);
+            $proxmox->resumeVm($vm);
             $vm->update(['status' => 'running']);
 
             return ApiResponse::success(['vm' => $vm], 'VM unsuspended.');
@@ -173,7 +173,7 @@ class VmController extends Controller
     {
         try {
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->deleteVm($vm->node->name, $vm->vmid);
+            $proxmox->deleteVm($vm);
 
             $vm->snapshots()->delete();
             $vm->natRules()->delete();
@@ -202,19 +202,19 @@ class VmController extends Controller
 
                     switch ($action) {
                         case 'start':
-                            $proxmox->startVm($vm->node->name, $vm->vmid);
+                            $proxmox->startVm($vm);
                             $vm->update(['status' => 'running']);
                             break;
                         case 'stop':
-                            $proxmox->stopVm($vm->node->name, $vm->vmid);
+                            $proxmox->stopVm($vm);
                             $vm->update(['status' => 'stopped']);
                             break;
                         case 'restart':
-                            $proxmox->restartVm($vm->node->name, $vm->vmid);
+                            $proxmox->restartVm($vm);
                             $vm->update(['status' => 'running']);
                             break;
                         case 'delete':
-                            $proxmox->deleteVm($vm->node->name, $vm->vmid);
+                            $proxmox->deleteVm($vm);
                             $vm->snapshots()->delete();
                             $vm->natRules()->delete();
                             $vm->domains()->delete();

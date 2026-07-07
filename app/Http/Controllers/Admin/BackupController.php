@@ -44,11 +44,10 @@ class BackupController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'type' => ['required', 'string', 'in:database,full,config'],
-            ]);
-
-            $type     = $request->type;
+            $type = $request->input('type', 'database');
+            if (!in_array($type, ['database', 'full', 'config'])) {
+                $type = 'database';
+            }
             $filename = $type . '-backup-' . date('Ymd_His') . '.sql';
             $backupPath = storage_path('app/backups');
             

@@ -113,11 +113,11 @@ Route::middleware(['auth:sanctum', 'admin', \Illuminate\Routing\Middleware\Subst
     Route::put('backup-settings', [BackupController::class, 'updateSettings']);
 
     // Settings
+    Route::get('settings/email-templates', [SettingController::class, 'emailTemplates']);
+    Route::put('settings/email-templates/{template}', [SettingController::class, 'updateEmailTemplate']);
+    Route::get('settings/email-templates/{template}/preview', [SettingController::class, 'previewTemplate']);
     Route::get('settings/{group}', [SettingController::class, 'show']);
     Route::put('settings/{group}', [SettingController::class, 'update']);
     Route::post('settings/test-smtp', [SettingController::class, 'testSmtp']);
     Route::post('settings/test-epay', [SettingController::class, 'testEpay']);
-    Route::get('settings/email-templates', [SettingController::class, 'emailTemplates']);
-    Route::put('settings/email-templates/{template}', [SettingController::class, 'updateEmailTemplate']);
-    Route::get('settings/email-templates/{template}/preview', [SettingController::class, 'previewTemplate']);
 });

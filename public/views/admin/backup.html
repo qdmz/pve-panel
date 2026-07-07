@@ -52,65 +52,68 @@
     const items = res.data.backups || res.data || [];
     if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-3)">暂无备份记录，点击"立即备份"创建</td></tr>'; return; }
 
-    tbody.innerHTML = items.map(b =>
-      '<tr><td style="font-family:var(--mono);font-size:12px">' + esc(b.filename||b.name||'backup-'+b.id) + '</td>' +
-      '<td>' + (b.type||'database') + '</td>' +
-      '<td>' + (b.size ? (b.size > 1048576 ? (b.size/1048576).toFixed(1)+' MB' : (b.size/1024).toFixed(1)+' KB') : '-') + '</td>' +
-      '<td>' + UI.statusBadge(b.status||'completed', {completed:['success','完成'],in_progress:['warning','进行中'],failed:['danger','失败']}) + '</td>' +
-      '<td style="font-size:12px">' + UI.formatDate(b.created_at) + '</td>' +
+    tbody.innerHTML = items.map(b => {
+      var fname = b.filename || b.name || 'backup';
+      var fsize = b.size || 0;
+      var fdate = b.date || b.created_at || '';
+      var ftype = fname.split('-')[0] || 'database';
+      var fid = encodeURIComponent(fname);
+      return '<tr><td style="font-family:var(--mono);font-size:12px">' + esc(fname) + '</td>' +
+      '<td>' + ftype + '</td>' +
+      '<td>' + (b.size_human || (fsize > 1048576 ? (fsize/1048576).toFixed(1)+' MB' : (fsize/1024).toFixed(1)+' KB') || '-') + '</td>' +
+      '<td><span class="status-badge status-success">完成</span></td>' +
+      '<td style="font-size:12px">' + UI.formatDate(fdate) + '</td>' +
       '<td><div style="display:flex;gap:4px">' +
-      '<button class="btn-sm default" onclick="restore('+b.id+')" style="font-size:11px">恢复</button>' +
-      '<button class="btn-sm default" onclick="download('+b.id+')" style="font-size:11px">下载</button>' +
-      '<button class="btn-sm danger" onclick="del('+b.id+')" style="font-size:11px">删除</button>' +
-      '</div></td></tr>').join('');
+      '<button class="btn-sm default" onclick="restore(\''+fid+'\')" style="font-size:11px">恢复</button>' +
+      '<button class="btn-sm default" onclick="download(\''+fid+'\')" style="font-size:11px">下载</button>' +
+      '<button class="btn-sm danger" onclick="del(\''+fid+'\')" style="font-size:11px">删除</button>' +
+      '</div></td></tr>';
+    }).join('');
   }
 
   function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
 
   window.createBackup = async function() {
     UI.notify('正在创建备份...','info');
-    const r = await API.createBackup();
+    const r = await API.createBackup({ type: 'database' });
     if (r.success) { UI.notify('备份创建成功','success'); load(); }
     else UI.notify(r.message||'创建失败','error');
   };
 
   window.restore = async function(id) {
+    var fname = decodeURIComponent(id);
     if (!confirm('确定要恢复此备份吗？当前数据将被覆盖！')) return;
-    const r = await API.restoreBackup(id);
+    const r = await API.restoreBackup(fname);
     if (r.success) { UI.notify('恢复成功','success'); load(); }
     else UI.notify(r.message||'恢复失败','error');
   };
 
   window.download = async function(id) {
-    const res = await API.downloadBackup(id);
-    if (res.success && res.data && res.data.url) {
-      window.open(res.data.url, '_blank');
-    } else {
-      // Fallback: direct download with auth header via fetch + blob
-      try {
-        const resp = await fetch('/api/admin/backups/' + id + '/download', {
-          headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
-        });
-        if (resp.ok) {
-          const blob = await resp.blob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = 'backup-' + id + '.sql';
-          document.body.appendChild(a); a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        } else {
-          UI.notify('下载失败', 'error');
-        }
-      } catch (e) {
-        UI.notify('下载失败: ' + e.message, 'error');
+    var fname = decodeURIComponent(id);
+    try {
+      const resp = await fetch('/api/admin/backups/' + encodeURIComponent(fname) + '/download', {
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+      });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = fname;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        UI.notify('下载失败', 'error');
       }
+    } catch (e) {
+      UI.notify('下载失败: ' + e.message, 'error');
     }
   };
 
   window.del = async function(id) {
+    var fname = decodeURIComponent(id);
     if (!confirm('确定删除此备份？')) return;
-    const r = await API.deleteBackup(id);
+    const r = await API.deleteBackup(fname);
     if (r.success) { UI.notify('已删除','success'); load(); }
     else UI.notify(r.message,'error');
   };

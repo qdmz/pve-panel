@@ -93,6 +93,7 @@ class NodeController extends Controller
                 'username', 'password', 'realm',
                 'api_token', 'virtualization',
                 'bridge', 'storage', 'nat_network',
+                'nat_start_port', 'nat_end_port', 'max_ports_per_vm',
                 'ipv6_bridge', 'nat_enabled', 'notes',
             ];
 
@@ -212,7 +213,30 @@ class NodeController extends Controller
             $result  = $proxmox->syncNodeTemplates($node);
 
             if ($result['success']) {
-                return ApiResponse::success(['templates' => $result['templates'] ?? []], 'Templates synced.');
+                $templates = $result['templates'] ?? [];
+                $totalCount = $result['total'] ?? 0;
+                if (!$totalCount && is_array($templates)) {
+                    $totalCount = count($templates['kvm'] ?? []) + count($templates['lxc'] ?? []);
+                }
+
+                // Persist templates to database
+                foreach (($templates['kvm'] ?? []) as $tpl) {
+                    \App\Models\NodeTemplate::updateOrCreate(
+                        ['node_id' => $node->id, 'name' => $tpl['name']],
+                        ['type' => 'kvm', 'format' => $tpl['format'] ?? 'iso', 'size' => $tpl['size'] ?? 0]
+                    );
+                }
+                foreach (($templates['lxc'] ?? []) as $tpl) {
+                    \App\Models\NodeTemplate::updateOrCreate(
+                        ['node_id' => $node->id, 'name' => $tpl['name']],
+                        ['type' => 'lxc', 'format' => $tpl['format'] ?? '', 'size' => $tpl['size'] ?? 0]
+                    );
+                }
+
+                return ApiResponse::success([
+                    'templates' => $templates,
+                    'templates_count' => $totalCount,
+                ], 'Templates synced.');
             }
 
             return ApiResponse::error('Template sync failed: ' . ($result['error'] ?? 'Unknown error'), 502);

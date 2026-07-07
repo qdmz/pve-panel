@@ -181,7 +181,7 @@
 
     // --- Backups ---
     getBackups() { return adminApi('/backups'); },
-    createBackup() { return adminApi('/backups', { method: 'POST' }); },
+    createBackup(data) { return adminApi('/backups', { method: 'POST', body: data || { type: 'database' } }); },
     restoreBackup(id) { return adminApi('/backups/' + id + '/restore', { method: 'POST' }); },
     deleteBackup(id) { return adminApi('/backups/' + id, { method: 'DELETE' }); },
     downloadBackup(id) { return adminApi('/backups/' + id + '/download'); },
@@ -193,6 +193,11 @@
     updateSettings(group, data) { return adminApi('/settings/' + group, { method: 'PUT', body: data }); },
     testSmtp(data) { return adminApi('/settings/test-smtp', { method: 'POST', body: data }); },
     testEpay(data) { return adminApi('/settings/test-epay', { method: 'POST', body: data }); },
+
+    // --- Email Templates ---
+    getEmailTemplates() { return adminApi('/settings/email-templates'); },
+    updateEmailTemplate(id, data) { return adminApi('/settings/email-templates/' + id, { method: 'PUT', body: data }); },
+    previewEmailTemplate(id) { return adminApi('/settings/email-templates/' + id + '/preview'); },
   };
 
   // ===================== UI Helpers =====================

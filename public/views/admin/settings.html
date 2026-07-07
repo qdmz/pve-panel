@@ -39,6 +39,7 @@
         <button class="settings-tab active" data-tab="general" onclick="switchTab('general',this)">站点设置</button>
         <button class="settings-tab" data-tab="payment" onclick="switchTab('payment',this)">支付配置</button>
         <button class="settings-tab" data-tab="email" onclick="switchTab('email',this)">邮件 SMTP</button>
+        <button class="settings-tab" data-tab="templates" onclick="switchTab('templates',this)">邮件模板</button>
       </div>
 
       <div id="panel-general" class="table-wrapper settings-panel active">
@@ -70,6 +71,15 @@
           <div class="form-group"><label>加密方式</label><select class="form-input" id="smtpEncryption"><option value="ssl">SSL</option><option value="tls">TLS</option></select></div>
           <div class="form-group"><label>发件人名称</label><input class="form-input" id="smtpFromName"></div>
           <div style="grid-column:1/-1"><button class="btn primary" onclick="testSmtp()">📧 发送测试邮件</button><span id="smtpResult" style="margin-left:12px;font-size:13px"></span></div>
+        </div>
+      </div>
+
+      <div id="panel-templates" class="table-wrapper settings-panel">
+        <div class="table-header"><h3>邮件模板配置</h3></div>
+        <div style="padding:24px">
+          <div id="templateList" style="display:grid;gap:16px">
+            <div style="text-align:center;padding:24px;color:var(--text-3)"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载邮件模板...</div>
+          </div>
         </div>
       </div>
 
@@ -169,7 +179,52 @@
     document.getElementById('smtpResult').style.color = res.success ? 'var(--green)' : 'var(--red)';
   };
 
+  // ===== Email Templates =====
+  async function loadEmailTemplates() {
+    const container = document.getElementById('templateList');
+    if (!container) return;
+    const res = await API.getEmailTemplates();
+    if (!res.success || !res.data || !res.data.templates) {
+      container.innerHTML = '<div style="color:var(--text-3)">加载失败</div>';
+      return;
+    }
+    const templates = res.data.templates;
+    container.innerHTML = templates.map(t => `
+      <div class="table-wrapper" style="border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <div class="table-header" style="padding:12px 16px"><h3 style="font-size:14px">${t.title}</h3></div>
+        <div style="padding:16px;display:grid;gap:12px">
+          <div class="form-group" style="margin:0"><label style="font-size:12px">邮件主题</label><input class="form-input" id="tpl-subject-${t.id}" value="${esc(t.subject||'')}"></div>
+          <div class="form-group" style="margin:0"><label style="font-size:12px">邮件内容</label><textarea class="form-input" id="tpl-content-${t.id}" rows="4" style="font-family:var(--mono);font-size:12px">${esc(t.content||t.preview||'')}</textarea></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn-sm primary" onclick="saveTemplate(${t.id})">💾 保存</button>
+            <span id="tpl-msg-${t.id}" style="font-size:12px"></span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.saveTemplate = async function(id) {
+    const subject = document.getElementById('tpl-subject-'+id).value;
+    const content = document.getElementById('tpl-content-'+id).value;
+    const msgEl = document.getElementById('tpl-msg-'+id);
+    msgEl.textContent = '保存中...';
+    msgEl.style.color = '';
+    const res = await API.updateEmailTemplate(id, { subject, content });
+    if (res.success) {
+      msgEl.textContent = '✅ 已保存';
+      msgEl.style.color = 'var(--green)';
+    } else {
+      msgEl.textContent = '❌ ' + (res.message||'保存失败');
+      msgEl.style.color = 'var(--red)';
+    }
+    setTimeout(() => { msgEl.textContent = ''; }, 3000);
+  };
+
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
   loadSettings();
+  loadEmailTemplates();
 })();
 </script>
 </body>

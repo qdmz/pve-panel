@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
-use App\Services\EmailService;
 use App\Services\EpayService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class SettingController extends Controller
 {
@@ -40,8 +40,8 @@ class SettingController extends Controller
 
             foreach ($settings as $key => $value) {
                 Setting::updateOrCreate(
-                    ['group' => $group, 'key' => $key],
-                    ['value' => is_array($value) ? json_encode($value) : $value]
+                    ['key' => $key],
+                    ['group' => $group, 'value' => is_array($value) ? json_encode($value) : $value]
                 );
             }
 
@@ -58,18 +58,46 @@ class SettingController extends Controller
     public function testSmtp(Request $request)
     {
         try {
-            $request->validate([
-                'email' => ['required', 'email'],
-            ]);
-
-            $emailService = new EmailService();
-            $result = $emailService->sendTestEmail($request->email);
-
-            if ($result) {
-                return ApiResponse::success(null, 'Test email sent successfully.');
+            // Accept both 'email' and 'to' fields for flexibility
+            $email = $request->input('email') ?: $request->input('to');
+            if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return ApiResponse::error('A valid email address is required.', 422);
             }
 
-            return ApiResponse::error('Failed to send test email. Check SMTP configuration.', 500);
+            // Load SMTP settings from DB
+            $emailSettings = Setting::getByGroup('email');
+            $host = $emailSettings['mail_host'] ?? '';
+            $port = $emailSettings['mail_port'] ?? 465;
+            $encryption = $emailSettings['mail_encryption'] ?? 'ssl';
+            $username = $emailSettings['mail_username'] ?? '';
+            $password = $emailSettings['mail_password'] ?? '';
+            $fromName = $emailSettings['mail_from_name'] ?? 'CloudVM';
+
+            if (!$host || !$username) {
+                return ApiResponse::error('SMTP settings not configured. Please save SMTP settings first.', 400);
+            }
+
+            // Configure mail dynamically
+            config([
+                'mail.default' => 'smtp',
+                'mail.mailers.smtp' => [
+                    'transport' => 'smtp',
+                    'host' => $host,
+                    'port' => (int) $port,
+                    'encryption' => $encryption,
+                    'username' => $username,
+                    'password' => $password,
+                    'timeout' => 30,
+                ],
+                'mail.from.address' => $username,
+                'mail.from.name' => $fromName,
+            ]);
+
+            Mail::raw('This is a test email from your SMTP configuration. If you received this, your SMTP settings are correct.', function ($message) use ($email, $fromName) {
+                $message->to($email)->subject('SMTP Test Email - ' . $fromName);
+            });
+
+            return ApiResponse::success(null, 'Test email sent successfully.');
         } catch (\Exception $e) {
             \Log::error('Admin\\SettingController::testSmtp failed', ['error' => $e->getMessage()]);
             return ApiResponse::error('SMTP test failed: ' . $e->getMessage(), 500);

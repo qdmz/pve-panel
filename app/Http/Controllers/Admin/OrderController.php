@@ -15,7 +15,7 @@ class OrderController extends Controller
         try {
             $orders = Order::with(['user:id,name,email', 'product:id,name'])
                 ->when($request->status, function ($query, $status) {
-                    return $query->byStatus($status);
+                    return $query->where('payment_status', $status);
                 })
                 ->when($request->date_from, function ($query, $date) {
                     return $query->whereDate('created_at', '>=', $date);
@@ -57,14 +57,14 @@ class OrderController extends Controller
     public function markPaid(Request $request, Order $order)
     {
         try {
-            if ($order->status !== 'pending') {
+            if ($order->payment_status !== 'pending') {
                 return ApiResponse::error('Order is not in pending status.', 400);
             }
 
             $transactionId = $request->input('transaction_id', 'MANUAL-' . date('YmdHis'));
 
             $order->update([
-                'status'         => 'paid',
+                'payment_status' => 'paid',
                 'payment_method' => 'manual',
                 'transaction_id' => $transactionId,
                 'paid_at'        => now(),
@@ -92,7 +92,7 @@ class OrderController extends Controller
     public function refund(Request $request, Order $order)
     {
         try {
-            if ($order->status !== 'paid') {
+            if ($order->payment_status !== 'paid') {
                 return ApiResponse::error('Only paid orders can be refunded.', 400);
             }
 
@@ -113,7 +113,7 @@ class OrderController extends Controller
                 'reference_id'   => $order->id,
             ]);
 
-            $order->update(['status' => 'refunded']);
+            $order->update(['payment_status' => 'refunded']);
 
             return ApiResponse::success(['order' => $order], 'Refund processed.');
         } catch (\Exception $e) {
@@ -132,7 +132,7 @@ class OrderController extends Controller
             $totalOrders       = Order::count();
             $pendingOrders     = Order::pending()->count();
             $paidOrders        = Order::paid()->count();
-            $refundedOrders    = Order::where('status', 'refunded')->count();
+            $refundedOrders    = Order::where('payment_status', 'refunded')->count();
 
             $byMethod = Order::paid()
                 ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total')
