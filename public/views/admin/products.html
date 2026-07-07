@@ -202,20 +202,24 @@
     document.getElementById('prodYearly').value = p.yearly_price || 0;
     document.getElementById('prodStock').value = p.stock !== undefined ? p.stock : -1;
     document.getElementById('prodDesc').value = p.description || '';
-    // Set node and templates
-    document.getElementById('prodNodeId').value = p.node_id || '';
-    if (p.node_id) { await loadTemplatesForNode(p.node_id, p.template_id); }
+    // Set node and templates (node_ids is an array)
+    const nodeId = (p.node_ids && p.node_ids.length > 0) ? p.node_ids[0] : '';
+    document.getElementById('prodNodeId').value = nodeId;
+    const templateId = (p.template_ids && p.template_ids.length > 0) ? p.template_ids[0] : '';
+    if (nodeId) { await loadTemplatesForNode(nodeId, templateId); }
     openProductModal(p.id);
   };
 
   window.saveProduct = async function() {
     const id = document.getElementById('editProductId').value;
+    const nodeId = document.getElementById('prodNodeId').value;
+    const templateId = document.getElementById('prodTemplateId').value;
     const data = {
       name: document.getElementById('prodName').value.trim(),
       type: document.getElementById('prodType').value,
       status: document.getElementById('prodStatus').value,
-      node_id: document.getElementById('prodNodeId').value || null,
-      template_id: document.getElementById('prodTemplateId').value || null,
+      node_ids: nodeId ? [parseInt(nodeId)] : [],
+      template_ids: templateId ? [templateId] : [],
       cpu: parseInt(document.getElementById('prodCpu').value) || 1,
       memory: parseInt(document.getElementById('prodMemory').value) || 1024,
       disk: parseInt(document.getElementById('prodDisk').value) || 20,

@@ -1015,32 +1015,65 @@ class ProxmoxService
         try {
             $nodeName = $this->getNodeName($node);
 
-            // Get storage content (templates, ISOs)
-            $storage = $node->storage;
-            $response = $this->pvesh($node, 'get', "/nodes/{$nodeName}/storage/{$storage}/content");
-
             $templates = [
                 'kvm' => [],
                 'lxc' => [],
             ];
 
-            foreach ($response['data'] ?? [] as $item) {
+            // 1. Get QEMU VM templates (VMs converted to templates, template=1)
+            $qemuResponse = $this->pvesh($node, 'get', "/nodes/{$nodeName}/qemu");
+            foreach ($qemuResponse['data'] ?? [] as $vm) {
+                if (($vm['template'] ?? 0) == 1) {
+                    $vmid = (string) ($vm['vmid'] ?? '');
+                    $templates['kvm'][] = [
+                        'name'        => $vm['name'] ?? "vm-{$vmid}",
+                        'template_id' => $vmid,
+                        'vmid'        => $vmid,
+                        'size'        => $vm['maxdisk'] ?? 0,
+                        'format'      => 'qcow2',
+                        'source'      => 'vm-template',
+                    ];
+                }
+            }
+
+            // 2. Get storage content (ISO images + LXC templates)
+            $storage = $node->storage ?: 'local';
+            $storageResponse = $this->pvesh($node, 'get', "/nodes/{$nodeName}/storage/{$storage}/content");
+
+            foreach ($storageResponse['data'] ?? [] as $item) {
                 $contentType = $item['content'] ?? '';
                 $volId = $item['volid'] ?? '';
 
                 if ($contentType === 'iso') {
+                    // Extract filename from volid
+                    $filename = $volId;
+                    if (str_contains($filename, '/')) {
+                        $parts = explode('/', $filename);
+                        $filename = end($parts);
+                    }
                     $templates['kvm'][] = [
-                        'name' => $volId,
-                        'size' => $item['size'] ?? 0,
-                        'format' => $item['format'] ?? 'iso',
+                        'name'        => $volId,
+                        'template_id' => $filename,
+                        'size'        => $item['size'] ?? 0,
+                        'format'      => $item['format'] ?? 'iso',
+                        'source'      => 'iso',
                     ];
-                } elseif (in_array($contentType, ['vztmpl', 'ctpl', 'rootdir'])) {
+                } elseif ($contentType === 'vztmpl') {
+                    // LXC container template
+                    $filename = $volId;
+                    if (str_contains($filename, '/')) {
+                        $parts = explode('/', $filename);
+                        $filename = end($parts);
+                    }
                     $templates['lxc'][] = [
-                        'name' => $volId,
-                        'size' => $item['size'] ?? 0,
-                        'format' => $item['format'] ?? '',
+                        'name'        => $volId,
+                        'template_id' => $filename,
+                        'size'        => $item['size'] ?? 0,
+                        'format'      => $item['format'] ?? '',
+                        'source'      => 'vztmpl',
                     ];
                 }
+                // Skip 'rootdir' (LXC container disks) and 'images' (VM disks) — not templates
             }
 
             return [
