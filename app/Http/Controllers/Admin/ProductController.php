@@ -40,14 +40,22 @@ class ProductController extends Controller
     {
         try {
             $data = $request->validated();
-            // Use $request->input() directly for array fields — validated() may
-            // exclude empty arrays [].  Force these fields into $data so the
-            // INSERT always includes them (avoids "Field doesn't have a default
-            // value" under MariaDB strict mode).
-            $data['node_ids'] = $request->input('node_ids', []);
-            $data['template_ids'] = $request->input('template_ids', []);
 
-            $product = Product::create($data);
+            // Always include node_ids / template_ids in the INSERT so that
+            // MariaDB never hits "Field doesn't have a default value" — even
+            // when strict mode is enabled.  We json_encode manually to bypass
+            // the Eloquent array-cast, which sometimes omits empty arrays from
+            // the generated SQL.
+            $nodeIds      = $request->input('node_ids', []);
+            $templateIds  = $request->input('template_ids', []);
+            $data['node_ids']      = is_array($nodeIds)      ? $nodeIds      : [];
+            $data['template_ids']  = is_array($templateIds)  ? $templateIds  : [];
+
+            // Force-fill ensures mass-assignment protection is bypassed and
+            // ALL attributes (including empty-array casts) appear in the INSERT.
+            $product = new Product;
+            $product->forceFill($data);
+            $product->save();
 
             return ApiResponse::success(['product' => $product], 'Product created.', 201);
         } catch (\Exception $e) {
