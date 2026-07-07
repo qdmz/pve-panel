@@ -225,11 +225,13 @@ class NodeController extends Controller
                 // Persist KVM templates (ISO + VM templates)
                 foreach (($templates['kvm'] ?? []) as $tpl) {
                     $templateId = $tpl['template_id'] ?? $tpl['name'];
+                    if (!$templateId) continue; // skip if no template_id
                     $currentTemplateIds[] = $templateId;
 
                     \App\Models\NodeTemplate::updateOrCreate(
                         ['node_id' => $node->id, 'template_id' => $templateId],
                         [
+                            'template_id' => $templateId,  // include in values too for create case
                             'name'   => $tpl['name'],
                             'type'   => 'kvm',
                             'format' => $tpl['format'] ?? 'iso',
@@ -241,11 +243,13 @@ class NodeController extends Controller
                 // Persist LXC templates
                 foreach (($templates['lxc'] ?? []) as $tpl) {
                     $templateId = $tpl['template_id'] ?? $tpl['name'];
+                    if (!$templateId) continue; // skip if no template_id
                     $currentTemplateIds[] = $templateId;
 
                     \App\Models\NodeTemplate::updateOrCreate(
                         ['node_id' => $node->id, 'template_id' => $templateId],
                         [
+                            'template_id' => $templateId,  // include in values too for create case
                             'name'   => $tpl['name'],
                             'type'   => 'lxc',
                             'format' => $tpl['format'] ?? '',

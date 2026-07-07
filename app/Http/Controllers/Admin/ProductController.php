@@ -40,9 +40,12 @@ class ProductController extends Controller
     {
         try {
             $data = $request->validated();
-            // Ensure node_ids and template_ids have defaults (DB columns are NOT NULL)
-            $data['node_ids'] = $data['node_ids'] ?? [];
-            $data['template_ids'] = $data['template_ids'] ?? [];
+            // Use $request->input() directly for array fields — validated() may
+            // exclude empty arrays [].  Force these fields into $data so the
+            // INSERT always includes them (avoids "Field doesn't have a default
+            // value" under MariaDB strict mode).
+            $data['node_ids'] = $request->input('node_ids', []);
+            $data['template_ids'] = $request->input('template_ids', []);
 
             $product = Product::create($data);
 
