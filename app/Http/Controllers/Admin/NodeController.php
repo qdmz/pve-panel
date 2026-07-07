@@ -192,6 +192,7 @@ class NodeController extends Controller
                 return ApiResponse::success([
                     'total_pve_vms' => $result['total_pve_vms'] ?? 0,
                     'synced'        => $result['synced']        ?? 0,
+                    'imported'      => $result['imported']      ?? 0,
                     'resources'     => $result['resources']     ?? [],
                 ], 'VMs synced successfully.');
             }
@@ -220,18 +221,67 @@ class NodeController extends Controller
                 }
 
                 // Persist templates to database
+                // template_id is derived from the volid (e.g. "local:iso/alpine-virt-3.21.3-x86_64.iso")
                 foreach (($templates['kvm'] ?? []) as $tpl) {
+                    $volid = $tpl['name'];
+                    // Extract filename from volid: "local:iso/alpine-virt-3.21.3-x86_64.iso" → "alpine-virt-3.21.3-x86_64.iso"
+                    $templateId = $volid;
+                    if (str_contains($volid, '/')) {
+                        $parts = explode('/', $volid);
+                        $templateId = end($parts);
+                    }
+                    // Remove storage prefix if present: "local:alpine-virt-3.21.3-x86_64.iso" → "alpine-virt-3.21.3-x86_64.iso"
+                    if (str_contains($templateId, ':')) {
+                        $parts = explode(':', $templateId);
+                        $templateId = end($parts);
+                    }
+
                     \App\Models\NodeTemplate::updateOrCreate(
-                        ['node_id' => $node->id, 'name' => $tpl['name']],
-                        ['type' => 'kvm', 'format' => $tpl['format'] ?? 'iso', 'size' => $tpl['size'] ?? 0]
+                        ['node_id' => $node->id, 'template_id' => $templateId],
+                        [
+                            'name'   => $volid,
+                            'type'   => 'kvm',
+                            'format' => $tpl['format'] ?? 'iso',
+                            'size'   => $tpl['size'] ?? 0,
+                        ]
                     );
                 }
                 foreach (($templates['lxc'] ?? []) as $tpl) {
+                    $volid = $tpl['name'];
+                    $templateId = $volid;
+                    if (str_contains($volid, '/')) {
+                        $parts = explode('/', $volid);
+                        $templateId = end($parts);
+                    }
+                    if (str_contains($templateId, ':')) {
+                        $parts = explode(':', $templateId);
+                        $templateId = end($parts);
+                    }
+
                     \App\Models\NodeTemplate::updateOrCreate(
-                        ['node_id' => $node->id, 'name' => $tpl['name']],
-                        ['type' => 'lxc', 'format' => $tpl['format'] ?? '', 'size' => $tpl['size'] ?? 0]
+                        ['node_id' => $node->id, 'template_id' => $templateId],
+                        [
+                            'name'   => $volid,
+                            'type'   => 'lxc',
+                            'format' => $tpl['format'] ?? '',
+                            'size'   => $tpl['size'] ?? 0,
+                        ]
                     );
                 }
+
+                // Clean up templates that no longer exist on PVE
+                $currentTemplateIds = collect($templates['kvm'] ?? [])
+                    ->merge($templates['lxc'] ?? [])
+                    ->map(function ($tpl) {
+                        $id = $tpl['name'];
+                        if (str_contains($id, '/')) { $parts = explode('/', $id); $id = end($parts); }
+                        if (str_contains($id, ':')) { $parts = explode(':', $id); $id = end($parts); }
+                        return $id;
+                    })
+                    ->toArray();
+                \App\Models\NodeTemplate::where('node_id', $node->id)
+                    ->whereNotIn('template_id', $currentTemplateIds)
+                    ->delete();
 
                 return ApiResponse::success([
                     'templates' => $templates,

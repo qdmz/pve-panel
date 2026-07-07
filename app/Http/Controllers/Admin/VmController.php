@@ -14,12 +14,7 @@ class VmController extends Controller
 {
     protected function getProxmoxService(VirtualMachine $vm): ProxmoxService
     {
-        $service = new ProxmoxService();
-        if ($vm->node) {
-            $service->configure($vm->node);
-            $service->authenticate();
-        }
-        return $service;
+        return new ProxmoxService();
     }
 
     public function index(Request $request)
@@ -122,6 +117,10 @@ class VmController extends Controller
     public function restart(VirtualMachine $vm)
     {
         try {
+            if ($vm->status === 'stopped') {
+                return ApiResponse::error('Cannot restart a stopped VM. Please start it first.', 400);
+            }
+
             $proxmox = $this->getProxmoxService($vm);
             $proxmox->restartVm($vm);
             $vm->update(['status' => 'running']);

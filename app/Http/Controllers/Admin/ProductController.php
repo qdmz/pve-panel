@@ -39,7 +39,12 @@ class ProductController extends Controller
     public function store(CreateProductRequest $request)
     {
         try {
-            $product = Product::create($request->validated());
+            $data = $request->validated();
+            // Ensure node_ids and template_ids have defaults (DB columns are NOT NULL)
+            $data['node_ids'] = $data['node_ids'] ?? [];
+            $data['template_ids'] = $data['template_ids'] ?? [];
+
+            $product = Product::create($data);
 
             return ApiResponse::success(['product' => $product], 'Product created.', 201);
         } catch (\Exception $e) {

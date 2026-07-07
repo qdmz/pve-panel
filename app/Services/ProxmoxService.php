@@ -126,9 +126,15 @@ class ProxmoxService
                 CURLOPT_CUSTOMREQUEST  => strtoupper($method),
             ]);
 
-            if (!empty($data) && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'])) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-            } elseif (!empty($data) && $method === 'get') {
+            $methodUpper = strtoupper($method);
+            if (in_array($methodUpper, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+                // Always send a JSON body for write methods — PVE rejects empty
+                // body when Content-Type: application/json is set.
+                // Use stdClass to produce "{}" (JSON object) instead of "[]" (array),
+                // because PVE's Perl API expects a hash reference, not an array.
+                $body = empty($data) ? '{}' : json_encode($data);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+            } elseif ($methodUpper === 'GET' && !empty($data)) {
                 $url .= '?' . http_build_query($data);
                 curl_setopt($ch, CURLOPT_URL, $url);
             }
@@ -896,7 +902,12 @@ class ProxmoxService
         try {
             $pveVms = $this->getVms($node);
             $syncedCount = 0;
+            $importedCount = 0;
             $pveVmIds = [];
+
+            // Find an admin user to assign imported VMs to
+            $adminUser = \App\Models\User::where('role', 'admin')->first();
+            $adminUserId = $adminUser?->id ?? 1;
 
             foreach ($pveVms as $pveVm) {
                 $vmid = (string) $pveVm['vmid'];
@@ -906,24 +917,62 @@ class ProxmoxService
                     ->where('vm_id', $vmid)
                     ->first();
 
-                if (!$dbVm) {
-                    continue; // Only sync VMs that exist in our DB
-                }
-
-                // Update status from PVE
+                // Map PVE status to our DB status
                 $pveStatus = $pveVm['status'] ?? 'unknown';
                 $dbStatus = match ($pveStatus) {
                     'running' => 'running',
                     'stopped' => 'stopped',
                     'paused' => 'suspended',
-                    default => $dbVm->status,
+                    default => 'stopped',
                 };
 
+                // Extract resource info from PVE
+                $maxMem = (int) ($pveVm['maxmem'] ?? 0);
+                $maxDisk = (int) ($pveVm['maxdisk'] ?? 0);
+                $maxCpu = (int) ($pveVm['maxcpu'] ?? 1);
+                // Determine type from PVE data (getVms() sets 'type' to 'kvm' or 'lxc')
+                $pveType = $pveVm['type'] ?? '';
+                if ($pveType === 'lxc' || str_starts_with($pveVm['id'] ?? '', 'lxc/')) {
+                    $vmType = 'lxc';
+                } else {
+                    $vmType = 'kvm';
+                }
+
+                $vmName = $pveVm['name'] ?? "vm-{$vmid}";
+
+                if (!$dbVm) {
+                    // Import new VM from PVE into our database
+                    try {
+                        $dbVm = VirtualMachine::create([
+                            'user_id'       => $adminUserId,
+                            'node_id'       => $node->id,
+                            'vm_id'         => $vmid,
+                            'name'          => $vmName,
+                            'type'          => $vmType,
+                            'cpu'           => $maxCpu,
+                            'memory'        => (int) ($maxMem / (1024 * 1024)), // bytes → MB
+                            'disk'          => (int) ($maxDisk / (1024 * 1024 * 1024)), // bytes → GB
+                            'bandwidth'     => 0,
+                            'traffic_limit' => 0,
+                            'traffic_used'  => 0,
+                            'ip'            => null,
+                            'status'        => $dbStatus,
+                            'expires_at'    => now()->addDays(365), // temp expiration
+                            'notes'         => 'Imported from PVE on ' . now()->toDateTimeString(),
+                        ]);
+                        $importedCount++;
+                    } catch (\Exception $createEx) {
+                        Log::warning("Failed to import VM {$vmid} from PVE: " . $createEx->getMessage());
+                        continue;
+                    }
+                }
+
+                // Update status and resources from PVE
                 $dbVm->update([
                     'status' => $dbStatus,
-                    'memory' => $pveVm['maxmem'] ?? $dbVm->memory,
-                    'cpu' => $pveVm['maxcpu'] ?? $dbVm->cpu,
-                    'disk' => $pveVm['maxdisk'] ?? $dbVm->disk,
+                    'memory' => (int) ($maxMem / (1024 * 1024)),
+                    'cpu'    => $maxCpu,
+                    'disk'   => (int) ($maxDisk / (1024 * 1024 * 1024)),
                 ]);
 
                 $syncedCount++;
@@ -940,10 +989,11 @@ class ProxmoxService
             ]);
 
             return [
-                'success' => true,
-                'total_pve_vms' => count($pveVms),
-                'synced' => $syncedCount,
-                'resources' => $resources,
+                'success'        => true,
+                'total_pve_vms'  => count($pveVms),
+                'synced'         => $syncedCount,
+                'imported'       => $importedCount,
+                'resources'      => $resources,
             ];
 
         } catch (\Exception $e) {
