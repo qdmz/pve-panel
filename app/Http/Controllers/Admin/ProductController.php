@@ -59,8 +59,8 @@ class ProductController extends Controller
 
             return ApiResponse::success(['product' => $product], 'Product created.', 201);
         } catch (\Exception $e) {
-            \Log::error('Admin\\ProductController::store failed', ['error' => $e->getMessage()]);
-            return ApiResponse::error('Failed to create product.', 500);
+            \Log::error('Admin\ProductController::store failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return ApiResponse::error('Failed to create product: ' . $e->getMessage(), 500);
         }
     }
 

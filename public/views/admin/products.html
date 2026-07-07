@@ -241,7 +241,13 @@
       document.getElementById('productModal').style.display = 'none';
       loadProducts();
     } else {
-      document.getElementById('prodModalMsg').textContent = res.message || '保存失败';
+      // Handle both simple errors and Laravel validation errors (422)
+      let errMsg = res.message || '保存失败';
+      if (res.errors) {
+        const fieldErrors = Object.values(res.errors).flat();
+        if (fieldErrors.length) errMsg = fieldErrors.join('; ');
+      }
+      document.getElementById('prodModalMsg').textContent = errMsg;
     }
   };
 
@@ -294,7 +300,9 @@
       } else {
         sel.innerHTML = '<option value="">— 选择镜像 —</option>' +
           tmpls.map(t => '<option value="' + t.template_id + '"' + (t.template_id == selectedTemplateId ? ' selected' : '') + '>' +
-            (t.type === 'lxc' ? '[LXC] ' : '[KVM] ') + esc(t.name) + (t.size ? ' (' + (t.size / 1024 / 1024 / 1024).toFixed(1) + 'G)' : '') + '</option>').join('');
+            (t.type === 'lxc' ? '[LXC] ' : '[KVM] ') +
+            (t.source === 'vm-template' ? 'VM模板 ' : '') +
+            esc(t.name) + (t.size ? ' (' + (t.size / 1024 / 1024 / 1024).toFixed(1) + 'G)' : '') + '</option>').join('');
       }
     } else {
       sel.innerHTML = '<option value="">— 加载失败 —</option>';

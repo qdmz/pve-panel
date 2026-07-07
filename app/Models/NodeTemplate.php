@@ -12,6 +12,7 @@ class NodeTemplate extends Model
         'template_id',
         'name',
         'type',
+        'source',
         'format',
         'size',
         'description',

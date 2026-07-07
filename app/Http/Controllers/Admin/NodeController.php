@@ -234,6 +234,7 @@ class NodeController extends Controller
                             'template_id' => $templateId,  // include in values too for create case
                             'name'   => $tpl['name'],
                             'type'   => 'kvm',
+                            'source' => $tpl['source'] ?? ($tpl['vmid'] ? 'vm-template' : 'iso'),
                             'format' => $tpl['format'] ?? 'iso',
                             'size'   => $tpl['size'] ?? 0,
                         ]
@@ -252,6 +253,7 @@ class NodeController extends Controller
                             'template_id' => $templateId,  // include in values too for create case
                             'name'   => $tpl['name'],
                             'type'   => 'lxc',
+                            'source' => 'lxc-template',
                             'format' => $tpl['format'] ?? '',
                             'size'   => $tpl['size'] ?? 0,
                         ]
