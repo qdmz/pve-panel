@@ -281,84 +281,10 @@
       </label>
       <span class="toggle-label" id="yearlyLabel">年付 <em class="discount-badge">省 20%</em></span>
     </div>
-    <div class="pricing-grid">
-      <div class="pricing-card reveal">
-        <div class="pricing-header">
-          <span class="plan-type">LXC 入门</span>
-          <div class="plan-price">
-            <span class="price-currency">¥</span>
-            <span class="price-amount" data-monthly="29" data-yearly="23">29</span>
-            <span class="price-period">/月</span>
-          </div>
-        </div>
-        <ul class="plan-features">
-          <li>1 vCPU</li>
-          <li>512MB 内存</li>
-          <li>10GB SSD</li>
-          <li>500GB 月流量</li>
-          <li>1 个 IPv4（NAT）</li>
-          <li>WebSSH 访问</li>
-        </ul>
-        <a href="views/auth/register.html" class="btn-plan">立即购买</a>
-      </div>
-      <div class="pricing-card featured reveal">
-        <div class="plan-popular">最受欢迎</div>
-        <div class="pricing-header">
-          <span class="plan-type">KVM 标准</span>
-          <div class="plan-price">
-            <span class="price-currency">¥</span>
-            <span class="price-amount" data-monthly="79" data-yearly="63">79</span>
-            <span class="price-period">/月</span>
-          </div>
-        </div>
-        <ul class="plan-features">
-          <li>2 vCPU</li>
-          <li>2GB 内存</li>
-          <li>40GB SSD</li>
-          <li>1TB 月流量</li>
-          <li>1 个 IPv4</li>
-          <li>VNC + WebSSH</li>
-          <li>快照 × 3</li>
-        </ul>
-        <a href="views/auth/register.html" class="btn-plan featured">立即购买</a>
-      </div>
-      <div class="pricing-card reveal">
-        <div class="pricing-header">
-          <span class="plan-type">KVM 专业</span>
-          <div class="plan-price">
-            <span class="price-currency">¥</span>
-            <span class="price-amount" data-monthly="199" data-yearly="159">199</span>
-            <span class="price-period">/月</span>
-          </div>
-        </div>
-        <ul class="plan-features">
-          <li>4 vCPU</li>
-          <li>8GB 内存</li>
-          <li>100GB SSD</li>
-          <li>不限流量</li>
-          <li>1 个 IPv4</li>
-          <li>VNC + WebSSH + SFTP</li>
-          <li>快照 × 10</li>
-          <li>域名绑定</li>
-        </ul>
-        <a href="views/auth/register.html" class="btn-plan">立即购买</a>
-      </div>
-      <div class="pricing-card enterprise reveal">
-        <div class="pricing-header">
-          <span class="plan-type">企业定制</span>
-          <div class="plan-price">
-            <span class="price-amount" style="font-size:2rem">联系我们</span>
-          </div>
-        </div>
-        <ul class="plan-features">
-          <li>自定义 CPU / 内存 / 存储</li>
-          <li>独立物理机方案</li>
-          <li>专属带宽</li>
-          <li>SLA 合同</li>
-          <li>7×24 专属支持</li>
-          <li>数据备份方案</li>
-        </ul>
-        <a href="#" class="btn-plan enterprise" onclick="openTicket()">提交工单</a>
+    <div class="pricing-grid" id="pricingGrid">
+      <!-- Products loaded dynamically from API -->
+      <div class="pricing-card reveal" style="grid-column: 1/-1; text-align:center; padding:40px;">
+        <p style="color:var(--text-3)">加载中...</p>
       </div>
     </div>
   </div>
@@ -526,5 +452,137 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script>
+// ===== Dynamic Pricing from API =====
+(function() {
+  var pricingGrid = document.getElementById('pricingGrid');
+  var billingToggle = document.getElementById('billingToggle');
+  var monthlyLabel = document.getElementById('monthlyLabel');
+  var yearlyLabel = document.getElementById('yearlyLabel');
+  var isYearly = false;
+  var allProducts = [];
+
+  // Fallback defaults when API fails
+  var fallbackProducts = [
+    {name:'LXC 入门',type:'lxc',cpu:1,memory:512,disk:10,bandwidth:5,traffic:500,monthly_price:29,yearly_price:278,features:['WebSSH 访问','NAT 端口转发'],stock:-1},
+    {name:'KVM 标准',type:'kvm',cpu:2,memory:2048,disk:40,bandwidth:10,traffic:1024,monthly_price:79,yearly_price:758,features:['独立 IPv4','VNC + WebSSH','快照 x3','DDoS 防护'],stock:-1},
+    {name:'KVM 专业',type:'kvm',cpu:4,memory:8192,disk:100,bandwidth:30,traffic:-1,monthly_price:199,yearly_price:1910,features:['独立 IPv4+IPv6','VNC + WebSSH + SFTP','快照 x10','域名绑定','DDoS 高级防护'],stock:5}
+  ];
+
+  function renderPricing(products) {
+    allProducts = products;
+    var html = '';
+    var featuredIdx = products.length > 1 ? 1 : 0; // 2nd card is featured
+
+    products.forEach(function(p, i) {
+      var isFeatured = (i === featuredIdx);
+      var typeLabel = p.type.toUpperCase();
+      var typeClass = p.type === 'lxc' ? 'lxc-card' : '';
+      var trafficLabel = (p.traffic === -1 || p.traffic === 0) ? '不限流量' : formatTraffic(p.traffic);
+      var stockLabel = p.stock === -1 ? '库存充足' : (p.stock > 0 ? '仅剩 '+p.stock+' 台' : '缺货');
+      var stockCls = p.stock === -1 || p.stock > 5 ? 'good' : 'limited';
+      var features = (p.features && p.features.length) ? p.features : [];
+      if (!features.length) {
+        features = [typeLabel+' 全虚拟化', 'SSD 高速存储', 'WebSSH 管理'];
+      }
+
+      html += '<div class="pricing-card' + (isFeatured ? ' featured' : '') + ' ' + typeClass + ' reveal" data-product-id="'+p.id+'">';
+      if (isFeatured) html += '<div class="plan-popular">最受欢迎</div>';
+      html += '<div class="pricing-header">';
+      html += '<span class="plan-type">' + escHtml(p.name) + '</span>';
+      html += '<div class="plan-price">';
+      html += '<span class="price-currency">¥</span>';
+      html += '<span class="price-amount" data-monthly="'+p.monthly_price+'" data-yearly="'+p.yearly_price+'">'+p.monthly_price+'</span>';
+      html += '<span class="price-period">/月</span>';
+      html += '</div></div>';
+      html += '<ul class="plan-features">';
+      html += '<li>'+p.cpu+' vCPU</li>';
+      html += '<li>'+formatMemory(p.memory)+' 内存</li>';
+      html += '<li>'+p.disk+'GB SSD</li>';
+      html += '<li>'+p.bandwidth+' Mbps 带宽</li>';
+      html += '<li>'+trafficLabel+'</li>';
+      features.forEach(function(f) { html += '<li>'+escHtml(f)+'</li>'; });
+      html += '</ul>';
+      html += '<div class="availability"><span class="avail-dot '+stockCls+'"></span>'+stockLabel+'</div>';
+      html += '<a href="views/auth/register.html" class="btn-plan'+(isFeatured?' featured':'')+'">立即购买</a>';
+      html += '</div>';
+    });
+
+    // Add enterprise card
+    html += '<div class="pricing-card enterprise reveal">';
+    html += '<div class="pricing-header"><span class="plan-type">企业定制</span>';
+    html += '<div class="plan-price"><span class="price-amount" style="font-size:2rem">联系我们</span></div></div>';
+    html += '<ul class="plan-features">';
+    html += '<li>自定义 CPU / 内存 / 存储</li><li>独立物理机方案</li><li>专属带宽</li>';
+    html += '<li>SLA 合同</li><li>7×24 专属支持</li><li>数据备份方案</li>';
+    html += '</ul>';
+    html += '<a href="#" class="btn-plan enterprise" onclick="openTicket()">提交工单</a>';
+    html += '</div>';
+
+    pricingGrid.innerHTML = html;
+    // Trigger reveal animations
+    setTimeout(function() {
+      var cards = pricingGrid.querySelectorAll('.reveal');
+      cards.forEach(function(c) { c.classList.add('visible'); });
+    }, 100);
+  }
+
+  function loadProducts() {
+    fetch('/api/products')
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.success && res.data && res.data.data && res.data.data.length) {
+          var products = res.data.data.filter(function(p) { return p.status === 'active'; });
+          if (products.length > 0) {
+            // Sort by sort_order, take up to 3
+            products.sort(function(a, b) { return (a.sort_order||0) - (b.sort_order||0); });
+            var top = products.slice(0, 3);
+            // If only 1-2 products, pad with mixed types
+            if (top.length < 3) {
+              var remaining = products.filter(function(p) { return top.indexOf(p) === -1; });
+              while (top.length < 3 && remaining.length > 0) {
+                top.push(remaining.shift());
+              }
+            }
+            renderPricing(top);
+            return;
+          }
+        }
+        renderPricing(fallbackProducts);
+      })
+      .catch(function() {
+        renderPricing(fallbackProducts);
+      });
+  }
+
+  // Billing toggle
+  function updatePrices() {
+    document.querySelectorAll('.price-amount').forEach(function(el) {
+      var price = isYearly ? el.dataset.yearly : el.dataset.monthly;
+      if (price && el.parentElement) {
+        el.textContent = price;
+        var period = el.parentElement.querySelector('.price-period');
+        if (period) period.textContent = isYearly ? '/年' : '/月';
+      }
+    });
+    if (monthlyLabel) monthlyLabel.classList.toggle('active', !isYearly);
+    if (yearlyLabel) yearlyLabel.classList.toggle('active', isYearly);
+  }
+
+  if (billingToggle) {
+    billingToggle.addEventListener('change', function() {
+      isYearly = this.checked;
+      updatePrices();
+    });
+  }
+
+  function formatMemory(mb) { return mb >= 1024 ? (mb/1024).toFixed(0)+'GB' : mb+'MB'; }
+  function formatTraffic(gb) { return gb >= 1024 ? (gb/1024).toFixed(0)+'TB' : gb+'GB 月流量'; }
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // Start loading
+  loadProducts();
+})();
+</script>
 </body>
 </html>
