@@ -12,6 +12,7 @@ use App\Jobs\SendEmailJob;
 use App\Models\LoginLog;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;

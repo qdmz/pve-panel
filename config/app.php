@@ -36,7 +36,7 @@ return [
         'driver' => 'file',
     ],
 
-    'providers' => [],
+    'providers' => ServiceProvider::defaultProviders()->toArray(),
 
     'aliases' => [],
 ];
