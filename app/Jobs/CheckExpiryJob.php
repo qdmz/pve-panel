@@ -17,7 +17,7 @@ class CheckExpiryJob implements ShouldQueue
     public function handle(): void
     {
         // Notify VMs expiring in 7 days
-        $expiring7Days = VirtualMachine::expiringSoon(7)
+        $expiring7Days = VirtualMachine::expiring(7)
             ->where('expires_at', '>', now()->addDays(3))
             ->get();
 
@@ -26,7 +26,7 @@ class CheckExpiryJob implements ShouldQueue
         }
 
         // Notify VMs expiring in 3 days
-        $expiring3Days = VirtualMachine::expiringSoon(3)
+        $expiring3Days = VirtualMachine::expiring(3)
             ->where('expires_at', '>', now()->addDay())
             ->get();
 
@@ -35,7 +35,7 @@ class CheckExpiryJob implements ShouldQueue
         }
 
         // Notify VMs expiring in 1 day
-        $expiring1Day = VirtualMachine::expiringSoon(1)
+        $expiring1Day = VirtualMachine::expiring(1)
             ->where('expires_at', '>', now())
             ->get();
 
@@ -44,8 +44,8 @@ class CheckExpiryJob implements ShouldQueue
         }
 
         // Auto-suspend VMs past expiry
-        $expiredVms = VirtualMachine::expired()
-            ->where('status', '!=', 'suspended')
+        $expiredVms = VirtualMachine::where('expires_at', '<', now())
+            ->whereNotIn('status', ['suspended', 'deleting', 'creating'])
             ->get();
 
         foreach ($expiredVms as $vm) {
@@ -69,13 +69,6 @@ class CheckExpiryJob implements ShouldQueue
                 return;
             }
 
-            $notificationPrefs = $user->notification_preferences ?? [];
-
-            // Check if user has email expiry notification enabled
-            if (isset($notificationPrefs['email_expiry']) && !$notificationPrefs['email_expiry']) {
-                return;
-            }
-
             SendEmailJob::dispatch($user->email, 'vm-expiry', [
                 'vm_name'   => $vm->name,
                 'days_left' => $daysLeft,
@@ -91,19 +84,23 @@ class CheckExpiryJob implements ShouldQueue
     protected function suspendVm(VirtualMachine $vm): void
     {
         try {
-            if (!$vm->node || !$vm->node->isOnline()) {
+            $node = $vm->node;
+
+            if (!$node || !$node->isOnline()) {
                 $vm->update(['status' => 'suspended']);
                 return;
             }
 
             $proxmox = new ProxmoxService();
-            $proxmox->configure($vm->node);
-
-            if ($proxmox->authenticate()) {
-                $proxmox->suspendVm($vm->node->name, $vm->vmid);
-            }
+            $proxmox->suspendVm($vm);
 
             $vm->update(['status' => 'suspended']);
+
+            \Log::info('VM auto-suspended due to expiry', [
+                'vm_id'   => $vm->id,
+                'vmid'    => $vm->vm_id,
+                'expired' => $vm->expires_at,
+            ]);
         } catch (\Exception $e) {
             \Log::error('CheckExpiryJob::suspendVm failed', [
                 'vm_id' => $vm->id,

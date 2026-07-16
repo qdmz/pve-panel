@@ -28,7 +28,7 @@ class Setting extends Model
         'description',
     ];
 
-    public static function getValue(string $key, mixed $default = null): mixed
+    public static function getValue(string $key, $default = null)
     {
         $setting = Cache::remember("setting.{$key}", 3600, function () use ($key) {
             return static::where('key', $key)->first();
@@ -61,14 +61,18 @@ class Setting extends Model
         Cache::forget("setting.{$key}");
     }
 
-    public function castValue(): mixed
+    public function castValue()
     {
-        return match ($this->type) {
-            'integer' => (int) $this->value,
-            'boolean' => filter_var($this->value, FILTER_VALIDATE_BOOLEAN),
-            'json' => json_decode($this->value, true),
-            default => $this->value,
-        };
+        switch ($this->type) {
+            case 'integer':
+                return (int) $this->value;
+            case 'boolean':
+                return filter_var($this->value, FILTER_VALIDATE_BOOLEAN);
+            case 'json':
+                return json_decode($this->value, true);
+            default:
+                return $this->value;
+        }
     }
 
     public function scopeByGroup($query, string $group)

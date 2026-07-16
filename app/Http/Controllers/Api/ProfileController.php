@@ -49,7 +49,7 @@ class ProfileController extends Controller
     {
         try {
             $logs = $request->user()->loginLogs()
-                         ->orderBy('login_at', 'desc')
+                         ->orderBy('created_at', 'desc')
                          ->paginate(20);
 
             return ApiResponse::paginated($logs, 'Login logs retrieved.');

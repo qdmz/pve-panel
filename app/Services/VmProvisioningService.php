@@ -37,11 +37,12 @@ class VmProvisioningService
         $maxVmid = VirtualMachine::withTrashed()->max('vm_id');
         $nextVmid = $maxVmid ? (int) $maxVmid + 1 : 100;
 
-        $expiresAt = match ($order->billing_cycle) {
-            'quarterly' => now()->addMonths(3),
-            'yearly'    => now()->addYear(),
-            default     => now()->addMonth(),
-        };
+        $expiresAt = now()->addMonth();
+        if ($order->billing_cycle === 'quarterly') {
+            $expiresAt = now()->addMonths(3);
+        } elseif ($order->billing_cycle === 'yearly') {
+            $expiresAt = now()->addYear();
+        }
 
         // Sanitize VM name for Proxmox (DNS-safe: alphanumeric + hyphens only)
         $rawName = $product->name ?? 'VM';

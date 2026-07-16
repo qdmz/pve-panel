@@ -25,6 +25,7 @@ class Ticket extends Model
 
     protected $fillable = [
         'user_id',
+        'ticket_no',
         'subject',
         'department',
         'priority',
@@ -66,6 +67,11 @@ class Ticket extends Model
     public function scopeInProgress($query)
     {
         return $query->where('status', 'in_progress');
+    }
+
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
     }
 
     public function close(): void

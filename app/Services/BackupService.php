@@ -387,11 +387,12 @@ class BackupService
 
         foreach ($dirs as $dir) {
             $name = basename($dir);
-            $target = match ($name) {
-                'storage' => storage_path('app/public'),
-                'uploads' => public_path('uploads'),
-                default => null,
-            };
+            $target = null;
+            if ($name === 'storage') {
+                $target = storage_path('app/public');
+            } elseif ($name === 'uploads') {
+                $target = public_path('uploads');
+            }
 
             if ($target && File::isDirectory($dir)) {
                 File::copyDirectory($dir, $target);

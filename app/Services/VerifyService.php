@@ -21,12 +21,15 @@ class VerifyService
      */
     public function autoVerify(Verification $verification): array
     {
-        return match ($this->provider) {
-            'aliyun' => $this->verifyWithAliyun($verification->real_name, $verification->id_number),
-            'tencent' => $this->verifyWithTencent($verification->real_name, $verification->id_number),
-            'baidu' => $this->verifyWithBaidu($verification->real_name, $verification->id_number),
-            default => $this->verifyWithAliyun($verification->real_name, $verification->id_number),
-        };
+        switch ($this->provider) {
+            case 'tencent':
+                return $this->verifyWithTencent($verification->real_name, $verification->id_number);
+            case 'baidu':
+                return $this->verifyWithBaidu($verification->real_name, $verification->id_number);
+            case 'aliyun':
+            default:
+                return $this->verifyWithAliyun($verification->real_name, $verification->id_number);
+        }
     }
 
     /**

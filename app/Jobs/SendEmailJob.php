@@ -16,11 +16,16 @@ class SendEmailJob implements ShouldQueue
     public int $tries = 3;
     public int $backoff = 60;
 
-    public function __construct(
-        protected string $to,
-        protected string $templateType,
-        protected array  $data = [],
-    ) {}
+    protected string $to;
+    protected string $templateType;
+    protected array $data;
+
+    public function __construct(string $to, string $templateType, array $data = [])
+    {
+        $this->to = $to;
+        $this->templateType = $templateType;
+        $this->data = $data;
+    }
 
     public function handle(EmailService $emailService): void
     {

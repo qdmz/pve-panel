@@ -53,51 +53,42 @@ class OrderController extends Controller
             $couponId       = null;
 
             if ($request->coupon_code) {
-                $coupon = Coupon::active()->where('code', $request->coupon_code)->first();
+                $coupon = Coupon::where('code', $request->coupon_code)->first();
 
-                if (!$coupon) {
+                if (!$coupon || !$coupon->isAvailable()) {
                     return ApiResponse::error('Invalid or expired coupon code.', 400);
-                }
-
-                if (!$coupon->isAvailable()) {
-                    return ApiResponse::error('Coupon is no longer available.', 400);
                 }
 
                 if (!$coupon->isUsableByUser($user->id)) {
                     return ApiResponse::error('You have reached the usage limit for this coupon.', 400);
                 }
 
-                if ($coupon->min_amount && $amount < $coupon->min_amount) {
-                    return ApiResponse::error("Minimum order amount is {$coupon->min_amount}.", 400);
+                if ($coupon->min_order_amount > 0 && $amount < $coupon->min_order_amount) {
+                    return ApiResponse::error("Minimum order amount for this coupon is {$coupon->min_order_amount}.", 400);
                 }
 
-                $couponDiscount = $coupon->type === 'fixed'
-                    ? $coupon->value
-                    : $amount * ($coupon->value / 100);
-
-                $couponDiscount = min($couponDiscount, $amount);
+                $couponDiscount = $coupon->calculateDiscount($amount);
                 $couponId       = $coupon->id;
             }
 
             $finalAmount = max(0, $amount - $couponDiscount);
 
             $order = Order::create([
-                'order_no'        => 'ORD-' . date('YmdHis') . rand(1000, 9999),
+                'order_no'        => Order::generateOrderNo(),
                 'user_id'         => $user->id,
                 'product_id'      => $product->id,
                 'billing_cycle'   => $request->billing_cycle,
                 'amount'          => $finalAmount,
-                'original_amount' => $amount,
+                'discount'        => $couponDiscount,
                 'coupon_id'       => $couponId,
-                'coupon_discount' => $couponDiscount,
-                'status'          => 'pending',
+                'payment_status'  => 'pending',
             ]);
 
             if ($couponId) {
                 Coupon::where('id', $couponId)->increment('used_count');
             }
 
-            // If using balance, auto-deduct and provision
+            // If free (100% coupon), auto-process
             if ($finalAmount <= 0) {
                 $order->update([
                     'payment_status' => 'paid',
@@ -110,7 +101,7 @@ class OrderController extends Controller
 
             return ApiResponse::success(['order' => $order], 'Order created successfully.', 201);
         } catch (\Exception $e) {
-            \Log::error('OrderController::store failed', ['error' => $e->getMessage()]);
+            \Log::error('OrderController::store failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return ApiResponse::error('Failed to create order.', 500);
         }
     }

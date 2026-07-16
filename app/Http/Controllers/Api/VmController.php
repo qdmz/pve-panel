@@ -18,14 +18,12 @@ use Illuminate\Http\Request;
 
 class VmController extends Controller
 {
+    /**
+     * Get ProxmoxService for a VM's node.
+     */
     protected function getProxmoxService(VirtualMachine $vm): ProxmoxService
     {
-        $service = new ProxmoxService();
-        if ($vm->node) {
-            $service->configure($vm->node);
-            $service->authenticate();
-        }
-        return $service;
+        return app(ProxmoxService::class);
     }
 
     public function index(Request $request)
@@ -50,8 +48,12 @@ class VmController extends Controller
                 return ApiResponse::error('Unauthorized.', 403);
             }
 
+            if ($vm->trashed()) {
+                return ApiResponse::error('VM not found.', 404);
+            }
+
             $vm->load([
-                'node:id,name,status',
+                'node:id,name,host,status',
                 'snapshots' => function ($q) { $q->orderBy('created_at', 'desc')->limit(10); },
                 'natRules',
                 'domains',
@@ -76,7 +78,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->startVm($vm->node->name, $vm->vmid);
+            $proxmox->startVm($vm);
 
             $vm->update(['status' => 'running']);
 
@@ -99,7 +101,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->stopVm($vm->node->name, $vm->vmid);
+            $proxmox->stopVm($vm);
 
             $vm->update(['status' => 'stopped']);
 
@@ -118,7 +120,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->restartVm($vm->node->name, $vm->vmid);
+            $proxmox->restartVm($vm);
 
             $vm->update(['status' => 'running']);
 
@@ -137,9 +139,9 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->resetVmPassword($vm->node->name, $vm->vmid, 'root', $request->new_password);
+            $proxmox->resetRootPassword($vm, $request->new_password);
 
-            $vm->update(['password' => $request->new_password]);
+            $vm->update(['root_password' => bcrypt($request->new_password)]);
 
             return ApiResponse::success(null, 'Password reset successfully.');
         } catch (\Exception $e) {
@@ -160,10 +162,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->reinstallVm($vm->node->name, $vm->vmid, [
-                'ide2' => "local:iso/{$request->template_id},media=cdrom",
-                'boot' => 'order=ide2',
-            ]);
+            $proxmox->reinstallVm($vm, $request->template_id);
 
             $vm->update([
                 'os_template' => $request->template_id,
@@ -189,11 +188,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $vncInfo = $proxmox->getVncProxy($vm->node->name, $vm->vmid);
-
-            if (!$vncInfo) {
-                return ApiResponse::error('Failed to get VNC proxy.', 502);
-            }
+            $vncInfo = $proxmox->getVncProxy($vm);
 
             return ApiResponse::success(['vnc' => $vncInfo]);
         } catch (\Exception $e) {
@@ -209,11 +204,10 @@ class VmController extends Controller
                 return ApiResponse::error('Unauthorized.', 403);
             }
 
-            $timeframe = $request->get('timeframe', 'hour');
-            $proxmox   = $this->getProxmoxService($vm);
-            $rrdData   = $proxmox->getVmRrdData($vm->node->name, $vm->vmid, $timeframe);
+            $proxmox = $this->getProxmoxService($vm);
+            $metrics = $proxmox->getVmMetrics($vm);
 
-            return ApiResponse::success(['metrics' => $rrdData]);
+            return ApiResponse::success(['metrics' => $metrics]);
         } catch (\Exception $e) {
             \Log::error('VmController::metrics failed', ['error' => $e->getMessage()]);
             return ApiResponse::error('Failed to retrieve metrics.', 502);
@@ -228,6 +222,11 @@ class VmController extends Controller
             }
 
             $product = $vm->product;
+
+            if (!$product) {
+                return ApiResponse::error('Product not found for this VM.', 404);
+            }
+
             $amount  = $product->getPriceForCycle($request->billing_cycle);
 
             if (!$amount) {
@@ -240,28 +239,20 @@ class VmController extends Controller
             $couponCode     = $request->coupon_code;
 
             if ($couponCode) {
-                $coupon = Coupon::active()->where('code', $couponCode)->first();
+                $coupon = Coupon::where('code', $couponCode)->active()->first();
 
-                if (!$coupon) {
+                if (!$coupon || !$coupon->isActive()) {
                     return ApiResponse::error('Invalid or expired coupon code.', 400);
                 }
 
-                if (!$coupon->isAvailable()) {
-                    return ApiResponse::error('Coupon is no longer available.', 400);
+                if ($coupon->min_order_amount && $amount < $coupon->min_order_amount) {
+                    return ApiResponse::error("Minimum order amount for this coupon is {$coupon->min_order_amount}.", 400);
                 }
 
-                if (!$coupon->isUsableByUser($request->user()->id)) {
-                    return ApiResponse::error('You have reached the usage limit for this coupon.', 400);
-                }
-
-                if ($coupon->min_amount && $amount < $coupon->min_amount) {
-                    return ApiResponse::error("Minimum order amount for this coupon is {$coupon->min_amount}.", 400);
-                }
-
-                if ($coupon->type === 'fixed') {
-                    $couponDiscount = $coupon->value;
+                if ($coupon->discount_type === 'percentage') {
+                    $couponDiscount = $amount * ($coupon->discount_value / 100);
                 } else {
-                    $couponDiscount = $amount * ($coupon->value / 100);
+                    $couponDiscount = min($coupon->discount_value, $amount);
                 }
 
                 $couponDiscount = min($couponDiscount, $amount);
@@ -277,10 +268,9 @@ class VmController extends Controller
                 'vm_id'           => $vm->id,
                 'billing_cycle'   => $request->billing_cycle,
                 'amount'          => $finalAmount,
-                'original_amount' => $amount,
+                'discount'        => $couponDiscount,
                 'coupon_id'       => $couponId,
-                'coupon_discount' => $couponDiscount,
-                'status'          => 'pending',
+                'payment_status'  => 'pending',
             ]);
 
             if ($couponId) {
@@ -306,7 +296,7 @@ class VmController extends Controller
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->deleteVm($vm->node->name, $vm->vmid);
+            $proxmox->deleteVm($vm);
 
             $vm->snapshots()->delete();
             $vm->natRules()->delete();
@@ -348,12 +338,7 @@ class VmController extends Controller
             $snapname = 'snap_' . date('Ymd_His');
             $proxmox  = $this->getProxmoxService($vm);
 
-            $result = $proxmox->createSnapshot(
-                $vm->node->name,
-                $vm->vmid,
-                $snapname,
-                $request->description ?? ''
-            );
+            $result = $proxmox->createSnapshot($vm, $snapname, $request->description ?? '');
 
             $snapshot = $vm->snapshots()->create([
                 'name'          => $request->name,
@@ -378,7 +363,7 @@ class VmController extends Controller
             $snapshot = $vm->snapshots()->findOrFail($snapshotId);
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->deleteSnapshot($vm->node->name, $vm->vmid, $snapshot->snapshot_name);
+            $proxmox->deleteSnapshot($vm, $snapshot->snapshot_name);
 
             $snapshot->delete();
 
@@ -396,136 +381,19 @@ class VmController extends Controller
                 return ApiResponse::error('Unauthorized.', 403);
             }
 
-            $snapshot = $vm->snapshots()->findOrFail($snapshotId);
+            $snapshot = $vm->snapshots()->where('id', $snapshotId)->first();
 
-            if ($vm->status !== 'stopped') {
-                return ApiResponse::error('VM must be stopped before restoring a snapshot.', 400);
+            if (!$snapshot) {
+                return ApiResponse::error('Snapshot not found.', 404);
             }
 
             $proxmox = $this->getProxmoxService($vm);
-            $proxmox->restoreSnapshot($vm->node->name, $vm->vmid, $snapshot->snapshot_name);
+            $proxmox->restoreVmSnapshot($vm, $snapshot->snapshot_id);
 
-            return ApiResponse::success(null, 'Snapshot restored.');
+            return ApiResponse::success(null, 'Snapshot restore initiated.');
         } catch (\Exception $e) {
             \Log::error('VmController::restoreSnapshot failed', ['error' => $e->getMessage()]);
             return ApiResponse::error('Failed to restore snapshot.', 502);
-        }
-    }
-
-    // NAT endpoints
-
-    public function natRules(Request $request, VirtualMachine $vm)
-    {
-        try {
-            if ($vm->user_id !== $request->user()->id) {
-                return ApiResponse::error('Unauthorized.', 403);
-            }
-
-            $rules = $vm->natRules()->orderBy('created_at', 'desc')->get();
-
-            return ApiResponse::success(['nat_rules' => $rules]);
-        } catch (\Exception $e) {
-            \Log::error('VmController::natRules failed', ['error' => $e->getMessage()]);
-            return ApiResponse::error('Failed to retrieve NAT rules.', 500);
-        }
-    }
-
-    public function addNatRule(AddNatRuleRequest $request, VirtualMachine $vm)
-    {
-        try {
-            if ($vm->user_id !== $request->user()->id) {
-                return ApiResponse::error('Unauthorized.', 403);
-            }
-
-            $rule = $vm->natRules()->create($request->validated());
-
-            // Apply iptables rule on the PVE host
-            try {
-                $node = $vm->node;
-                $svc = app(\App\Services\ProxmoxService::class);
-                $svc->addPortForward(
-                    $node,
-                    (string) $rule->public_port,
-                    $vm->nat_ipv4 ?: $vm->ip,
-                    (string) $rule->local_port,
-                    $rule->protocol
-                );
-            } catch (\Exception $e) {
-                \Log::warning('NatRule saved but iptables apply failed', ['error' => $e->getMessage()]);
-            }
-
-            return ApiResponse::success(['nat_rule' => $rule], 'NAT rule added.', 201);
-        } catch (\Exception $e) {
-            \Log::error('VmController::addNatRule failed', ['error' => $e->getMessage()]);
-            return ApiResponse::error('Failed to add NAT rule.', 500);
-        }
-    }
-
-    public function deleteNatRule(Request $request, VirtualMachine $vm, $ruleId)
-    {
-        try {
-            if ($vm->user_id !== $request->user()->id) {
-                return ApiResponse::error('Unauthorized.', 403);
-            }
-
-            $rule = $vm->natRules()->findOrFail($ruleId);
-            $rule->delete();
-
-            return ApiResponse::success(null, 'NAT rule deleted.');
-        } catch (\Exception $e) {
-            \Log::error('VmController::deleteNatRule failed', ['error' => $e->getMessage()]);
-            return ApiResponse::error('Failed to delete NAT rule.', 500);
-        }
-    }
-
-    // Domain endpoints
-
-    public function domains(Request $request, VirtualMachine $vm)
-    {
-        try {
-            if ($vm->user_id !== $request->user()->id) {
-                return ApiResponse::error('Unauthorized.', 403);
-            }
-
-            $domains = $vm->domains()->orderBy('created_at', 'desc')->get();
-
-            return ApiResponse::success(['domains' => $domains]);
-        } catch (\Exception $e) {
-            \Log::error('VmController::domains failed', ['error' => $e->getMessage()]);
-            return ApiResponse::error('Failed to retrieve domains.', 500);
-        }
-    }
-
-    public function addDomain(AddDomainRequest $request, VirtualMachine $vm)
-    {
-        try {
-            if ($vm->user_id !== $request->user()->id) {
-                return ApiResponse::error('Unauthorized.', 403);
-            }
-
-            $domain = $vm->domains()->create($request->validated());
-
-            return ApiResponse::success(['domain' => $domain], 'Domain added.', 201);
-        } catch (\Exception $e) {
-            \Log::error('VmController::addDomain failed', ['error' => $e->getMessage()]);
-            return ApiResponse::error('Failed to add domain.', 500);
-        }
-    }
-
-    public function deleteDomain(Request $request, VirtualMachine $vm, $domainId)
-    {
-        try {
-            if ($vm->user_id !== $request->user()->id) {
-                return ApiResponse::error('Unauthorized.', 403);
-            }
-
-            $domain = $vm->domains()->findOrFail($domainId);
-            $domain->delete();
-
-            return ApiResponse::success(null, 'Domain deleted.');
-        } catch (\Exception $e) {
-            \Log::error('VmController::deleteDomain failed', ['error' => $e->getMessage()]);
-            return ApiResponse::error('Failed to delete domain.', 500);
         }
     }
 }

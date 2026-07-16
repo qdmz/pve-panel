@@ -73,6 +73,9 @@ class Coupon extends Model
         return $this->belongsTo(User::class, 'used_by');
     }
 
+    /**
+     * Check if coupon is currently active and usable.
+     */
     public function isActive(): bool
     {
         if ($this->status !== 'active') {
@@ -81,10 +84,34 @@ class Coupon extends Model
         if ($this->max_uses > 0 && $this->used_count >= $this->max_uses) {
             return false;
         }
-        if ($this->expires_at && $this->expires_at->isPast()) {
+        if ($this->expires_at && \Carbon\Carbon::parse($this->expires_at)->isPast()) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Alias for isActive() used in controllers.
+     */
+    public function isAvailable(): bool
+    {
+        return $this->isActive();
+    }
+
+    /**
+     * Check if a user has not exceeded per_user_limit.
+     */
+    public function isUsableByUser(int $userId): bool
+    {
+        if ($this->per_user_limit <= 0) {
+            return true;
+        }
+
+        $usageCount = \App\Models\Order::where('coupon_id', $this->id)
+            ->where('user_id', $userId)
+            ->count();
+
+        return $usageCount < $this->per_user_limit;
     }
 
     public function calculateDiscount(float $orderAmount): float
@@ -98,5 +125,13 @@ class Coupon extends Model
         }
 
         return min($this->discount_value, $orderAmount);
+    }
+
+    /**
+     * Scope: only active coupons.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 
 class SettingController extends Controller
 {
-    protected array $allowedGroups = ['general', 'payment', 'email', 'verify', 'site'];
+    protected array $allowedGroups = ['general', 'payment', 'mail', 'vm', 'backup', 'site'];
 
     public function show(string $group)
     {
@@ -181,14 +181,8 @@ class SettingController extends Controller
     public function updateEmailTemplate(Request $request, $templateId)
     {
         try {
-            $templateName = match ((int) $templateId) {
-                1 => 'verification',
-                2 => 'password-reset',
-                3 => 'welcome',
-                4 => 'vm-expiry',
-                5 => 'test',
-                default => null,
-            };
+            $templateNames = [1 => 'verification', 2 => 'password-reset', 3 => 'welcome', 4 => 'vm-expiry', 5 => 'test'];
+            $templateName = $templateNames[(int) $templateId] ?? null;
 
             if (!$templateName) {
                 return ApiResponse::error('Template not found.', 404);
@@ -211,14 +205,8 @@ class SettingController extends Controller
     public function previewTemplate($templateId)
     {
         try {
-            $templateName = match ((int) $templateId) {
-                1 => 'verification',
-                2 => 'password-reset',
-                3 => 'welcome',
-                4 => 'vm-expiry',
-                5 => 'test',
-                default => null,
-            };
+            $templateNames = [1 => 'verification', 2 => 'password-reset', 3 => 'welcome', 4 => 'vm-expiry', 5 => 'test'];
+            $templateName = $templateNames[(int) $templateId] ?? null;
 
             if (!$templateName) {
                 return ApiResponse::error('Template not found.', 404);

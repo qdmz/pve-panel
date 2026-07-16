@@ -95,6 +95,11 @@ class Node extends Model
         return $this->hasMany(NatRule::class);
     }
 
+    public function templates(): HasMany
+    {
+        return $this->hasMany(NodeTemplate::class);
+    }
+
     public function isOnline(): bool
     {
         return $this->status === 'online';

@@ -17,9 +17,12 @@ class ProvisionVmJob implements ShouldQueue
     public int $tries = 1;
     public int $timeout = 600;
 
-    public function __construct(
-        protected VirtualMachine $vm,
-    ) {}
+    protected VirtualMachine $vm;
+
+    public function __construct(VirtualMachine $vm)
+    {
+        $this->vm = $vm;
+    }
 
     public function handle(ProxmoxService $proxmoxService): void
     {

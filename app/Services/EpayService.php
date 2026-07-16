@@ -395,13 +395,17 @@ class EpayService
      */
     private function mapPaymentType(string $method): string
     {
-        return match ($method) {
-            'alipay' => 'alipay',
-            'wechat' => 'wxpay',
-            'qqpay' => 'qqpay',
-            'bank' => 'bank',
-            default => 'alipay',
-        };
+        switch ($method) {
+            case 'wechat':
+                return 'wxpay';
+            case 'qqpay':
+                return 'qqpay';
+            case 'bank':
+                return 'bank';
+            case 'alipay':
+            default:
+                return 'alipay';
+        }
     }
 
     /**

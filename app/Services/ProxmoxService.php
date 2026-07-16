@@ -907,7 +907,7 @@ class ProxmoxService
 
             // Find an admin user to assign imported VMs to
             $adminUser = \App\Models\User::where('role', 'admin')->first();
-            $adminUserId = $adminUser?->id ?? 1;
+            $adminUserId = $adminUser ? $adminUser->id : 1;
 
             foreach ($pveVms as $pveVm) {
                 $vmid = (string) $pveVm['vmid'];
@@ -919,12 +919,12 @@ class ProxmoxService
 
                 // Map PVE status to our DB status
                 $pveStatus = $pveVm['status'] ?? 'unknown';
-                $dbStatus = match ($pveStatus) {
-                    'running' => 'running',
-                    'stopped' => 'stopped',
-                    'paused' => 'suspended',
-                    default => 'stopped',
-                };
+                $dbStatus = 'stopped';
+                if ($pveStatus === 'running') {
+                    $dbStatus = 'running';
+                } elseif ($pveStatus === 'paused') {
+                    $dbStatus = 'suspended';
+                }
 
                 // Extract resource info from PVE
                 $maxMem = (int) ($pveVm['maxmem'] ?? 0);

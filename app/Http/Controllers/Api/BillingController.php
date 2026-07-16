@@ -58,7 +58,8 @@ class BillingController extends Controller
             $vms = $request->user()->virtualMachines()
                         ->where('expires_at', '<=', now()->addDays(30))
                         ->where('status', '!=', 'deleted')
-                        ->select('id', 'name', 'hostname', 'type', 'status', 'expires_at')
+                        ->whereNotNull('expires_at')
+                        ->select('id', 'name', 'type', 'status', 'expires_at')
                         ->orderBy('expires_at', 'asc')
                         ->get();
 

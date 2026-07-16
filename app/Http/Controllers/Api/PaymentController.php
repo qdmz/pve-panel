@@ -26,14 +26,11 @@ class PaymentController extends Controller
             $couponId       = null;
 
             if ($request->coupon_code) {
-                $coupon = Coupon::active()->where('code', $request->coupon_code)->first();
+                $coupon = Coupon::where('code', $request->coupon_code)->first();
 
                 if ($coupon && $coupon->isAvailable() && $coupon->isUsableByUser($user->id)) {
-                    if (!$coupon->min_amount || $amount >= $coupon->min_amount) {
-                        $couponDiscount = $coupon->type === 'fixed'
-                            ? $coupon->value
-                            : $amount * ($coupon->value / 100);
-                        $couponDiscount = min($couponDiscount, $amount);
+                    if (!$coupon->min_order_amount || $amount >= $coupon->min_order_amount) {
+                        $couponDiscount = $coupon->calculateDiscount($amount);
                         $couponId       = $coupon->id;
 
                         Coupon::where('id', $couponId)->increment('used_count');
@@ -108,7 +105,7 @@ class PaymentController extends Controller
                     $balanceAfter = $user->balance;
 
                     $transaction->update([
-                        'balance_before'  => $balanceBefore,
+                        'balance_before'  => $balanceBefore + $transaction->amount,
                         'balance_after'   => $balanceAfter,
                         'transaction_id'  => $tradeNo,
                     ]);

@@ -15,7 +15,7 @@ class CreateOrderRequest extends FormRequest
     {
         return [
             'product_id'    => ['required', 'integer', 'exists:products,id'],
-            'billing_cycle' => ['required', 'string', 'in:monthly,quarterly,yearly'],
+            'billing_cycle' => ['required', 'string', 'in:monthly,yearly'],
             'coupon_code'   => ['nullable', 'string', 'max:50'],
         ];
     }
