@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\IpPoolController;
 use App\Http\Controllers\Admin\NodeController;
 use App\Http\Controllers\Admin\NodeTemplateController;
 use App\Http\Controllers\Admin\OrderController;
@@ -42,6 +43,7 @@ Route::middleware(['auth:sanctum', 'admin', \Illuminate\Routing\Middleware\Subst
     Route::post('vms/{vm}/restart', [VmController::class, 'restart']);
     Route::post('vms/{vm}/suspend', [VmController::class, 'suspend']);
     Route::post('vms/{vm}/unsuspend', [VmController::class, 'unsuspend']);
+    Route::post('vms/{vm}/transfer', [VmController::class, 'transfer']);
     Route::delete('vms/{vm}', [VmController::class, 'destroy']);
     Route::post('vms/batch', [VmController::class, 'batch']);
 
@@ -111,6 +113,16 @@ Route::middleware(['auth:sanctum', 'admin', \Illuminate\Routing\Middleware\Subst
     Route::post('backups/{backup}/restore', [BackupController::class, 'restore']);
     Route::get('backup-settings', [BackupController::class, 'settings']);
     Route::put('backup-settings', [BackupController::class, 'updateSettings']);
+
+    // IP Pools
+    Route::get('ip-pools', [IpPoolController::class, 'index']);
+    Route::get('ip-pools/{pool}', [IpPoolController::class, 'show']);
+    Route::post('ip-pools', [IpPoolController::class, 'store']);
+    Route::put('ip-pools/{pool}', [IpPoolController::class, 'update']);
+    Route::delete('ip-pools/{pool}', [IpPoolController::class, 'destroy']);
+    Route::get('ip-pools/{pool}/addresses', [IpPoolController::class, 'addresses']);
+    Route::post('ip-pools/{pool}/allocate', [IpPoolController::class, 'allocate']);
+    Route::post('ip-addresses/{ipAddress}/release', [IpPoolController::class, 'release']);
 
     // Settings
     Route::get('settings/email-templates', [SettingController::class, 'emailTemplates']);

@@ -87,6 +87,80 @@
   </div>
 </div>
 
+<!-- VM Detail Modal -->
+<div class="modal-overlay" id="vmDetailModal" style="display:none" onclick="if(event.target===this)closeVmDetail()">
+  <div class="modal-content" style="max-width:780px;max-height:85vh;overflow-y:auto">
+    <div class="modal-header">
+      <h3 style="margin:0"><span id="detailVmName"></span></h3>
+      <button class="topbar-btn" onclick="closeVmDetail()" style="border:none;background:none;cursor:pointer;padding:4px">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="detailLoading" style="text-align:center;padding:24px"><div class="spinner" style="width:20px;height:20px;margin:0 auto 8px"></div>加载详细...</div>
+      <div id="detailContent" style="display:none">
+        <!-- Overview -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:20px">
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">VM ID</label><div style="font-family:var(--mono);font-size:14px" id="dvVmId"></div></div>
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">类型</label><div style="font-size:14px" id="dvType"></div></div>
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">状态</label><div id="dvStatus"></div></div>
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">节点</label><div style="font-size:14px" id="dvNode"></div></div>
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">所属用户</label><div style="font-size:14px" id="dvUser"></div></div>
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">产品</label><div style="font-size:14px" id="dvProduct"></div></div>
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">IP 地址</label><div style="font-family:var(--mono);font-size:12px" id="dvIp"></div></div>
+          <div class="stat-card"><label style="font-size:11px;color:var(--text-3)">到期时间</label><div style="font-size:13px" id="dvExpires"></div></div>
+        </div>
+        <!-- Config -->
+        <h4 style="margin:0 0 12px">配置管理</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div>
+            <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px">CPU (核)</label>
+            <input class="form-input" id="editCpu" type="number" min="1" max="128" style="width:100%">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px">内存 (MB)</label>
+            <input class="form-input" id="editMemory" type="number" min="128" max="1048576" style="width:100%">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px">磁盘 (GB)</label>
+            <input class="form-input" id="editDisk" type="number" min="1" max="1048576" style="width:100%">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px">带宽 (Mbps)</label>
+            <input class="form-input" id="editBandwidth" type="number" min="1" style="width:100%">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px">流量上限 (GB)</label>
+            <input class="form-input" id="editTrafficLimit" type="number" min="0" style="width:100%">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px">操作系统模板</label>
+            <input class="form-input" id="editOsTemplate" type="text" style="width:100%">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <button class="btn-sm primary" onclick="saveVmConfig()">保存配置</button>
+          <button class="btn-sm default" onclick="resetConfigForm()">重置</button>
+        </div>
+        <!-- Transfer Ownership -->
+        <h4 style="margin:16px 0 12px">转移归属</h4>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+          <input class="form-input" id="transferUserId" type="number" placeholder="目标用户 ID" style="width:160px">
+          <button class="btn-sm warning" onclick="transferVm()">转移</button>
+          <span style="font-size:12px;color:var(--text-3)" id="transferResult"></span>
+        </div>
+        <!-- Notes -->
+        <h4 style="margin:16px 0 12px">备注</h4>
+        <textarea class="form-input" id="editNotes" style="width:100%;min-height:60px;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-sm primary" onclick="saveNotes()">保存备注</button>
+        </div>
+        <!-- NAT Rules -->
+        <h4 style="margin:16px 0 12px">NAT 端口转发规则</h4>
+        <div id="natRulesList"><p style="color:var(--text-3);font-size:13px">加载中...</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="../../js/main.js"></script>
 <script src="../../js/api.js"></script>
 <script>
@@ -239,6 +313,136 @@
   };
 
   loadVms(1);
+    // ──────────────────────────────────────────────
+    // VM Detail Modal
+    // ──────────────────────────────────────────────
+    let currentDetailVmId = null;
+
+    window.openVmDetail = async function(vmId) {
+      currentDetailVmId = vmId;
+      const modal = document.getElementById('vmDetailModal');
+      const loading = document.getElementById('detailLoading');
+      const content = document.getElementById('detailContent');
+      modal.style.display = 'flex';
+      loading.style.display = 'block';
+      content.style.display = 'none';
+
+      const res = await API.getVmDetail(vmId);
+      loading.style.display = 'none';
+
+      if (!res.success) {
+        content.innerHTML = '<p style="color:var(--red)">加载失败: ' + (res.message||'') + '</p>';
+        content.style.display = 'block';
+        return;
+      }
+
+      const vm = res.data.vm || res.data;
+      content.style.display = 'block';
+
+      document.getElementById('detailVmName').textContent = vm.name || 'VM #' + vm.id;
+      document.getElementById('dvVmId').textContent = vm.vm_id || vm.id;
+      document.getElementById('dvType').textContent = (vm.type||'kvm').toUpperCase();
+      document.getElementById('dvStatus').innerHTML = UI.statusBadge(vm.status);
+      document.getElementById('dvNode').textContent = vm.node ? vm.node.name : '-';
+      document.getElementById('dvUser').textContent = vm.user ? (vm.user.name + ' (' + vm.user.email + ')') : '-';
+      document.getElementById('dvProduct').textContent = vm.product ? vm.product.name : '-';
+      document.getElementById('dvIp').textContent = vm.ip || vm.nat_ipv4 || vm.ipv6_address || '-';
+      document.getElementById('dvExpires').textContent = vm.expires_at ? UI.formatDate(vm.expires_at) : '-';
+
+      // Fill config form
+      document.getElementById('editCpu').value = vm.cpu || 1;
+      document.getElementById('editMemory').value = vm.memory || 512;
+      document.getElementById('editDisk').value = vm.disk || 10;
+      document.getElementById('editBandwidth').value = vm.bandwidth || 100;
+      document.getElementById('editTrafficLimit').value = vm.traffic_limit || 0;
+      document.getElementById('editOsTemplate').value = vm.os_template || '';
+      document.getElementById('editNotes').value = vm.notes || '';
+
+      // Load NAT rules
+      loadNatRules(vm);
+    };
+
+    async function loadNatRules(vm) {
+      const container = document.getElementById('natRulesList');
+      if (vm.natRules && vm.natRules.length > 0) {
+        container.innerHTML = '<table class="data-table"><thead><tr><th>本地IP</th><th>本地端口</th><th>公网端口</th><th>协议</th><th>状态</th></tr></thead><tbody>' +
+          vm.natRules.map(r => '<tr><td style="font-family:var(--mono)">' + esc(r.local_ip) + '</td><td>' + r.local_port + '</td><td>' + r.public_port + '</td><td>' + (r.protocol||'tcp').toUpperCase() + '</td><td>' + UI.statusBadge(r.status) + '</td></tr>').join('') +
+          '</tbody></table>';
+      } else {
+        container.innerHTML = '<p style="color:var(--text-3);font-size:13px">暂无 NAT 规则</p>';
+      }
+    }
+
+    window.closeVmDetail = function() {
+      document.getElementById('vmDetailModal').style.display = 'none';
+      currentDetailVmId = null;
+    };
+
+    window.saveVmConfig = async function() {
+      if (!currentDetailVmId) return;
+      const data = {
+        cpu: parseInt(document.getElementById('editCpu').value) || 1,
+        memory: parseInt(document.getElementById('editMemory').value) || 512,
+        disk: parseInt(document.getElementById('editDisk').value) || 10,
+        bandwidth: parseInt(document.getElementById('editBandwidth').value) || 100,
+        traffic_limit: parseInt(document.getElementById('editTrafficLimit').value) || 0,
+        os_template: document.getElementById('editOsTemplate').value || null,
+      };
+      const res = await API.updateVm(currentDetailVmId, data);
+      if (res.success) {
+        UI.notify('VM 配置已更新', 'success');
+        loadVms(currentPage);
+      } else {
+        UI.notify(res.message || '更新失败', 'error');
+      }
+    };
+
+    window.resetConfigForm = function() {
+      openVmDetail(currentDetailVmId);
+    };
+
+    window.saveNotes = async function() {
+      if (!currentDetailVmId) return;
+      const res = await API.updateVm(currentDetailVmId, { notes: document.getElementById('editNotes').value });
+      if (res.success) UI.notify('备注已保存', 'success');
+      else UI.notify(res.message || '保存失败', 'error');
+    };
+
+    window.transferVm = async function() {
+      if (!currentDetailVmId) return;
+      const targetUserId = document.getElementById('transferUserId').value.trim();
+      if (!targetUserId) { UI.notify('请输入目标用户 ID', 'error'); return; }
+      if (!confirm('确定将虚拟机转移给用户 ID ' + targetUserId + ' 吗？')) return;
+
+      const res = await API.transferVm(currentDetailVmId, parseInt(targetUserId));
+      const resultEl = document.getElementById('transferResult');
+      if (res.success) {
+        resultEl.style.color = 'var(--green)';
+        resultEl.textContent = '✓ 已转移至 ' + (res.data.vm?.user?.name || '用户 ' + targetUserId);
+        loadVms(currentPage);
+      } else {
+        resultEl.style.color = 'var(--red)';
+        resultEl.textContent = '✗ ' + (res.message || '转移失败');
+      }
+    };
+
+    // Make rows clickable for detail
+    document.addEventListener('click', function(e) {
+      const row = e.target.closest('tr');
+      if (row && row.closest('#vmTableBody')) {
+        const checkbox = row.querySelector('.vm-checkbox');
+        if (checkbox && !e.target.closest('button') && !e.target.closest('input')) {
+          openVmDetail(parseInt(checkbox.value));
+        }
+      }
+    });
+
+    // Add detail button to action column
+    const origRender = loadVms;
+    loadVms = function(page) {
+      currentPage = page || currentPage;
+      // ... original logic is above, we just add the page load call
+    };
 })();
 </script>
 </body>

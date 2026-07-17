@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 
 class SettingController extends Controller
 {
-    protected array $allowedGroups = ['general', 'payment', 'mail', 'vm', 'backup', 'site'];
+    protected array $allowedGroups = ['general', 'payment', 'mail', 'email', 'vm', 'backup', 'site'];
 
     public function show(string $group)
     {

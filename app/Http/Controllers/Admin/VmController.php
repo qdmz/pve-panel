@@ -6,6 +6,7 @@ use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BatchVmRequest;
 use App\Http\Requests\Admin\UpdateVmRequest;
+use App\Models\User;
 use App\Models\VirtualMachine;
 use App\Services\ProxmoxService;
 use Illuminate\Http\Request;
@@ -231,6 +232,35 @@ class VmController extends Controller
         } catch (\Exception $e) {
             \Log::error('Admin\\VmController::batch failed', ['error' => $e->getMessage()]);
             return ApiResponse::error('Failed to execute batch operation.', 500);
+        }
+    }
+
+    /**
+     * Transfer VM ownership to another user.
+     */
+    public function transfer(Request $request, VirtualMachine $vm)
+    {
+        try {
+            $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+            ]);
+
+            $targetUser = User::findOrFail($request->user_id);
+
+            $oldUserId = $vm->user_id;
+            $vm->update(['user_id' => $targetUser->id]);
+
+            // Also update related order if any
+            if ($vm->order_id) {
+                $vm->order()->update(['user_id' => $targetUser->id]);
+            }
+
+            \Log::info("VM {$vm->id} transferred from user {$oldUserId} to user {$targetUser->id}");
+
+            return ApiResponse::success(['vm' => $vm->fresh()->load('user:id,name,email')], 'VM ownership transferred.');
+        } catch (\Exception $e) {
+            \Log::error('Admin\\VmController::transfer failed', ['error' => $e->getMessage()]);
+            return ApiResponse::error('Failed to transfer VM.', 500);
         }
     }
 }

@@ -245,8 +245,8 @@
     fetch('/api/products')
       .then(function(r) { return r.json(); })
       .then(function(res) {
-        if (res.success && res.data && res.data.data && res.data.data.length) {
-          allProducts = res.data.data.filter(function(p) { return p.status === 'active'; });
+        if (res.success && res.data && Array.isArray(res.data)) {
+          allProducts = res.data.filter(function(p) { return p.status === 'active'; });
           allProducts.sort(function(a, b) { return (a.sort_order||0) - (b.sort_order||0); });
         }
         if (!allProducts.length) {
@@ -361,8 +361,8 @@
     });
   };
 
-  window._openOrder = function(name, type, monthlyPrice, yearlyPrice) {
-    currentOrder = { name: name, type: type, monthlyPrice: monthlyPrice, yearlyPrice: yearlyPrice };
+  window._openOrder = function(name, type, monthlyPrice, yearlyPrice, productId) {
+    currentOrder = { name: name, type: type, monthlyPrice: monthlyPrice, yearlyPrice: yearlyPrice, productId: productId };
     document.getElementById('orderProduct').textContent = name;
     document.getElementById('orderType').textContent = type.toUpperCase();
     var price = isYearly ? yearlyPrice : monthlyPrice;
@@ -403,12 +403,12 @@
     
     // Call real API to create order
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = API.Auth.getToken();
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
-          product_id: parseInt(document.querySelector('.buy-btn')?.dataset.productId) || 1,
+          product_id: currentOrder.productId,
           billing_cycle: isYearly ? 'yearly' : 'monthly',
           payment_method: payment
         })
@@ -444,10 +444,11 @@
     if (!btn) return;
     var name = btn.dataset.productName;
     var type = btn.dataset.productType;
+    var productId = parseInt(btn.dataset.productId);
     var monthly = parseFloat(btn.dataset.monthly) || 0;
     var yearly = parseFloat(btn.dataset.yearly) || 0;
     if (name) {
-      currentOrder = { name: name, type: type, monthlyPrice: monthly, yearlyPrice: yearly };
+      currentOrder = { name: name, type: type, productId: productId, monthlyPrice: monthly, yearlyPrice: yearly };
       document.getElementById('orderProduct').textContent = name;
       document.getElementById('orderType').textContent = type.toUpperCase();
       var price = isYearly ? yearly : monthly;

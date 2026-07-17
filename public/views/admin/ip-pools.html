@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP 地址池 - 管理后台</title>
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+<div id="admin-app">
+  <div id="sidebar">加载中...</div>
+  <div id="main-content">
+    <div class="page-header">
+      <h2>IP 地址池管理</h2>
+      <div class="header-actions">
+        <button class="btn-sm primary" onclick="showCreatePoolModal()">+ 新建地址池</button>
+      </div>
+    </div>
+
+    <div id="poolTableContainer">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>节点</th>
+            <th>类型</th>
+            <th>子网 (CIDR)</th>
+            <th>网关</th>
+            <th>网桥</th>
+            <th>地址数</th>
+            <th>已分配</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="poolTableBody">
+          <tr><td colspan="9" style="text-align:center;color:var(--text-3)">加载中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Create/Edit Pool Modal -->
+    <div class="modal-overlay" id="poolFormModal" style="display:none" onclick="if(event.target===this)closeModal('poolFormModal')">
+      <div class="modal-content" style="max-width:520px">
+        <div class="modal-header">
+          <h3 id="poolFormTitle" style="margin:0">新建地址池</h3>
+          <button class="topbar-btn" onclick="closeModal('poolFormModal')" style="border:none;background:none;cursor:pointer;padding:4px">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>节点 *</label>
+            <select class="form-input" id="poolNodeId" style="width:100%"><option value="">-- 选择节点 --</option></select>
+          </div>
+          <div class="form-group">
+            <label>类型 *</label>
+            <select class="form-input" id="poolType" style="width:100%">
+              <option value="ipv4">IPv4</option>
+              <option value="ipv6">IPv6</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>子网 (CIDR) * <span style="font-size:11px;color:var(--text-3)">如 10.0.0.0/24</span></label>
+            <input class="form-input" id="poolSubnet" type="text" style="width:100%">
+          </div>
+          <div class="form-group">
+            <label>网关</label>
+            <input class="form-input" id="poolGateway" type="text" style="width:100%">
+          </div>
+          <div class="form-group">
+            <label>网桥</label>
+            <input class="form-input" id="poolBridge" type="text" value="vmbr1" style="width:100%">
+          </div>
+          <div class="form-group">
+            <label>DHCP 起始 IP</label>
+            <input class="form-input" id="poolDhcpStart" type="text" style="width:100%">
+          </div>
+          <div class="form-group">
+            <label>DHCP 结束 IP</label>
+            <input class="form-input" id="poolDhcpEnd" type="text" style="width:100%">
+          </div>
+          <div class="form-group">
+            <label>描述</label>
+            <input class="form-input" id="poolDescription" type="text" style="width:100%">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="btn-sm primary" onclick="savePool()">保存</button>
+            <button class="btn-sm default" onclick="closeModal('poolFormModal')">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address List Modal -->
+    <div class="modal-overlay" id="addressModal" style="display:none" onclick="if(event.target===this)closeModal('addressModal')">
+      <div class="modal-content" style="max-width:720px;max-height:80vh;overflow-y:auto">
+        <div class="modal-header">
+          <h3 id="addressModalTitle" style="margin:0">IP 地址列表</h3>
+          <button class="topbar-btn" onclick="closeModal('addressModal')" style="border:none;background:none;cursor:pointer;padding:4px">&times;</button>
+        </div>
+        <div class="modal-body">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>IP 地址</th>
+                <th>MAC 地址</th>
+                <th>VM ID</th>
+                <th>状态</th>
+                <th>分配时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="addressTableBody">
+              <tr><td colspan="6" style="text-align:center;color:var(--text-3)">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+(function() {
+  let pools = [];
+  let currentPoolId = null;
+  let editPoolId = null;
+
+  async function init() {
+    UI.renderSidebar('ip-pools');
+    await loadNodes();
+    await loadPools();
+  }
+
+  async function loadNodes() {
+    const res = await API.get('nodes', { _admin: true });
+    const select = document.getElementById('poolNodeId');
+    if (res.success && res.data && res.data.nodes) {
+      select.innerHTML = '<option value="">-- 选择节点 --</option>' +
+        res.data.nodes.map(n => '<option value="' + n.id + '">' + esc(n.name) + '</option>').join('');
+    }
+  }
+
+  async function loadPools() {
+    const res = await API.adminApi('/ip-pools');
+    const tbody = document.getElementById('poolTableBody');
+    if (res.success && res.data && Array.isArray(res.data)) {
+      pools = res.data;
+      // Check if paginated data
+      tbody.innerHTML = pools.length
+        ? pools.map(p => renderPoolRow(p)).join('')
+        : '<tr><td colspan="9" style="text-align:center;color:var(--text-3)">暂无 IP 地址池</td></tr>';
+    } else {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+    }
+  }
+
+  function renderPoolRow(p) {
+    const allocated = p.addresses ? p.addresses.filter(a => a.status === 'allocated').length : 0;
+    const total = p.addresses ? p.addresses.length : 0;
+    return '<tr>' +
+      '<td>' + p.id + '</td>' +
+      '<td>' + (p.node ? esc(p.node.name) : '-') + '</td>' +
+      '<td>' + (p.type || '').toUpperCase() + '</td>' +
+      '<td style="font-family:var(--mono)">' + esc(p.subnet) + '</td>' +
+      '<td style="font-family:var(--mono)">' + esc(p.gateway || '-') + '</td>' +
+      '<td>' + esc(p.bridge || 'vmbr1') + '</td>' +
+      '<td>' + total + '</td>' +
+      '<td>' + allocated + '</td>' +
+      '<td>' +
+        '<button class="btn-sm default" onclick="viewAddresses(' + p.id + ')" style="margin-right:4px">地址</button>' +
+        '<button class="btn-sm default" onclick="editPool(' + p.id + ')" style="margin-right:4px">编辑</button>' +
+        '<button class="btn-sm danger" onclick="deletePool(' + p.id + ')">删除</button>' +
+      '</td></tr>';
+  }
+
+  window.showCreatePoolModal = function() {
+    editPoolId = null;
+    document.getElementById('poolFormTitle').textContent = '新建地址池';
+    ['poolNodeId','poolType','poolSubnet','poolGateway','poolBridge','poolDhcpStart','poolDhcpEnd','poolDescription'].forEach(id => {
+      const el = document.getElementById(id);
+      if (id === 'poolBridge') el.value = 'vmbr1';
+      else if (id === 'poolType') el.value = 'ipv4';
+      else el.value = '';
+    });
+    document.getElementById('poolFormModal').style.display = 'flex';
+  };
+
+  window.editPool = function(id) {
+    const p = pools.find(x => x.id === id);
+    if (!p) return;
+    editPoolId = id;
+    document.getElementById('poolFormTitle').textContent = '编辑地址池 #' + id;
+    document.getElementById('poolNodeId').value = p.node_id || '';
+    document.getElementById('poolType').value = p.type || 'ipv4';
+    document.getElementById('poolSubnet').value = p.subnet || '';
+    document.getElementById('poolGateway').value = p.gateway || '';
+    document.getElementById('poolBridge').value = p.bridge || 'vmbr1';
+    document.getElementById('poolDhcpStart').value = p.dhcp_range_start || '';
+    document.getElementById('poolDhcpEnd').value = p.dhcp_range_end || '';
+    document.getElementById('poolDescription').value = p.description || '';
+    document.getElementById('poolFormModal').style.display = 'flex';
+  };
+
+  window.savePool = async function() {
+    const data = {
+      node_id: parseInt(document.getElementById('poolNodeId').value) || null,
+      type: document.getElementById('poolType').value,
+      subnet: document.getElementById('poolSubnet').value.trim(),
+      gateway: document.getElementById('poolGateway').value.trim() || null,
+      bridge: document.getElementById('poolBridge').value.trim() || 'vmbr1',
+      dhcp_range_start: document.getElementById('poolDhcpStart').value.trim() || null,
+      dhcp_range_end: document.getElementById('poolDhcpEnd').value.trim() || null,
+      description: document.getElementById('poolDescription').value.trim() || null,
+    };
+    if (!data.node_id || !data.subnet) { UI.notify('请填写节点和子网', 'error'); return; }
+
+    let res;
+    if (editPoolId) {
+      res = await API.adminApi('/ip-pools/' + editPoolId, { method: 'PUT', body: data });
+    } else {
+      res = await API.adminApi('/ip-pools', { method: 'POST', body: data });
+    }
+    if (res.success) {
+      UI.notify('保存成功', 'success');
+      closeModal('poolFormModal');
+      loadPools();
+    } else {
+      UI.notify(res.message || '保存失败', 'error');
+    }
+  };
+
+  window.deletePool = async function(id) {
+    if (!confirm('确定删除此 IP 地址池及其所有地址？')) return;
+    const res = await API.adminApi('/ip-pools/' + id, { method: 'DELETE' });
+    if (res.success) {
+      UI.notify('已删除', 'success');
+      loadPools();
+    } else {
+      UI.notify(res.message || '删除失败', 'error');
+    }
+  };
+
+  window.viewAddresses = async function(id) {
+    currentPoolId = id;
+    const p = pools.find(x => x.id === id);
+    document.getElementById('addressModalTitle').textContent = 'IP 地址 - ' + (p ? p.subnet : '#' + id);
+    document.getElementById('addressModal').style.display = 'flex';
+
+    const res = await API.adminApi('/ip-pools/' + id + '/addresses');
+    const tbody = document.getElementById('addressTableBody');
+    if (res.success && res.data && res.data.addresses) {
+      tbody.innerHTML = res.data.addresses.map(a => {
+        const statusClass = a.status === 'allocated' ? 'badge-warning' : 'badge-success';
+        return '<tr>' +
+          '<td style="font-family:var(--mono)">' + esc(a.ip_address) + '</td>' +
+          '<td style="font-family:var(--mono)">' + esc(a.mac_address || '-') + '</td>' +
+          '<td>' + (a.vm_id || '-') + '</td>' +
+          '<td><span class="badge ' + statusClass + '">' + (a.status === 'allocated' ? '已分配' : '空闲') + '</span></td>' +
+          '<td>' + (a.allocated_at ? UI.formatDate(a.allocated_at) : '-') + '</td>' +
+          '<td>' + (a.status === 'allocated'
+            ? '<button class="btn-sm default" onclick="releaseAddress(' + a.id + ')">释放</button>'
+            : '-') + '</td></tr>';
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+    }
+  };
+
+  window.releaseAddress = async function(addrId) {
+    if (!confirm('确定释放此 IP 地址？')) return;
+    const res = await API.adminApi('/ip-addresses/' + addrId + '/release', { method: 'POST' });
+    if (res.success) {
+      UI.notify('已释放', 'success');
+      viewAddresses(currentPoolId);
+      loadPools();
+    } else {
+      UI.notify(res.message || '释放失败', 'error');
+    }
+  };
+
+  window.closeModal = function(id) {
+    document.getElementById(id).style.display = 'none';
+  };
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
