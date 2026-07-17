@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\VirtualMachine;
 use App\Services\ProxmoxService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class VmController extends Controller
 {
@@ -255,7 +256,7 @@ class VmController extends Controller
                 $vm->order()->update(['user_id' => $targetUser->id]);
             }
 
-            \Log::info("VM {$vm->id} transferred from user {$oldUserId} to user {$targetUser->id}");
+            Log::info("VM {$vm->id} transferred from user {$oldUserId} to user {$targetUser->id}");
 
             return ApiResponse::success(['vm' => $vm->fresh()->load('user:id,name,email')], 'VM ownership transferred.');
         } catch (\Exception $e) {
