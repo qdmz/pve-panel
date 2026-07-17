@@ -77,8 +77,8 @@
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:20px;background:var(--bg-2);border:1px solid var(--border);border-radius:16px">
         <div class="vm-status-dot running" style="width:12px;height:12px"></div>
         <div>
-          <h2 style="font-size:20px;margin-bottom:4px">Web 生产服务器</h2>
-          <div style="font-size:13px;color:var(--text-3);font-family:var(--mono)">VM-101 · KVM · 广州节点 · IP: 45.192.123.45</div>
+          <h2 id="vmNameHead" style="font-size:20px;margin-bottom:4px">加载中...</h2>
+          <div id="vmSubtitle" style="font-size:13px;color:var(--text-3);font-family:var(--mono)">加载中...</div>
         </div>
         <span class="badge badge-success" style="margin-left:auto">运行中</span>
         <span class="vm-card-type vm-type-kvm" style="margin-left:8px">KVM</span>
@@ -96,16 +96,16 @@
           <div class="card-header"><h3>实例信息</h3></div>
           <div class="card-body" style="padding:0">
             <table style="width:100%;border-collapse:collapse;font-size:13px">
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">虚拟化类型</td><td style="padding:10px 16px;font-weight:600">KVM</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">CPU</td><td style="padding:10px 16px;font-family:var(--mono)">2 vCPU</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">内存</td><td style="padding:10px 16px;font-family:var(--mono)">4096 MB</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">存储</td><td style="padding:10px 16px;font-family:var(--mono)">80 GB SSD</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">操作系统</td><td style="padding:10px 16px">Ubuntu 22.04 LTS</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">主 IP</td><td style="padding:10px 16px;font-family:var(--mono)" onclick="copyToClipboard('45.192.123.45')" style="cursor:pointer">45.192.123.45</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">节点</td><td style="padding:10px 16px">广州 CN1</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">创建时间</td><td style="padding:10px 16px">2025-02-01</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">到期时间</td><td style="padding:10px 16px;color:var(--orange);font-weight:600">2025-08-01</td></tr>
-              <tr><td style="padding:10px 16px;color:var(--text-3)">月流量配额</td><td style="padding:10px 16px;font-family:var(--mono)">1 TB</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">虚拟化类型</td><td id="vmType" style="padding:10px 16px;font-weight:600">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">CPU</td><td id="vmCpu" style="padding:10px 16px;font-family:var(--mono)">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">内存</td><td id="vmMem" style="padding:10px 16px;font-family:var(--mono)">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">存储</td><td id="vmDisk" style="padding:10px 16px;font-family:var(--mono)">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">操作系统</td><td id="vmOs" style="padding:10px 16px">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">主 IP</td><td id="vmIp" style="padding:10px 16px;font-family:var(--mono)">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">节点</td><td id="vmNode" style="padding:10px 16px">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">创建时间</td><td id="vmCreated" style="padding:10px 16px">-</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 16px;color:var(--text-3)">到期时间</td><td id="vmExpires" style="padding:10px 16px">-</td></tr>
+              <tr><td style="padding:10px 16px;color:var(--text-3)">月流量配额</td><td id="vmTraffic" style="padding:10px 16px;font-family:var(--mono)">-</td></tr>
             </table>
           </div>
         </div>
@@ -402,9 +402,9 @@ async function loadVmDetail() {
 }
 
 function renderVmDetail(vm) {
-  document.getElementById('vmName').textContent = vm.name || `VM #${vm.id}`;
-  document.getElementById('vmHostname').textContent = vm.hostname || vm.name;
-  document.getElementById('vmPlan').textContent = vm.product?.name || `${vm.cpu}vCPU / ${vm.memory}MB / ${vm.disk}GB`;
+  document.title = (vm.name || `VM #${vm.id}`) + ' — CloudVM Pro';
+  document.getElementById('vmNameHead').textContent = vm.name || `VM #${vm.id}`;
+  document.getElementById('vmSubtitle').textContent = `${vm.hostname || vm.name} · ${(vm.product?.type || vm.type || 'KVM').toUpperCase()} · ${vm.node?.name || '-'}节点 · IP: ${vm.ipv4 || '-'}`;
   
   // Status
   const statusBadge = document.getElementById('vmStatus');
@@ -412,24 +412,22 @@ function renderVmDetail(vm) {
   statusBadge.className = 'badge ' + (isRunning ? 'badge-success' : 'badge-error');
   statusBadge.textContent = isRunning ? '运行中' : '已停止';
   
-  // Spec details
-  document.getElementById('cpuInfo').innerHTML = `<span class="badge badge-info">${vm.cpu} vCPU</span>`;
-  document.getElementById('memInfo').innerHTML = `<span class="badge badge-info">${vm.memory} MB</span>`;
-  document.getElementById('diskInfo').innerHTML = `<span class="badge badge-info">${vm.disk} GB</span>`;
-  document.getElementById('bandwidthInfo').innerHTML = `<span class="badge badge-info">${vm.bandwidth || 100} Mbps</span>`;
-  document.getElementById('trafficInfo').innerHTML = `<span class="badge badge-info">${vm.traffic || '-'} GB</span>`;
-
-  // Network
-  document.getElementById('ipv4Addr').textContent = vm.ipv4 || viewSource.IPv4 || '-';
-  document.getElementById('ipv6Addr').textContent = vm.ipv6 || '-';
-  const sshPort = vm.ssh_port || 22;
-  document.getElementById('sshInfo').innerHTML = `<code>ssh root@${vm.ipv4 || '...'} -p ${sshPort}</code>`;
+  // Table fields
+  document.getElementById('vmType').textContent = (vm.product?.type || vm.type || 'KVM').toUpperCase();
+  document.getElementById('vmCpu').textContent = (vm.cpu || '?') + ' vCPU';
+  document.getElementById('vmMem').textContent = (vm.memory || '?') + ' MB';
+  document.getElementById('vmDisk').textContent = (vm.disk || '?') + ' GB' + (vm.disk_type ? ' ' + vm.disk_type : '');
+  document.getElementById('vmOs').textContent = vm.os || '-';
+  document.getElementById('vmIp').textContent = vm.ipv4 || '-';
+  document.getElementById('vmIp').onclick = vm.ipv4 ? function(){copyToClipboard(vm.ipv4)} : null;
+  document.getElementById('vmIp').style.cursor = vm.ipv4 ? 'pointer' : 'default';
+  document.getElementById('vmNode').textContent = vm.node?.name || '-';
   
-  // Dates
-  const created = new Date(vm.created_at).toLocaleDateString('zh-CN');
+  const created = vm.created_at ? new Date(vm.created_at).toLocaleDateString('zh-CN') : '-';
   const expires = vm.expires_at ? new Date(vm.expires_at).toLocaleDateString('zh-CN') : '-';
-  document.getElementById('createDate').textContent = created;
-  document.getElementById('expireDate').textContent = expires;
+  document.getElementById('vmCreated').textContent = created;
+  document.getElementById('vmExpires').textContent = expires;
+  document.getElementById('vmTraffic').textContent = vm.traffic ? (vm.traffic + ' GB') : '-';
   
   // Action buttons
   renderActions(vm, isRunning);
