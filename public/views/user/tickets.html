@@ -193,11 +193,8 @@
       </div>
       <div class="form-group">
         <label>关联实例</label>
-        <select class="form-input">
+        <select class="form-input" id="ticketVmSelect">
           <option value="">不关联</option>
-          <option>VM-101 Web 生产服务器</option>
-          <option>CT-102 测试容器</option>
-          <option>VM-103 备用服务器</option>
         </select>
       </div>
       <div class="form-group">
@@ -224,6 +221,7 @@
     ThemeManager.init();
     loadUserInfo();
     loadTickets();
+    loadVmSelect();
   });
 
   // ── Load user info in sidebar ──
@@ -470,7 +468,7 @@
     const titleInput = modal.querySelector('input');
     const categorySelect = modal.querySelector('select');
     const prioritySelect = modal.querySelectorAll('select')[1];
-    const vmSelect = modal.querySelectorAll('select')[2];
+    const vmSelect = document.getElementById('ticketVmSelect');
     const detailTextarea = modal.querySelector('textarea');
 
     const title = titleInput ? titleInput.value.trim() : '';
@@ -535,6 +533,21 @@
       closed:   ['badge-default', '已关闭']
     };
     const priorityLabels = { high: '高', medium: '中', low: '低' };
+
+    async function loadVmSelect() {
+      try {
+        const res = await fetch('/api/vms', {
+          headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+        const vms = data.data?.data || data.data || [];
+        const select = document.getElementById('ticketVmSelect');
+        if (!select) return;
+        select.innerHTML = '<option value="">不关联</option>' + vms.map(v =>
+          '<option value="' + v.id + '">' + (v.name || 'VM #' + v.id) + '</option>'
+        ).join('');
+      } catch(e) {}
+    }
 
     wrapper.innerHTML = filtered.map(t =>
       '<div class="ticket-item" onclick="openTicketDetail(\'' + t.id + '\')">' +

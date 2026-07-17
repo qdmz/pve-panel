@@ -60,9 +60,7 @@ const products = [
 ];
 
 const vms = [
-  { id: 1, vm_id: 100, user_id: 1, node_id: 1, product_id: 2, name: 'web-server-01', hostname: 'web-server-01', type: 'kvm', status: 'running', cpu: 2, memory: 2048, disk: 40, bandwidth: 10, traffic_limit: 1000, traffic_used: 234.5, ip: '172.16.1.10', nat_ipv4: '172.16.1.10', ipv6_address: '2402:4e00:1020:1400::1001', os_template: 'ubuntu-22.04-cloudinit', root_password: '********', expires_at: '2026-08-15T08:00:00Z', created_at: '2026-06-15T08:00:00Z' },
-  { id: 2, vm_id: 101, user_id: 1, node_id: 1, product_id: 3, name: 'db-server-01', hostname: 'db-server-01', type: 'kvm', status: 'running', cpu: 4, memory: 4096, disk: 80, bandwidth: 20, traffic_limit: 2000, traffic_used: 567.8, ip: '172.16.1.11', nat_ipv4: '172.16.1.11', ipv6_address: '2402:4e00:1020:1400::1002', os_template: 'debian-12-cloudinit', root_password: '********', expires_at: '2026-09-01T08:00:00Z', created_at: '2026-06-20T08:00:00Z' },
-  { id: 3, vm_id: 102, user_id: 1, node_id: 2, product_id: 5, name: 'dev-container', hostname: 'dev-container', type: 'lxc', status: 'stopped', cpu: 1, memory: 512, disk: 10, bandwidth: 5, traffic_limit: 300, traffic_used: 45.2, ip: '172.16.2.10', nat_ipv4: '172.16.2.10', ipv6_address: '2402:4e00:1020:1401::1001', os_template: 'ubuntu-22.04-standard_22.04-1_amd64.tar.zst', root_password: '********', expires_at: '2026-07-15T08:00:00Z', created_at: '2026-06-01T08:00:00Z' },
+  { id: 1, vm_id: 100, user_id: 1, node_id: 1, product_id: 2, name: 'web-server-01', hostname: 'web-server-01', type: 'kvm', status: 'running', cpu: 2, memory: 2048, disk: 40, bandwidth: 10, traffic_limit: 1000, traffic_used: 0, ip: '172.16.1.10', nat_ipv4: '172.16.1.10', ipv6_address: '2402:4e00:1020:1400::1001', os_template: 'ubuntu-22.04-cloudinit', root_password: '********', expires_at: '2026-08-15T08:00:00Z', created_at: '2026-06-15T08:00:00Z' },
 ];
 
 let vmIdCounter = 103;
@@ -387,8 +385,34 @@ api.post('/orders/:order/cancel', (req, res) => {
 });
 
 // Payments
-api.post('/recharge', (req, res) => {
-  res.json({ success: true, data: { payment_url: 'https://pay.wanjuanxueyi.com/submit.php?pid=2093&type=alipay&name=账户充值&money=' + req.body.amount } });
+api.post('/payment/create', (req, res) => {
+  const { amount, method } = req.body;
+  const tradeNo = 'CVMP' + Date.now();
+  res.json({
+    success: true,
+    data: {
+      id: tradeNo,
+      trade_no: tradeNo,
+      amount: parseFloat(amount),
+      method: method || 'alipay',
+      qrcode: null, // no real QR code in mock
+      payment_url: 'https://pay.wanjuanxueyi.com/submit.php?pid=2093&type=' + (method || 'alipay') + '&out_trade_no=' + tradeNo + '&name=账户充值&money=' + parseFloat(amount).toFixed(2),
+    },
+    message: '订单创建成功',
+  });
+});
+
+api.get('/payment/status/:tradeNo', (req, res) => {
+  // Always return pending to avoid auto-complete; user sees the payment_url
+  res.json({
+    success: true,
+    data: {
+      id: req.params.tradeNo,
+      trade_no: req.params.tradeNo,
+      status: 'pending',
+      amount: 0,
+    },
+  });
 });
 
 // Tickets

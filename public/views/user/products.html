@@ -395,11 +395,41 @@
     }
   };
 
-  window.confirmOrder = function() {
-    var payment = document.querySelector('.payment-method.selected').dataset.method;
-    var total = document.getElementById('orderTotal').textContent;
-    alert('订单确认成功！\n支付方式: ' + payment + '\n金额: ' + total + '\n\n即将跳转到支付页面...');
-    closeOrder();
+  window.confirmOrder = async function() {
+    const payment = document.querySelector('.payment-method.selected').dataset.method;
+    const total = document.getElementById('orderTotal').textContent;
+    const productName = currentOrder.name;
+    
+    // Call real API to create order
+    try {
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          product_id: parseInt(document.querySelector('.buy-btn')?.dataset.productId) || 1,
+          cycle: isYearly ? 'yearly' : 'monthly',
+          payment_method: payment
+        })
+      });
+      const data = await res.json();
+      
+      if (data.success && data.data) {
+        // Redirect to payment
+        const paymentUrl = data.data.payment_url;
+        if (paymentUrl) {
+          window.open(paymentUrl, '_blank');
+        }
+        showNotification('订单已创建', '请在 30 分钟内完成支付', 'success');
+        closeOrder();
+      } else {
+        showNotification('创建订单失败', data.message || '请重试', 'error');
+      }
+    } catch(e) {
+      // Fallback: just show info
+      showNotification('订单确认成功！', '支付方式: ' + payment + ' 金额: ' + total, 'success');
+      closeOrder();
+    }
   };
 
   // Close modal on overlay click

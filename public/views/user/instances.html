@@ -1,691 +1,308 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我的虚拟机 - CloudVM Pro</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css">
-  <link rel="stylesheet" href="../../css/dashboard.css">
-  <style>
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; backdrop-filter: blur(12px); transition: all 0.3s ease; }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); border-color: var(--accent); }
-    .stat-card .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 20px; }
-    .stat-card .stat-icon.blue { background: rgba(37,99,235,0.12); color: #2563eb; }
-    .stat-card .stat-icon.green { background: rgba(16,185,129,0.12); color: #10b981; }
-    .stat-card .stat-icon.gray { background: rgba(107,114,128,0.12); color: #6b7280; }
-    .stat-card .stat-icon.orange { background: rgba(245,158,11,0.12); color: #f59e0b; }
-    .stat-card .stat-value { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; color: var(--text-1); line-height: 1; }
-    .stat-card .stat-label { font-size: 13px; color: var(--text-3); margin-top: 6px; }
-    .stat-card .stat-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-
-    .warning-banner { background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(239,68,68,0.08)); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; margin-bottom: 24px; font-size: 14px; color: var(--text-2); }
-    .warning-banner .warn-icon { flex-shrink: 0; color: #f59e0b; }
-    .warning-banner a { color: var(--accent); font-weight: 500; white-space: nowrap; }
-
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
-    .section-header h2 { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; color: var(--text-1); margin: 0; }
-    .vm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-
-    .vm-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; backdrop-filter: blur(12px); transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .vm-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(37,99,235,0.03), transparent); opacity: 0; transition: opacity 0.3s; }
-    .vm-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); border-color: rgba(37,99,235,0.2); }
-    .vm-card:hover::before { opacity: 1; }
-    .vm-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .vm-card-name { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .status-dot.running { background: #10b981; animation: pulse-dot 2s infinite; }
-    .status-dot.stopped { background: #6b7280; }
-    .status-dot.suspended { background: #f59e0b; }
-    @keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); } 50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); } }
-    .status-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.02em; }
-    .status-badge.running { background: rgba(16,185,129,0.12); color: #10b981; }
-    .status-badge.stopped { background: rgba(107,114,128,0.12); color: #6b7280; }
-    .status-badge.suspended { background: rgba(245,158,11,0.12); color: #f59e0b; }
-
-    .vm-info-row { display: flex; gap: 16px; margin-bottom: 10px; font-size: 12px; color: var(--text-3); flex-wrap: wrap; }
-    .vm-info-item { display: flex; align-items: center; gap: 4px; }
-    .vm-info-item .label { color: var(--text-3); }
-    .vm-info-item .value { color: var(--text-2); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
-    .copy-btn { cursor: pointer; background: none; border: none; color: var(--text-3); padding: 0; display: inline-flex; transition: color 0.2s; }
-    .copy-btn:hover { color: var(--accent); }
-    .type-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 5px; letter-spacing: 0.05em; }
-    .type-badge.kvm { background: rgba(37,99,235,0.1); color: #2563eb; }
-    .type-badge.lxc { background: rgba(139,92,246,0.1); color: #8b5cf6; }
-
-    .vm-specs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 12px 0; padding: 12px; background: var(--bg-2); border-radius: 10px; }
-    .spec-item { text-align: center; }
-    .spec-item .spec-label { font-size: 10px; color: var(--text-3); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .spec-item .spec-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--text-1); }
-
-    .expiry-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-    .expiry-date { font-size: 12px; color: var(--text-3); }
-    .expiry-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 10px; }
-    .expiry-badge.safe { background: rgba(16,185,129,0.1); color: #10b981; }
-    .expiry-badge.warn { background: rgba(245,158,11,0.1); color: #f59e0b; }
-    .expiry-badge.danger { background: rgba(239,68,68,0.1); color: #ef4444; }
-
-    .vm-actions { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
-    .vm-action-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 5px; }
-    .vm-action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,0.05); }
-    .vm-action-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .vm-action-btn.primary:hover { opacity: 0.9; }
-    .vm-action-btn.danger:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.05); }
-
-    .empty-state { text-align: center; padding: 60px 20px; background: var(--card-bg); border: 1px dashed var(--border); border-radius: 16px; }
-    .empty-state svg { color: var(--text-3); margin-bottom: 16px; }
-    .empty-state h3 { font-family: 'Outfit', sans-serif; font-size: 18px; color: var(--text-2); margin: 0 0 8px; }
-    .empty-state p { color: var(--text-3); font-size: 14px; margin-bottom: 20px; }
-    .empty-state .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; background: var(--accent); color: #fff; border-radius: 10px; text-decoration: none; font-weight: 500; transition: opacity 0.2s; }
-    .empty-state .btn:hover { opacity: 0.9; }
-
-    @media (max-width: 1024px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-      .vm-grid { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .vm-specs { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    }
-    @media (max-width: 480px) {
-      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .stat-card { padding: 14px; }
-      .stat-card .stat-value { font-size: 22px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的虚拟机 — CloudVM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+  .vm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px,1fr)); gap: 16px; }
+  .vm-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; backdrop-filter: blur(12px); transition: all 0.3s ease; position: relative; overflow: hidden; }
+  .vm-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(37,99,235,0.03), transparent); opacity: 0; transition: opacity 0.3s; }
+  .vm-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); border-color: rgba(37,99,235,0.2); }
+  .vm-card:hover::before { opacity: 1; }
+  .vm-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .vm-card-name { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .status-dot.running { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.4); }
+  .status-dot.stopped { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+  .status-dot.suspended { background: #f59e0b; }
+  .status-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .status-badge.running { background: rgba(16,185,129,0.15); color: #10b981; }
+  .status-badge.stopped { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .status-badge.suspended { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .vm-info-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .vm-info-item { display: flex; align-items: center; gap: 4px; }
+  .vm-info-item .label { font-size: 11px; color: var(--text-3); }
+  .vm-info-item .value { font-size: 12px; color: var(--text-1); font-family: 'JetBrains Mono', monospace; }
+  .copy-btn { background: none; border: none; cursor: pointer; padding: 0; color: var(--text-3); opacity: 0; transition: opacity 0.2s; }
+  .vm-card:hover .copy-btn { opacity: 1; }
+  .copy-btn:hover { color: var(--accent); }
+  .type-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+  .type-badge.kvm { background: rgba(37,99,235,0.12); color: #3b82f6; }
+  .type-badge.lxc { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+  .vm-specs { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; padding: 12px; background: var(--bg-1); border-radius: 8px; }
+  .spec-item { text-align: center; }
+  .spec-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; margin-bottom: 2px; }
+  .spec-value { font-size: 14px; font-weight: 600; color: var(--text-1); }
+  .expiry-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .expiry-date { font-size: 12px; color: var(--text-3); }
+  .expiry-badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 6px; }
+  .expiry-badge.safe { background: rgba(16,185,129,0.1); color: #10b981; }
+  .expiry-badge.warn { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .expiry-badge.danger { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .vm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .vm-action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); cursor: pointer; transition: all 0.2s; }
+  .vm-action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,0.06); }
+  .vm-action-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .vm-action-btn.primary:hover { opacity: 0.9; }
+  .vm-action-btn.danger { color: #ef4444; border-color: rgba(239,68,68,0.3); }
+  .vm-action-btn.danger:hover { background: rgba(239,68,68,0.06); }
+  .vm-action-btn.success { color: #10b981; border-color: rgba(16,185,129,0.3); }
+  .vm-action-btn.success:hover { background: rgba(16,185,129,0.06); }
+  .filter-bar { display: flex; align-items: center; gap: 8px; }
+  .filter-bar select { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); font-size: 13px; font-family: 'Outfit', sans-serif; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .stat-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; margin-bottom: 8px; }
+  .stat-icon.blue { background: rgba(37,99,235,0.1); color: #3b82f6; }
+  .stat-icon.gray { background: rgba(156,163,175,0.1); color: #9ca3af; }
+  .stat-icon.orange { background: rgba(245,158,11,0.1); color: #f59e0b; }
+  .stat-value { font-size: 24px; font-weight: 800; color: var(--text-1); }
+  .stat-label { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-header h2 { font-size: 18px; margin: 0; }
+</style>
 </head>
 <body>
-<div class="dashboard-layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-inner">
-      <div class="sidebar-header">
-        <div class="nav-brand">
-          <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.9"/><rect x="15" y="2" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="2" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.6"/><rect x="15" y="15" width="11" height="11" rx="3" fill="currentColor" opacity="0.3"/></svg></div>
-          <span class="brand-name">CloudVM<span class="brand-pro">Pro</span></span>
-        </div>
-      </div>
-      <nav class="sidebar-nav">
-        <div class="sidebar-section">
-          <div class="sidebar-section-label">主菜单</div>
-          <a class="sidebar-item" href="dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>控制台</a>
-          <a class="sidebar-item active" href="instances.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>我的虚拟机</a>
-          <a class="sidebar-item" href="products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>购买产品</a>
-        </div>
-        <div class="sidebar-section">
-          <div class="sidebar-section-label">账户</div>
-          <a class="sidebar-item" href="billing.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>充值 & 账单</a>
-          <a class="sidebar-item" href="tickets.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单支持</a>
-          <a class="sidebar-item" href="announcements.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>系统公告</a>
-        </div>
-        <div class="sidebar-section">
-          <div class="sidebar-section-label">设置</div>
-          <a class="sidebar-item" href="profile.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>账号设置</a>
-          <a class="sidebar-item" href="verify.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>实名认证</a>
-        </div>
-      </nav>
-      <div class="sidebar-footer">
-        <div><div style="font-size:12px;color:var(--text-3)">Balance</div><div style="font-size:16px;font-weight:600">¥ 1,280.00</div></div>
-      </div>
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor"/><polyline points="8 21 12 17 16 21" stroke="currentColor"/></svg>
+      <span class="brand-text">CloudVM<span class="brand-accent">Pro</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-item" href="dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>控制台总览
+      </a>
+      <a class="sidebar-item active" href="instances.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>我的虚拟机
+        <span class="sidebar-badge" id="sidebarVmCount">0</span>
+      </a>
+      <a class="sidebar-item" href="products.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>购买产品
+      </a>
+      <a class="sidebar-item" href="billing.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>充值 & 账单
+      </a>
+      <a class="sidebar-item" href="tickets.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>工单支持
+        <span class="sidebar-badge" id="sidebarTicketCount" style="display:none">0</span>
+      </a>
+      <a class="sidebar-item" href="announcements.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>系统公告
+      </a>
+      <a class="sidebar-item" href="profile.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>账号设置
+      </a>
+      <a class="sidebar-item" href="verify.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>实名认证
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="sidebar-logout" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>退出登录
+      </button>
     </div>
   </aside>
 
-  <div class="main-content">
+  <!-- Main -->
+  <main class="main-content">
     <header class="topbar">
-      <button class="topbar-btn sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="breadcrumb"><a href="dashboard.html">控制台</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">我的虚拟机</span></div>
-      <div class="topbar-actions"><button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button></div>
+      <button class="topbar-btn" onclick="toggleSidebar()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="topbar-title">我的虚拟机</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" onclick="ThemeManager.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+        <div class="user-avatar" id="userAvatar">T</div>
+        <span class="user-name" id="userName">TestUser</span>
+      </div>
     </header>
+
     <div class="page-content">
-      <!-- Page Header -->
-      <div class="section-header">
-        <div>
-          <h1 style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:700;color:var(--text-1);margin:0;">我的虚拟机</h1>
-          <p style="color:var(--text-3);font-size:13px;margin:4px 0 0;">管理您的所有虚拟机实例</p>
-        </div>
-        <a href="products.html" class="vm-action-btn primary" style="text-decoration:none;padding:10px 20px;font-size:14px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          订购新实例
-        </a>
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="dashboard.html">控制台</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">我的虚拟机</span>
       </div>
 
-      <!-- Warning Banner -->
-      <div class="warning-banner">
-        <svg class="warn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span>您有 <strong>1</strong> 台虚拟机即将到期，请及时续费以免服务中断。</span>
-        <a href="billing.html">立即续费 →</a>
-      </div>
-
-      <!-- Stats Cards -->
-      <div class="stats-grid">
+      <!-- Stats -->
+      <div class="stats-grid" id="instancesStats">
         <div class="stat-card">
-          <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></div>
-          <div class="stat-value">6</div>
-          <div class="stat-label">虚拟机总数</div>
+          <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg></div>
+          <div class="stat-value" id="statTotal">-</div>
+          <div class="stat-label">总计</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-          <div class="stat-value">4</div>
+          <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div class="stat-value" id="statRunning">-</div>
           <div class="stat-label">运行中</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></div>
-          <div class="stat-value">1</div>
+          <div class="stat-value" id="statStopped">-</div>
           <div class="stat-label">已停止</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="stat-value">1</div>
+          <div class="stat-value" id="statExpiring">-</div>
           <div class="stat-label">即将到期</div>
         </div>
       </div>
 
-      <!-- VM Grid -->
+      <!-- Filter -->
       <div class="section-header">
         <h2>实例列表</h2>
-        <div style="display:flex;gap:8px;">
-          <select style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-2);color:var(--text-2);font-size:13px;font-family:'Outfit',sans-serif;">
-            <option>全部状态</option>
-            <option>运行中</option>
-            <option>已停止</option>
-            <option>已暂停</option>
+        <div class="filter-bar">
+          <select id="statusFilter" onchange="filterVMs()">
+            <option value="all">全部状态</option>
+            <option value="running">运行中</option>
+            <option value="stopped">已停止</option>
+            <option value="suspended">已暂停</option>
           </select>
         </div>
       </div>
 
-      <div class="vm-grid">
-        <!-- VM 1 - Running -->
-        <div class="vm-card">
-          <div class="vm-card-header">
-            <div class="vm-card-name">
-              <span class="status-dot running"></span>
-              Web 服务器 - 生产环境
-            </div>
-            <span class="status-badge running">运行中</span>
-          </div>
-          <div class="vm-info-row">
-            <div class="vm-info-item">
-              <span class="label">ID:</span>
-              <span class="value">vm-8a3f2c1d</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('vm-8a3f2c1d')" title="复制ID">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <div class="vm-info-item">
-              <span class="label">IP:</span>
-              <span class="value">192.168.1.100</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('192.168.1.100')" title="复制IP">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <span class="type-badge kvm">KVM</span>
-          </div>
-          <div class="vm-specs">
-            <div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">4 核</div></div>
-            <div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">8 GB</div></div>
-            <div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">100 GB</div></div>
-            <div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">10 Mbps</div></div>
-          </div>
-          <div class="expiry-row">
-            <span class="expiry-date">到期: 2026-12-15</span>
-            <span class="expiry-badge safe">剩余 167 天</span>
-          </div>
-          <div class="vm-actions">
-            <a href="instance-detail.html" class="vm-action-btn primary" style="text-decoration:none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>VNC 控制台
-            </a>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>停止
-            </button>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重启
-            </button>
-            <a href="instance-detail.html" class="vm-action-btn" style="text-decoration:none;">详情 →</a>
-          </div>
-        </div>
-
-        <!-- VM 2 - Running -->
-        <div class="vm-card">
-          <div class="vm-card-header">
-            <div class="vm-card-name">
-              <span class="status-dot running"></span>
-              MySQL 数据库服务器
-            </div>
-            <span class="status-badge running">运行中</span>
-          </div>
-          <div class="vm-info-row">
-            <div class="vm-info-item">
-              <span class="label">ID:</span>
-              <span class="value">vm-7b2e9a4f</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('vm-7b2e9a4f')" title="复制ID">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <div class="vm-info-item">
-              <span class="label">IP:</span>
-              <span class="value">192.168.1.101</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('192.168.1.101')" title="复制IP">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <span class="type-badge kvm">KVM</span>
-          </div>
-          <div class="vm-specs">
-            <div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">8 核</div></div>
-            <div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">16 GB</div></div>
-            <div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">200 GB</div></div>
-            <div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">20 Mbps</div></div>
-          </div>
-          <div class="expiry-row">
-            <span class="expiry-date">到期: 2027-03-20</span>
-            <span class="expiry-badge safe">剩余 262 天</span>
-          </div>
-          <div class="vm-actions">
-            <a href="instance-detail.html" class="vm-action-btn primary" style="text-decoration:none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>VNC 控制台
-            </a>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>停止
-            </button>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重启
-            </button>
-            <a href="instance-detail.html" class="vm-action-btn" style="text-decoration:none;">详情 →</a>
-          </div>
-        </div>
-
-        <!-- VM 3 - Running (LXC) -->
-        <div class="vm-card">
-          <div class="vm-card-header">
-            <div class="vm-card-name">
-              <span class="status-dot running"></span>
-              Nginx 反向代理
-            </div>
-            <span class="status-badge running">运行中</span>
-          </div>
-          <div class="vm-info-row">
-            <div class="vm-info-item">
-              <span class="label">ID:</span>
-              <span class="value">vm-4d6c5b1e</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('vm-4d6c5b1e')" title="复制ID">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <div class="vm-info-item">
-              <span class="label">IP:</span>
-              <span class="value">192.168.1.102</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('192.168.1.102')" title="复制IP">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <span class="type-badge lxc">LXC</span>
-          </div>
-          <div class="vm-specs">
-            <div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">2 核</div></div>
-            <div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">4 GB</div></div>
-            <div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">60 GB</div></div>
-            <div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">30 Mbps</div></div>
-          </div>
-          <div class="expiry-row">
-            <span class="expiry-date">到期: 2026-09-30</span>
-            <span class="expiry-badge safe">剩余 91 天</span>
-          </div>
-          <div class="vm-actions">
-            <a href="instance-detail.html" class="vm-action-btn primary" style="text-decoration:none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>VNC 控制台
-            </a>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>停止
-            </button>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重启
-            </button>
-            <a href="instance-detail.html" class="vm-action-btn" style="text-decoration:none;">详情 →</a>
-          </div>
-        </div>
-
-        <!-- VM 4 - Running (LXC) -->
-        <div class="vm-card">
-          <div class="vm-card-header">
-            <div class="vm-card-name">
-              <span class="status-dot running"></span>
-              Redis 缓存服务
-            </div>
-            <span class="status-badge running">运行中</span>
-          </div>
-          <div class="vm-info-row">
-            <div class="vm-info-item">
-              <span class="label">ID:</span>
-              <span class="value">vm-9f8e7d3a</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('vm-9f8e7d3a')" title="复制ID">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <div class="vm-info-item">
-              <span class="label">IP:</span>
-              <span class="value">192.168.1.103</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('192.168.1.103')" title="复制IP">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <span class="type-badge lxc">LXC</span>
-          </div>
-          <div class="vm-specs">
-            <div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">2 核</div></div>
-            <div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">8 GB</div></div>
-            <div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">80 GB</div></div>
-            <div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">15 Mbps</div></div>
-          </div>
-          <div class="expiry-row">
-            <span class="expiry-date">到期: 2026-11-10</span>
-            <span class="expiry-badge safe">剩余 132 天</span>
-          </div>
-          <div class="vm-actions">
-            <a href="instance-detail.html" class="vm-action-btn primary" style="text-decoration:none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>VNC 控制台
-            </a>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>停止
-            </button>
-            <button class="vm-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重启
-            </button>
-            <a href="instance-detail.html" class="vm-action-btn" style="text-decoration:none;">详情 →</a>
-          </div>
-        </div>
-
-        <!-- VM 5 - Stopped -->
-        <div class="vm-card">
-          <div class="vm-card-header">
-            <div class="vm-card-name">
-              <span class="status-dot stopped"></span>
-              测试开发环境
-            </div>
-            <span class="status-badge stopped">已停止</span>
-          </div>
-          <div class="vm-info-row">
-            <div class="vm-info-item">
-              <span class="label">ID:</span>
-              <span class="value">vm-1a2b3c4d</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('vm-1a2b3c4d')" title="复制ID">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <div class="vm-info-item">
-              <span class="label">IP:</span>
-              <span class="value">192.168.1.200</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('192.168.1.200')" title="复制IP">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <span class="type-badge kvm">KVM</span>
-          </div>
-          <div class="vm-specs">
-            <div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">4 核</div></div>
-            <div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">8 GB</div></div>
-            <div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">120 GB</div></div>
-            <div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">5 Mbps</div></div>
-          </div>
-          <div class="expiry-row">
-            <span class="expiry-date">到期: 2026-08-15</span>
-            <span class="expiry-badge warn">剩余 45 天</span>
-          </div>
-          <div class="vm-actions">
-            <button class="vm-action-btn primary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>启动
-            </button>
-            <a href="instance-detail.html" class="vm-action-btn" style="text-decoration:none;">详情 →</a>
-          </div>
-        </div>
-
-        <!-- VM 6 - Suspended (Expiring) -->
-        <div class="vm-card" style="border-color:rgba(245,158,11,0.3);">
-          <div class="vm-card-header">
-            <div class="vm-card-name">
-              <span class="status-dot suspended"></span>
-              文件备份服务器
-            </div>
-            <span class="status-badge suspended">已暂停</span>
-          </div>
-          <div class="vm-info-row">
-            <div class="vm-info-item">
-              <span class="label">ID:</span>
-              <span class="value">vm-5e6f7g8h</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('vm-5e6f7g8h')" title="复制ID">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <div class="vm-info-item">
-              <span class="label">IP:</span>
-              <span class="value">192.168.1.250</span>
-              <button class="copy-btn" onclick="navigator.clipboard.writeText('192.168.1.250')" title="复制IP">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <span class="type-badge kvm">KVM</span>
-          </div>
-          <div class="vm-specs">
-            <div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">2 核</div></div>
-            <div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">4 GB</div></div>
-            <div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">500 GB</div></div>
-            <div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">10 Mbps</div></div>
-          </div>
-          <div class="expiry-row">
-            <span class="expiry-date">到期: 2026-07-05</span>
-            <span class="expiry-badge danger">剩余 4 天</span>
-          </div>
-          <div class="vm-actions">
-            <a href="billing.html" class="vm-action-btn primary" style="text-decoration:none;">立即续费</a>
-            <button class="vm-action-btn danger">删除</button>
-            <a href="instance-detail.html" class="vm-action-btn" style="text-decoration:none;">详情 →</a>
-          </div>
+      <!-- VM Grid -->
+      <div class="vm-grid" id="vmContainer">
+        <div class="empty-state" style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3);display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div class="spinner" style="width:24px;height:24px"></div>
+          <span>加载虚拟机列表中...</span>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </div>
 
 <script src="../../js/main.js"></script>
-<script src="../../js/dashboard.js"></script>
-<script src="../../js/api.js"></script>
 <script>
-  // ── Load VMs from API and render ──
-  document.addEventListener('DOMContentLoaded', loadVMs);
+let allVms = [];
 
-  async function loadVMs() {
-    if (!API.Auth.getToken()) return;
+async function loadData() {
+  try {
+    const token = localStorage.getItem('admin_token');
+    if (!token) { window.location.href = '../auth/login.html'; return; }
 
-    try {
-      const res = await fetch('/api/vms', {
-        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
-      });
-      const result = await res.json();
-      const vms = result.data || result.vms || [];
+    const [meRes, vmsRes] = await Promise.all([
+      fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' } }),
+      fetch('/api/vms', { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' } }),
+    ]);
+    const me = await meRes.json();
+    const vms = await vmsRes.json();
 
-      // ── Update stat cards ──
-      const total = vms.length;
-      const running = vms.filter(v => v.status === 'running').length;
-      const stopped = vms.filter(v => v.status === 'stopped').length;
-      const suspended = vms.filter(v => v.status === 'suspended' || v.status === 'paused').length;
-      const expiring = vms.filter(v => {
-        if (!v.expiry_date) return false;
-        const days = (new Date(v.expiry_date) - new Date()) / (1000 * 60 * 60 * 24);
-        return days <= 7 && days >= 0;
-      }).length;
-
-      const statValues = document.querySelectorAll('.stat-card .stat-value');
-      if (statValues.length >= 4) {
-        statValues[0].textContent = total;
-        statValues[1].textContent = running;
-        statValues[2].textContent = stopped;
-        statValues[3].textContent = expiring;
-      }
-
-      // ── Update warning banner expiring count ──
-      const banner = document.querySelector('.warning-banner strong');
-      if (banner) banner.textContent = expiring;
-
-      // ── Render VM cards ──
-      const grid = document.querySelector('.vm-grid');
-      if (!grid) return;
-      grid.innerHTML = '';
-
-      if (vms.length === 0) {
-        grid.innerHTML =
-          '<div class="empty-state" style="grid-column:1/-1">' +
-            '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>' +
-            '<h3>暂无虚拟机</h3>' +
-            '<p>您还没有订购任何虚拟机实例，立即订购吧！</p>' +
-            '<a href="products.html" class="btn">订购新实例</a>' +
-          '</div>';
-        return;
-      }
-
-      const statusLabels = { running: '运行中', stopped: '已停止', suspended: '已暂停', paused: '已暂停' };
-      const now = new Date();
-
-      vms.forEach(vm => {
-        const status = vm.status || 'stopped';
-        const sl = statusLabels[status] || status;
-        const typeLabel = (vm.type || 'kvm').toUpperCase();
-
-        let expiryHtml = '';
-        if (vm.expiry_date) {
-          const exp = new Date(vm.expiry_date);
-          const days = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-          let cls = 'safe', txt = '剩余 ' + days + ' 天';
-          if (days <= 0)      { cls = 'danger'; txt = '已过期'; }
-          else if (days <= 7) { cls = 'danger'; }
-          else if (days <= 30){ cls = 'warn'; }
-          expiryHtml =
-            '<div class="expiry-row">' +
-              '<span class="expiry-date">到期: ' + vm.expiry_date + '</span>' +
-              '<span class="expiry-badge ' + cls + '">' + txt + '</span>' +
-            '</div>';
-        }
-
-        const card = document.createElement('div');
-        card.className = 'vm-card';
-        if (status === 'suspended' || status === 'paused') {
-          card.style.borderColor = 'rgba(245,158,11,0.3)';
-        }
-
-        // Build action buttons
-        let actionsHtml = '';
-        if (status === 'running') {
-          actionsHtml +=
-            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn primary" style="text-decoration:none;">' +
-              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>VNC 控制台' +
-            '</a>' +
-            '<button class="vm-action-btn" onclick="vmAction(\'' + vm.id + '\',\'stop\')">' +
-              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>停止' +
-            '</button>' +
-            '<button class="vm-action-btn" onclick="vmAction(\'' + vm.id + '\',\'restart\')">' +
-              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重启' +
-            '</button>' +
-            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
-        } else if (status === 'stopped') {
-          actionsHtml +=
-            '<button class="vm-action-btn primary" onclick="vmAction(\'' + vm.id + '\',\'start\')">' +
-              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>启动' +
-            '</button>' +
-            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
-        } else if (status === 'suspended' || status === 'paused') {
-          actionsHtml +=
-            '<a href="billing.html?id=' + vm.id + '" class="vm-action-btn primary" style="text-decoration:none;">立即续费</a>' +
-            '<button class="vm-action-btn danger" onclick="vmAction(\'' + vm.id + '\',\'delete\')">删除</button>' +
-            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
-        } else {
-          actionsHtml += '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
-        }
-
-        card.innerHTML =
-          '<div class="vm-card-header">' +
-            '<div class="vm-card-name">' +
-              '<span class="status-dot ' + status + '"></span>' +
-              (vm.name || '未命名实例') +
-            '</div>' +
-            '<span class="status-badge ' + status + '">' + sl + '</span>' +
-          '</div>' +
-          '<div class="vm-info-row">' +
-            '<div class="vm-info-item">' +
-              '<span class="label">ID:</span>' +
-              '<span class="value">' + (vm.vmid || vm.id || '-') + '</span>' +
-              '<button class="copy-btn" onclick="navigator.clipboard.writeText(\'' + (vm.vmid || vm.id || '') + '\')" title="复制ID">' +
-                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
-              '</button>' +
-            '</div>' +
-            '<div class="vm-info-item">' +
-              '<span class="label">IP:</span>' +
-              '<span class="value">' + (vm.ip || vm.ip_address || '-') + '</span>' +
-              (vm.ip || vm.ip_address ? '<button class="copy-btn" onclick="navigator.clipboard.writeText(\'' + (vm.ip || vm.ip_address || '') + '\')" title="复制IP">' +
-                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
-              '</button>' : '') +
-            '</div>' +
-            '<span class="type-badge ' + (vm.type || 'kvm') + '">' + typeLabel + '</span>' +
-          '</div>' +
-          '<div class="vm-specs">' +
-            '<div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">' + (vm.cpu_cores || vm.cpu || '?') + ' 核</div></div>' +
-            '<div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">' + (vm.memory || vm.memory_gb || vm.ram || '?') + ' GB</div></div>' +
-            '<div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">' + (vm.disk || vm.disk_gb || '?') + ' GB</div></div>' +
-            '<div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">' + (vm.bandwidth || vm.bw || '?') + ' Mbps</div></div>' +
-          '</div>' +
-          expiryHtml +
-          '<div class="vm-actions">' + actionsHtml + '</div>';
-
-        grid.appendChild(card);
-      });
-    } catch (err) {
-      console.error('Failed to load VMs:', err);
-      const g = document.querySelector('.vm-grid');
-      if (g) g.innerHTML =
-        '<div class="empty-state" style="grid-column:1/-1">' +
-          '<h3>加载失败</h3><p>无法从服务器获取虚拟机列表，请刷新重试</p>' +
-        '</div>';
+    // Update user
+    if (me.success) {
+      const name = me.data?.name || me.data?.user?.name || '用户';
+      document.getElementById('userName').textContent = name;
+      document.getElementById('userAvatar').textContent = name[0];
     }
-  }
 
-  // ── VM actions (start/stop/restart) ──
-  async function vmAction(id, action) {
-    const token = API.Auth.getToken();
-    if (!token) return;
-
-    const actionMap = {
-      start:   { method: 'POST', url: '/api/vms/' + id + '/start' },
-      stop:    { method: 'POST', url: '/api/vms/' + id + '/stop' },
-      restart: { method: 'POST', url: '/api/vms/' + id + '/restart' }
-    };
-
-    const cfg = actionMap[action];
-    if (!cfg) return;
-
-    try {
-      const res = await fetch(cfg.url, {
-        method: cfg.method,
-        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
-      });
-      const data = await res.json();
-      if (data.success || data.message) {
-        showNotification('操作成功', action + ' 操作已提交', 'success');
-        setTimeout(loadVMs, 2000);
-      } else {
-        showNotification('操作失败', data.message || '未知错误', 'error');
-      }
-    } catch (err) {
-      showNotification('操作失败', '网络错误', 'error');
+    // Process VMs
+    if (vms.success) {
+      allVms = vms.data?.data || vms.data || [];
     }
+    
+    updateStats();
+    renderVms(allVms);
+    document.getElementById('sidebarVmCount').textContent = allVms.length;
+  } catch(e) {
+    console.error('Load failed', e);
   }
+}
 
-  // ── Notification fallback ──
-  function showNotification(title, msg, type) {
-    if (typeof window.showNotification === 'function') {
-      window.showNotification(title, msg, type);
-    } else {
-      alert('[' + type + '] ' + title + ': ' + msg);
-    }
+function updateStats() {
+  const total = allVms.length;
+  const running = allVms.filter(v => v.status === 'running').length;
+  const stopped = allVms.filter(v => v.status === 'stopped').length;
+  const expiring = allVms.filter(v => {
+    if (!v.expires_at) return false;
+    const days = (new Date(v.expires_at) - new Date()) / 86400000;
+    return days > 0 && days < 30;
+  }).length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statRunning').textContent = running;
+  document.getElementById('statStopped').textContent = stopped;
+  document.getElementById('statExpiring').textContent = expiring;
+}
+
+function renderVms(vms) {
+  const container = document.getElementById('vmContainer');
+  if (!container) return;
+  if (!vms.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3)">暂无虚拟机实例。<br><br><a href="products.html" class="btn primary">立即购买</a></div>';
+    return;
   }
+  container.innerHTML = vms.map(vm => {
+    const isRunning = vm.status === 'running';
+    const isStopped = vm.status === 'stopped';
+    const expires = vm.expires_at ? new Date(vm.expires_at) : null;
+    const daysLeft = expires ? Math.ceil((expires - new Date()) / 86400000) : null;
+    let expiryClass = 'safe';
+    if (daysLeft !== null && daysLeft < 0) expiryClass = 'danger';
+    else if (daysLeft !== null && daysLeft < 30) expiryClass = 'warn';
+    const vmIdDisplay = vm.vm_id || vm.id;
+    const type = (vm.type || 'kvm').toUpperCase();
+    
+    return `<div class="vm-card">
+      <div class="vm-card-header">
+        <div class="vm-card-name">
+          <span class="status-dot ${isRunning ? 'running' : isStopped ? 'stopped' : 'suspended'}"></span>
+          ${vm.name || 'VM #' + vm.id}
+        </div>
+        <span class="status-badge ${isRunning ? 'running' : isStopped ? 'stopped' : 'suspended'}">${isRunning ? '运行中' : isStopped ? '已停止' : '已暂停'}</span>
+      </div>
+      <div class="vm-info-row">
+        <div class="vm-info-item">
+          <span class="label">ID:</span>
+          <span class="value">${vmIdDisplay}</span>
+        </div>
+        <div class="vm-info-item">
+          <span class="label">IP:</span>
+          <span class="value">${vm.ipv4 || vm.ip || 'NAT'}</span>
+        </div>
+        <span class="type-badge ${type.toLowerCase()}">${type}</span>
+      </div>
+      <div class="vm-specs">
+        <div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">${vm.cpu} 核</div></div>
+        <div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">${vm.memory} MB</div></div>
+        <div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">${vm.disk} GB</div></div>
+        <div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">${vm.bandwidth || '-'} Mbps</div></div>
+      </div>
+      <div class="expiry-row">
+        <span class="expiry-date">${expires ? '到期: ' + expires.toLocaleDateString('zh-CN') : ''}</span>
+        ${daysLeft !== null ? `<span class="expiry-badge ${expiryClass}">${daysLeft >= 0 ? '剩余 ' + daysLeft + ' 天' : '已过期'}</span>` : ''}
+      </div>
+      <div class="vm-actions">
+        ${isRunning ? `
+          <a href="instance-detail.html?id=${vm.id}" class="vm-action-btn primary" style="text-decoration:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>VNC 控制台
+          </a>
+          <button class="vm-action-btn danger" onclick="VMOperations.perform(${vm.id},'stop','关机')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>停止
+          </button>
+          <button class="vm-action-btn" onclick="VMOperations.perform(${vm.id},'restart','重启')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重启
+          </button>
+        ` : `
+          <button class="vm-action-btn success" onclick="VMOperations.perform(${vm.id},'start','开机')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>启动
+          </button>
+        `}
+        <a href="instance-detail.html?id=${vm.id}" class="vm-action-btn" style="text-decoration:none;">详情 &rarr;</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.filterVMs = function() {
+  const status = document.getElementById('statusFilter').value;
+  if (status === 'all') renderVms(allVms);
+  else renderVms(allVms.filter(v => v.status === status));
+};
+
+// Start
+document.addEventListener('DOMContentLoaded', loadData);
 </script>
 </body>
 </html>

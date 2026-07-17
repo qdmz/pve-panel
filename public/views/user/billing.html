@@ -123,12 +123,8 @@
             <div class="card-header"><h3>即将到期服务</h3></div>
             <div>
               <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px">
-                <div><div style="font-weight:600">测试容器 CT-102</div><div style="color:var(--orange);margin-top:2px">到期: 2025-07-15 (14天后)</div></div>
-                <a href="?renew=102" class="btn-sm success">续费 ¥29</a>
-              </div>
-              <div style="padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:13px">
-                <div><div style="font-weight:600">Web 生产服务器 VM-101</div><div style="color:var(--text-3);margin-top:2px">到期: 2025-08-01</div></div>
-                <a href="?renew=101" class="btn-sm default">续费 ¥79</a>
+                <div id="expiringListContent"></div>
+                <div style="font-size:13px;color:var(--text-3);text-align:center;padding:12px" id="expiringEmpty">暂无即将到期服务</div>
               </div>
             </div>
           </div>
@@ -149,13 +145,8 @@
         </div>
         <table class="data-table" id="billTable">
           <thead><tr><th>时间</th><th>类型</th><th>描述</th><th>金额</th><th>余额</th><th>状态</th></tr></thead>
-          <tbody>
+          <tbody id="billBody">
             <tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:20px" id="billLoading">加载账单中...</td></tr>
-            <tr><td>2025-07-01 00:00</td><td><span class="badge badge-danger">消费</span></td><td>VM-101 KVM 标准月费</td><td style="color:var(--red);font-weight:700">-¥79.00</td><td>¥28.50</td><td><span class="badge badge-success">成功</span></td></tr>
-            <tr><td>2025-06-15 14:33</td><td><span class="badge badge-info">充值</span></td><td>微信支付充值</td><td style="color:var(--green);font-weight:700">+¥200.00</td><td>¥107.50</td><td><span class="badge badge-success">成功</span></td></tr>
-            <tr><td>2025-06-01 00:00</td><td><span class="badge badge-danger">消费</span></td><td>CT-102 LXC 入门月费</td><td style="color:var(--red);font-weight:700">-¥29.00</td><td>¥-92.50</td><td><span class="badge badge-success">成功</span></td></tr>
-            <tr><td>2025-06-01 00:00</td><td><span class="badge badge-danger">消费</span></td><td>VM-101 KVM 标准月费</td><td style="color:var(--red);font-weight:700">-¥79.00</td><td>¥-13.50</td><td><span class="badge badge-success">成功</span></td></tr>
-            <tr><td>2025-05-28</td><td><span class="badge badge-success">充值</span></td><td>支付宝充值 (SUMMER2025 优惠码)</td><td style="color:var(--green);font-weight:700">+¥186.00</td><td>¥65.50</td><td><span class="badge badge-success">成功</span></td></tr>
           </tbody>
         </table>
         <div class="pagination">
@@ -176,12 +167,15 @@
   <div class="modal" style="max-width:380px">
     <div class="modal-header"><h3 id="payTitle">扫码支付</h3><button class="modal-close" onclick="ModalManager.close('payModal')">×</button></div>
     <div class="modal-body" style="text-align:center">
-      <div id="qrPlaceholder" style="width:200px;height:200px;background:var(--bg-3);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-3)">
+      <div id="payQrContainer" style="width:200px;height:200px;background:var(--bg-3);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-3)">
         支付二维码<br>（由易支付生成）
       </div>
       <div style="font-size:22px;font-weight:800;color:var(--green)" id="payAmount">¥100.00</div>
       <p style="font-size:13px;color:var(--text-3);margin-top:8px">请在 15 分钟内完成支付</p>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px">
+      <a id="payRedirectBtn" href="#" target="_blank" class="btn primary" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;text-decoration:none" onclick="event.stopPropagation()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> 前往支付
+      </a>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px" id="payPolling">
         <div class="spinner" style="width:14px;height:14px"></div>
         <span style="font-size:13px;color:var(--text-3)">等待支付确认...</span>
       </div>
@@ -221,7 +215,44 @@ async function loadBillingData() {
     if (bills.success && bills.data) {
       renderBills(bills.data.transactions || bills.data.orders || bills.data || []);
     }
+    
+    // Load expiring VMs
+    try {
+      const expRes = await fetch('/api/billing/expiring', {
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+      });
+      const expData = await expRes.json();
+      if (expData.success && expData.data) {
+        renderExpiring(expData.data?.data || expData.data || []);
+      }
+    } catch(e) {}
+    
   } catch(e) { console.error('Failed to load billing data', e); }
+}
+
+function renderExpiring(vms) {
+  const list = document.getElementById('expiringList');
+  const empty = document.getElementById('expiringEmpty');
+  const content = document.getElementById('expiringListContent');
+  if (!list) return;
+  if (content) content.innerHTML = '';
+  
+  if (!vms.length) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  
+  const html = vms.map(vm => {
+    const expires = vm.expires_at ? new Date(vm.expires_at) : null;
+    const daysLeft = expires ? Math.ceil((expires - new Date()) / 86400000) : null;
+    return `<div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px">
+      <div><div style="font-weight:600">${vm.name || 'VM #' + vm.id}</div><div style="color:${daysLeft !== null && daysLeft < 30 ? 'var(--orange)' : 'var(--text-3)'};margin-top:2px">到期: ${expires ? expires.toLocaleDateString('zh-CN') : '-'}${daysLeft !== null ? ' (' + daysLeft + '天后)' : ''}</div></div>
+      <a href="instance-detail.html?id=${vm.id}" class="btn-sm success">续费</a>
+    </div>`;
+  }).join('');
+  
+  if (content) content.innerHTML = html;
 }
 
 function renderBills(transactions) {
@@ -301,6 +332,11 @@ async function doRecharge() {
       const qrContainer = document.getElementById('payQrContainer');
       if (qrContainer && data.data.qrcode) {
         qrContainer.innerHTML = `<img src="${data.data.qrcode}" alt="支付二维码" style="width:200px;height:200px;border-radius:8px">`;
+      }
+      // Set payment redirect link
+      const payBtn = document.getElementById('payRedirectBtn');
+      if (payBtn && data.data.payment_url) {
+        payBtn.href = data.data.payment_url;
       }
       ModalManager.open('payModal');
       

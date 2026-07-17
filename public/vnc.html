@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VNC 控制台 — CloudVM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+body { background: #000; color: #fff; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; overflow: hidden; }
+.vnc-header { background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 8px 20px; display: flex; align-items: center; gap: 12px; }
+.vnc-header .brand-name { font-size: 14px; font-weight: 600; }
+.vnc-header .vm-info { font-size: 12px; color: rgba(255,255,255,0.5); }
+.vnc-header .status { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.vnc-header .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+.vnc-body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - 45px); }
+.vnc-error { text-align: center; padding: 40px; }
+.vnc-error h2 { font-size: 20px; margin: 0 0 12px; color: #ef4444; }
+.vnc-error p { font-size: 13px; color: rgba(255,255,255,0.6); margin: 0 0 20px; }
+.btn-retry { padding: 8px 24px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.vnc-loading { display: flex; flex-direction: column; align-items: center; gap: 16px; color: rgba(255,255,255,0.5); font-size: 13px; }
+.spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#vncCanvas { width: 100%; height: calc(100vh - 45px); }
+</style>
+</head>
+<body>
+<div class="vnc-header">
+  <span class="brand-name">CloudVM<span style="color:#2563eb">Pro</span></span>
+  <span class="vm-info" id="vmInfo">VM #-- · 正在连接...</span>
+  <div class="status"><span class="status-dot"></span>运行中</div>
+</div>
+<div class="vnc-body" id="vncBody">
+  <div class="vnc-loading" id="vncLoading">
+    <div class="spinner"></div>
+    <span>正在建立 VNC 连接...</span>
+  </div>
+  <div class="vnc-error" id="vncError" style="display:none">
+    <h2>❌ 连接失败</h2>
+    <p id="vncErrorMsg">无法建立 VNC 连接</p>
+    <button class="btn-retry" onclick="connectVNC()">重新连接</button>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script>
+const vmId = new URLSearchParams(location.search).get('vm');
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!vmId) {
+    showError('缺少 VM ID 参数');
+    return;
+  }
+  document.getElementById('vmInfo').textContent = `VM #${vmId} · 正在连接...`;
+  connectVNC();
+});
+
+function showError(msg) {
+  document.getElementById('vncLoading').style.display = 'none';
+  document.getElementById('vncError').style.display = 'block';
+  document.getElementById('vncErrorMsg').textContent = msg;
+}
+
+async function connectVNC() {
+  document.getElementById('vncLoading').style.display = 'flex';
+  document.getElementById('vncError').style.display = 'none';
+
+  try {
+    const token = localStorage.getItem('admin_token');
+    if (!token) { showError('请先登录'); return; }
+
+    const res = await fetch(`/api/vms/${vmId}/vnc`, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      showError(data.message || '无法获取 VNC 连接信息');
+      return;
+    }
+
+    document.getElementById('vmInfo').textContent = `VM #${vmId} · VNC 已连接`;
+    
+    // Support both formats: { vnc: { url|host,port } } and { vnc_url: '...' }
+    const raw = data.data;
+    const vnc = raw.vnc || raw;
+    
+    // Try to render NoVNC if available, otherwise show connection info
+    if (vnc.url || raw.vnc_url) {
+      const url = vnc.url || raw.vnc_url;
+      document.getElementById('vncBody').innerHTML = `<iframe id="vncCanvas" src="${url}" frameborder="0" allowfullscreen></iframe>`;
+    } else if (vnc.host && vnc.port) {
+      document.getElementById('vncLoading').style.display = 'none';
+      document.getElementById('vncBody').innerHTML = `
+        <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.7)">
+          <h3 style="margin:0 0 12px;color:#fff">VNC 连接信息</h3>
+          <p>主机: ${vnc.host}:${vnc.port}</p>
+          <p>密码: ${vnc.password || '无'}</p>
+          <p style="font-size:12px;margin-top:16px">请使用 VNC 客户端 (如 TightVNC, RealVNC) 连接</p>
+          <button class="btn-retry" onclick="window.location.reload()" style="margin-top:16px">重新连接</button>
+        </div>`;
+    } else {
+      showError('VNC 信息格式异常');
+    }
+  } catch(e) {
+    showError('网络连接失败');
+  }
+}
+</script>
+</body>
+</html>

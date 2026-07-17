@@ -105,8 +105,8 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
           </div>
           <div class="stat-card-label">虚拟机实例</div>
-          <div class="stat-card-value">3</div>
-          <div class="stat-card-sub">2 运行中 · 1 已停止</div>
+          <div class="stat-card-value" id="statVmTotal">-</div>
+          <div class="stat-card-sub" id="statVmSub">加载中...</div>
         </div>
         <div class="stat-card">
           <div class="stat-card-icon icon-green">
@@ -121,15 +121,15 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <div class="stat-card-label">本月流量</div>
-          <div class="stat-card-value">234 GB</div>
-          <div class="stat-card-sub">配额: 2 TB</div>
+          <div class="stat-card-value" id="statTraffic">-</div>
+          <div class="stat-card-sub" id="statTrafficSub">加载中...</div>
         </div>
         <div class="stat-card">
           <div class="stat-card-icon icon-purple">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
           <div class="stat-card-label">待处理工单</div>
-          <div class="stat-card-value" style="color:var(--orange)">1</div>
+          <div class="stat-card-value" style="color:var(--orange)" id="statTickets">-</div>
           <div class="stat-card-sub"><a href="tickets.html" style="color:var(--accent)">查看详情</a></div>
         </div>
       </div>
@@ -166,123 +166,11 @@
           <a href="products.html" class="btn-sm primary">+ 购买新实例</a>
         </div>
         <div class="card-body" style="padding:0">
-          <div class="vm-grid" style="padding:20px">
-
-            <!-- VM 1: Running KVM -->
-            <div class="vm-card">
-              <div class="vm-card-header">
-                <div class="vm-status-dot running" data-vm-status="101"></div>
-                <div class="vm-card-title">
-                  <h4>Web 生产服务器</h4>
-                  <span>VM-101 · 广州节点 · #101</span>
-                </div>
-                <span class="vm-card-type vm-type-kvm">KVM</span>
-              </div>
-              <div class="vm-specs">
-                <div class="vm-spec"><span class="vm-spec-val">2</span><span class="vm-spec-key">vCPU</span></div>
-                <div class="vm-spec"><span class="vm-spec-val">4G</span><span class="vm-spec-key">内存</span></div>
-                <div class="vm-spec"><span class="vm-spec-val">80G</span><span class="vm-spec-key">SSD</span></div>
-              </div>
-              <div class="vm-usage">
-                <div class="vm-usage-row">
-                  <span class="vm-usage-label">CPU</span>
-                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-blue" data-pct="45" style="width:45%"></div></div>
-                  <span class="vm-usage-pct">45%</span>
-                </div>
-                <div class="vm-usage-row">
-                  <span class="vm-usage-label">内存</span>
-                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-green" data-pct="62" style="width:62%"></div></div>
-                  <span class="vm-usage-pct">62%</span>
-                </div>
-              </div>
-              <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-family:var(--mono)">
-                IP: 45.192.123.45 · 到期: 2025-08-01
-              </div>
-              <div class="vm-actions">
-                <button class="vm-btn danger" data-vm="101" data-action="stop" onclick="VMOperations.perform(101,'stop','关机')">关机</button>
-                <button class="vm-btn" data-vm="101" data-action="restart" onclick="VMOperations.perform(101,'restart','重启')">重启</button>
-                <button class="vm-btn primary" onclick="VMOperations.openVNC(101)">VNC</button>
-                <button class="vm-btn" onclick="VMOperations.openSSH(101)">SSH</button>
-                <button class="vm-btn" onclick="window.location.href='instance-detail.html?id=101'">详情</button>
-              </div>
+          <div id="vmContainer" class="vm-grid" style="padding:20px;min-height:200px">
+            <div class="empty-state" style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3);display:flex;flex-direction:column;align-items:center;gap:12px">
+              <div class="spinner" style="width:24px;height:24px"></div>
+              <span>加载虚拟机列表中...</span>
             </div>
-
-            <!-- VM 2: Running LXC -->
-            <div class="vm-card">
-              <div class="vm-card-header">
-                <div class="vm-status-dot running" data-vm-status="102"></div>
-                <div class="vm-card-title">
-                  <h4>测试容器</h4>
-                  <span>CT-102 · 上海节点 · #102</span>
-                </div>
-                <span class="vm-card-type vm-type-lxc">LXC</span>
-              </div>
-              <div class="vm-specs">
-                <div class="vm-spec"><span class="vm-spec-val">1</span><span class="vm-spec-key">vCPU</span></div>
-                <div class="vm-spec"><span class="vm-spec-val">1G</span><span class="vm-spec-key">内存</span></div>
-                <div class="vm-spec"><span class="vm-spec-val">20G</span><span class="vm-spec-key">SSD</span></div>
-              </div>
-              <div class="vm-usage">
-                <div class="vm-usage-row">
-                  <span class="vm-usage-label">CPU</span>
-                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-blue" data-pct="12" style="width:12%"></div></div>
-                  <span class="vm-usage-pct">12%</span>
-                </div>
-                <div class="vm-usage-row">
-                  <span class="vm-usage-label">内存</span>
-                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-green" data-pct="38" style="width:38%"></div></div>
-                  <span class="vm-usage-pct">38%</span>
-                </div>
-              </div>
-              <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-family:var(--mono)">
-                IP: NAT · 端口: 10022→22 · 到期: 2025-07-15
-              </div>
-              <div class="vm-actions">
-                <button class="vm-btn danger" onclick="VMOperations.perform(102,'stop','关机')">关机</button>
-                <button class="vm-btn" onclick="VMOperations.perform(102,'restart','重启')">重启</button>
-                <button class="vm-btn" onclick="VMOperations.openSSH(102)">SSH</button>
-                <button class="vm-btn" onclick="window.location.href='instance-detail.html?id=102'">详情</button>
-                <button class="vm-btn" style="color:var(--orange)" onclick="renewVM(102)">续费</button>
-              </div>
-            </div>
-
-            <!-- VM 3: Stopped -->
-            <div class="vm-card">
-              <div class="vm-card-header">
-                <div class="vm-status-dot stopped" data-vm-status="103"></div>
-                <div class="vm-card-title">
-                  <h4>备用服务器</h4>
-                  <span>VM-103 · 香港节点 · #103</span>
-                </div>
-                <span class="vm-card-type vm-type-kvm">KVM</span>
-              </div>
-              <div class="vm-specs">
-                <div class="vm-spec"><span class="vm-spec-val">4</span><span class="vm-spec-key">vCPU</span></div>
-                <div class="vm-spec"><span class="vm-spec-val">8G</span><span class="vm-spec-key">内存</span></div>
-                <div class="vm-spec"><span class="vm-spec-val">100G</span><span class="vm-spec-key">SSD</span></div>
-              </div>
-              <div class="vm-usage">
-                <div class="vm-usage-row">
-                  <span class="vm-usage-label">CPU</span>
-                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-blue" data-pct="0" style="width:0%"></div></div>
-                  <span class="vm-usage-pct">0%</span>
-                </div>
-                <div class="vm-usage-row">
-                  <span class="vm-usage-label">内存</span>
-                  <div class="vm-usage-bar"><div class="vm-usage-fill fill-green" data-pct="0" style="width:0%"></div></div>
-                  <span class="vm-usage-pct">0%</span>
-                </div>
-              </div>
-              <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-family:var(--mono)">
-                IP: 154.9.237.88 · 已停止 · 到期: 2025-12-31
-              </div>
-              <div class="vm-actions">
-                <button class="vm-btn success" onclick="VMOperations.perform(103,'start','开机')">开机</button>
-                <button class="vm-btn primary" onclick="VMOperations.openVNC(103)">VNC</button>
-                <button class="vm-btn" onclick="window.location.href='instance-detail.html?id=103'">详情</button>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>
@@ -359,13 +247,17 @@ async function loadDashboardData() {
     const stopped = vmList.filter(v => v.status === 'stopped').length;
     const total = vmList.length;
 
-    // Update stat cards
-    const statValues = document.querySelectorAll('.stat-value');
-    if (statValues.length >= 3) {
-      statValues[0].textContent = total;
-      statValues[1].textContent = running;
-      statValues[2].textContent = stopped;
-    }
+    // Update stat cards (by id, not position)
+    const statVmTotal = document.getElementById('statVmTotal');
+    const statVmSub = document.getElementById('statVmSub');
+    if (statVmTotal) statVmTotal.textContent = total;
+    if (statVmSub) statVmSub.textContent = `${running} 运行中 · ${stopped} 已停止`;
+
+    // Traffic: sum from all VMs
+    const totalTraffic = vmList.reduce((s, v) => s + (v.traffic_used || 0), 0);
+    const totalTrafficLimit = vmList.reduce((s, v) => s + (v.traffic_limit || v.traffic || 1000), 0);
+    document.getElementById('statTraffic') && (document.getElementById('statTraffic').textContent = totalTraffic + ' GB');
+    document.getElementById('statTrafficSub') && (document.getElementById('statTrafficSub').textContent = '配额: ' + totalTrafficLimit + ' GB');
 
     // Update sidebar badge
     document.querySelector('.sidebar-badge').textContent = total;
