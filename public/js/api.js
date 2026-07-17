@@ -26,9 +26,7 @@
       }
       localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_user');
-      if (window.location.pathname.indexOf('/views/admin/') !== -1) {
-        window.location.href = '/views/auth/login.html';
-      }
+      window.location.href = '/views/auth/login.html';
     },
     guard() {
       if (!this.isLoggedIn()) {
