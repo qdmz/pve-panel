@@ -318,7 +318,7 @@ async function doRecharge() {
   // Real API call
   try {
     const token = localStorage.getItem('admin_token');
-    const res = await fetch('/api/payment/create', {
+    const res = await fetch('/api/recharge', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ amount: parseFloat(amount), method })

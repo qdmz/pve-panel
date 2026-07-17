@@ -212,6 +212,7 @@
 
 <script src="../../js/main.js"></script>
 <script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
 // ===== Dynamic Products from API =====
 (function() {
@@ -408,7 +409,7 @@
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           product_id: parseInt(document.querySelector('.buy-btn')?.dataset.productId) || 1,
-          cycle: isYearly ? 'yearly' : 'monthly',
+          billing_cycle: isYearly ? 'yearly' : 'monthly',
           payment_method: payment
         })
       });
