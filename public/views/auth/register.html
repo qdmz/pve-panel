@@ -122,6 +122,7 @@
 </div>
 
 <script src="../../js/main.js"></script>
+<script src="../../js/api.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
 
@@ -168,11 +169,28 @@ async function sendEmailCode() {
   btn.disabled = true;
   btn.textContent = '发送中...';
 
-  // Simulate API
-  await new Promise(r => setTimeout(r, 800));
-  codeSent = true;
-  showNotification('验证码已发送', `验证码已发送至 ${email}，请查收`, 'success');
-  startCountdown(60, btn, '重新发送');
+  // Real API call
+  try {
+    const res = await fetch('/api/send-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, type: 'register' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      codeSent = true;
+      showNotification('验证码已发送', `验证码已发送至 ${email}，请查收`, 'success');
+      startCountdown(60, btn, '重新发送');
+    } else {
+      showNotification('发送失败', data.message || '验证码发送失败，请稍后重试', 'error');
+      btn.disabled = false;
+      btn.textContent = '重新发送';
+    }
+  } catch(e) {
+    showNotification('网络错误', '无法连接到服务器，请检查网络', 'error');
+    btn.disabled = false;
+    btn.textContent = '重新发送';
+  }
 }
 
 document.getElementById('registerForm')?.addEventListener('submit', async function(e) {
@@ -216,11 +234,37 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;margin:0 auto"></div>';
 
-  await new Promise(r => setTimeout(r, 1500));
+  // Real API call
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: username,
+        email: email,
+        password: pwd,
+        password_confirmation: confirm,
+        realname: document.getElementById('realname').value,
+        phone: document.getElementById('phone').value,
+        referral: document.getElementById('referral').value,
+        code: code
+      })
+    });
+    const data = await res.json();
 
-  // Success - redirect to activation prompt
-  showAlert('注册成功！请查收邮件并点击激活链接完成账号激活。', 'success');
-  setTimeout(() => { window.location.href = 'login.html?registered=1'; }, 2500);
+    if (data.success) {
+      showAlert('注册成功！请查收邮件并点击激活链接完成账号激活。', 'success');
+      setTimeout(() => { window.location.href = 'login.html?registered=1'; }, 2500);
+    } else {
+      showAlert(data.message || '注册失败', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '注册账号';
+    }
+  } catch(e) {
+    showAlert('网络连接失败，请检查服务器状态', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '注册账号';
+  }
 });
 
 function showAlert(msg, type) {

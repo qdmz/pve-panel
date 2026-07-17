@@ -65,8 +65,8 @@
       <div class="user-info">
         <div class="user-avatar">张</div>
         <div>
-          <div class="user-name">张三</div>
-          <div class="user-balance">余额: ¥128.50</div>
+          <div class="user-name">加载中...</div>
+          <div class="user-balance">余额: --</div>
         </div>
         <a href="../auth/login.html" style="color:var(--text-3);margin-left:auto" title="退出">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -95,7 +95,7 @@
     <div class="page-content">
       <div class="page-header">
         <h1>控制台总览</h1>
-        <p>欢迎回来，张三。您当前有 3 台虚拟机实例。</p>
+        <p id="welcomeText">欢迎回来...</p>
       </div>
 
       <!-- Stats -->
@@ -113,7 +113,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           </div>
           <div class="stat-card-label">账户余额</div>
-          <div class="stat-card-value" style="color:var(--green)">¥128.50</div>
+          <div class="stat-card-value" style="color:var(--green)" id="balanceDisplay">¥0.00</div>
           <div class="stat-card-sub">充值记录 →</div>
         </div>
         <div class="stat-card">
@@ -318,27 +318,150 @@
 
 <script src="../../js/main.js"></script>
 <script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   ThemeManager.init();
   animateUsageBars();
-
-  // Traffic chart
-  const labels = Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return `${d.getMonth()+1}/${d.getDate()}`;});
-  const data = Array.from({length:30},()=>Math.random()*20+5);
-  CloudVMCharts.createLineChart(
-    document.getElementById('trafficChart').getContext('2d'), labels,
-    [{ label:'流量(GB)', data, backgroundColor:'rgba(37,99,235,0.08)', borderColor:'rgba(37,99,235,0.8)' }]
-  );
-
-  // Status chart
-  CloudVMCharts.createDoughnutChart(
-    document.getElementById('statusChart').getContext('2d'),
-    ['运行中','已停止'],
-    [2, 1],
-    ['rgba(22,163,74,0.8)', 'rgba(220,38,38,0.7)']
-  );
+  await loadDashboardData();
 });
+
+async function loadDashboardData() {
+  const token = localStorage.getItem('admin_token');
+  if (!token) return;
+
+  try {
+    const [meRes, vmsRes, announcesRes] = await Promise.all([
+      fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' } }),
+      fetch('/api/vms', { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' } }),
+      fetch('/api/announcements', { headers: { 'Accept': 'application/json' } })
+    ]);
+
+    const me = await meRes.json();
+    const vms = await vmsRes.json();
+    const announces = await announcesRes.json();
+
+    // Update user info
+    if (me.success && me.data) {
+      document.querySelector('.user-name').textContent = me.data.name || '用户';
+      document.querySelector('.user-balance').textContent = `余额: ¥${parseFloat(me.data.balance || 0).toFixed(2)}`;
+      document.querySelector('.user-avatar').textContent = (me.data.name || '用')[0];
+      document.querySelector('.page-header p').textContent = `欢迎回来，${me.data.name}。您当前有 ${me.data.vm_count || 0} 台虚拟机实例。`;
+    }
+
+    // Update VM stats
+    let vmList = [];
+    if (vms.success) {
+      vmList = vms.data || [];
+      if (vms.data?.data) vmList = vms.data.data; // paginated
+    }
+    const running = vmList.filter(v => v.status === 'running').length;
+    const stopped = vmList.filter(v => v.status === 'stopped').length;
+    const total = vmList.length;
+
+    // Update stat cards
+    const statValues = document.querySelectorAll('.stat-value');
+    if (statValues.length >= 3) {
+      statValues[0].textContent = total;
+      statValues[1].textContent = running;
+      statValues[2].textContent = stopped;
+    }
+
+    // Update sidebar badge
+    document.querySelector('.sidebar-badge').textContent = total;
+
+    // Status chart
+    CloudVMCharts.createDoughnutChart(
+      document.getElementById('statusChart').getContext('2d'),
+      ['运行中', '已停止'],
+      [running || 1, stopped || 0],
+      ['rgba(22,163,74,0.8)', 'rgba(220,38,38,0.7)']
+    );
+
+    // Traffic chart (use placeholder if no real data)
+    const labels = Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return `${d.getMonth()+1}/${d.getDate()}`;});
+    CloudVMCharts.createLineChart(
+      document.getElementById('trafficChart').getContext('2d'), labels,
+      [{ label:'流量(GB)', data: Array(30).fill(0), backgroundColor:'rgba(37,99,235,0.08)', borderColor:'rgba(37,99,235,0.8)' }]
+    );
+
+    // Render VM cards
+    renderVmCards(vmList);
+
+    // Render announcements
+    renderAnnouncements(announces.success ? (announces.data || []) : []);
+  } catch(e) {
+    console.error('Dashboard data load failed', e);
+  }
+}
+
+function renderVmCards(vms) {
+  const container = document.getElementById('vmContainer');
+  if (!container) return;
+  if (!vms.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3)">暂无虚拟机实例。<br><br><a href="products.html" class="btn primary">立即购买</a></div>';
+    return;
+  }
+  container.innerHTML = vms.slice(0, 6).map(vm => {
+    const isRunning = vm.status === 'running';
+    const expires = vm.expires_at ? new Date(vm.expires_at).toLocaleDateString('zh-CN') : '-';
+    const created = new Date(vm.created_at).toLocaleDateString('zh-CN');
+    const progress = vm.traffic_used ? Math.min(100, Math.round((vm.traffic_used / (vm.traffic || 1000)) * 100)) : 0;
+    return `<div class="vm-card">
+      <div class="vm-card-header">
+        <div class="vm-card-info">
+          <h3 class="vm-name">${vm.name || `VM #${vm.id}`}</h3>
+          <span class="badge ${isRunning ? 'badge-success' : 'badge-error'}">${isRunning ? '运行中' : '已停止'}</span>
+        </div>
+        <div class="vm-card-type">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+          ${vm.type || 'KVM'}
+        </div>
+      </div>
+      <div class="vm-card-specs">
+        <span class="spec-item">${vm.cpu} vCPU</span>
+        <span class="spec-item">${vm.memory} MB</span>
+        <span class="spec-item">${vm.disk} GB</span>
+        <span class="spec-item">${vm.ipv4 || 'NAT'}</span>
+      </div>
+      <div class="vm-card-traffic">
+        <div class="traffic-header"><span>本月流量</span><span>${vm.traffic_used || 0} GB / ${vm.traffic || 1000} GB</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="vm-card-footer">
+        <div class="vm-meta">
+          <span>创建: ${created}</span>
+          <span>到期: ${expires}</span>
+        </div>
+        <div class="vm-card-actions">
+          <button class="btn-sm primary" onclick="window.location.href='instance-detail.html?id=${vm.id}'">管理</button>
+          <button class="btn-sm ${isRunning ? 'danger' : 'success'}" onclick="VMOperations.perform(${vm.id},'${isRunning ? 'stop' : 'start'}','${isRunning ? '关机' : '开机'}')">${isRunning ? '关机' : '开机'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAnnouncements(list) {
+  const container = document.querySelector('.announcements-list') || document.getElementById('announceList');
+  if (!container) return;
+  if (!list.length) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-3)">暂无公告</div>';
+    return;
+  }
+  container.innerHTML = list.slice(0, 3).map(a => `
+    <div class="announcement-item">
+      <div class="announcement-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="announcement-content">
+        <div class="announcement-title">${a.title}</div>
+        <div class="announcement-text">${a.content || a.body || ''}</div>
+        <div class="announcement-date">${new Date(a.created_at || a.published_at).toLocaleDateString('zh-CN')}</div>
+      </div>
+    </div>
+  `).join('');
+}
 
 function renewVM(id) {
   window.location.href = `billing.html?renew=${id}`;

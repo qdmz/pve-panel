@@ -489,34 +489,203 @@
 
 <script src="../../js/main.js"></script>
 <script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-  // Copy feedback
-  document.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const orig = this.innerHTML;
-      this.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
-      setTimeout(() => { this.innerHTML = orig; }, 1500);
-    });
-  });
+  // ── Load VMs from API and render ──
+  document.addEventListener('DOMContentLoaded', loadVMs);
 
-  // Action buttons with simple feedback
-  document.querySelectorAll('.vm-action-btn:not([href])').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      const action = this.textContent.trim();
-      if (action === '删除') {
-        if (confirm('确定要删除此虚拟机吗？此操作不可恢复。')) {
-          alert('已提交删除请求');
-        }
-      } else if (action === '启动') {
-        alert('正在启动虚拟机...');
-      } else if (action === '停止') {
-        alert('正在停止虚拟机...');
-      } else if (action === '重启') {
-        alert('正在重启虚拟机...');
+  async function loadVMs() {
+    if (!API.Auth.getToken()) return;
+
+    try {
+      const res = await fetch('/api/vms', {
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+      });
+      const result = await res.json();
+      const vms = result.data || result.vms || [];
+
+      // ── Update stat cards ──
+      const total = vms.length;
+      const running = vms.filter(v => v.status === 'running').length;
+      const stopped = vms.filter(v => v.status === 'stopped').length;
+      const suspended = vms.filter(v => v.status === 'suspended' || v.status === 'paused').length;
+      const expiring = vms.filter(v => {
+        if (!v.expiry_date) return false;
+        const days = (new Date(v.expiry_date) - new Date()) / (1000 * 60 * 60 * 24);
+        return days <= 7 && days >= 0;
+      }).length;
+
+      const statValues = document.querySelectorAll('.stat-card .stat-value');
+      if (statValues.length >= 4) {
+        statValues[0].textContent = total;
+        statValues[1].textContent = running;
+        statValues[2].textContent = stopped;
+        statValues[3].textContent = expiring;
       }
-    });
-  });
+
+      // ── Update warning banner expiring count ──
+      const banner = document.querySelector('.warning-banner strong');
+      if (banner) banner.textContent = expiring;
+
+      // ── Render VM cards ──
+      const grid = document.querySelector('.vm-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (vms.length === 0) {
+        grid.innerHTML =
+          '<div class="empty-state" style="grid-column:1/-1">' +
+            '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>' +
+            '<h3>暂无虚拟机</h3>' +
+            '<p>您还没有订购任何虚拟机实例，立即订购吧！</p>' +
+            '<a href="products.html" class="btn">订购新实例</a>' +
+          '</div>';
+        return;
+      }
+
+      const statusLabels = { running: '运行中', stopped: '已停止', suspended: '已暂停', paused: '已暂停' };
+      const now = new Date();
+
+      vms.forEach(vm => {
+        const status = vm.status || 'stopped';
+        const sl = statusLabels[status] || status;
+        const typeLabel = (vm.type || 'kvm').toUpperCase();
+
+        let expiryHtml = '';
+        if (vm.expiry_date) {
+          const exp = new Date(vm.expiry_date);
+          const days = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+          let cls = 'safe', txt = '剩余 ' + days + ' 天';
+          if (days <= 0)      { cls = 'danger'; txt = '已过期'; }
+          else if (days <= 7) { cls = 'danger'; }
+          else if (days <= 30){ cls = 'warn'; }
+          expiryHtml =
+            '<div class="expiry-row">' +
+              '<span class="expiry-date">到期: ' + vm.expiry_date + '</span>' +
+              '<span class="expiry-badge ' + cls + '">' + txt + '</span>' +
+            '</div>';
+        }
+
+        const card = document.createElement('div');
+        card.className = 'vm-card';
+        if (status === 'suspended' || status === 'paused') {
+          card.style.borderColor = 'rgba(245,158,11,0.3)';
+        }
+
+        // Build action buttons
+        let actionsHtml = '';
+        if (status === 'running') {
+          actionsHtml +=
+            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn primary" style="text-decoration:none;">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>VNC 控制台' +
+            '</a>' +
+            '<button class="vm-action-btn" onclick="vmAction(\'' + vm.id + '\',\'stop\')">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>停止' +
+            '</button>' +
+            '<button class="vm-action-btn" onclick="vmAction(\'' + vm.id + '\',\'restart\')">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重启' +
+            '</button>' +
+            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
+        } else if (status === 'stopped') {
+          actionsHtml +=
+            '<button class="vm-action-btn primary" onclick="vmAction(\'' + vm.id + '\',\'start\')">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>启动' +
+            '</button>' +
+            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
+        } else if (status === 'suspended' || status === 'paused') {
+          actionsHtml +=
+            '<a href="billing.html?id=' + vm.id + '" class="vm-action-btn primary" style="text-decoration:none;">立即续费</a>' +
+            '<button class="vm-action-btn danger" onclick="vmAction(\'' + vm.id + '\',\'delete\')">删除</button>' +
+            '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
+        } else {
+          actionsHtml += '<a href="instance-detail.html?id=' + vm.id + '" class="vm-action-btn" style="text-decoration:none;">详情 →</a>';
+        }
+
+        card.innerHTML =
+          '<div class="vm-card-header">' +
+            '<div class="vm-card-name">' +
+              '<span class="status-dot ' + status + '"></span>' +
+              (vm.name || '未命名实例') +
+            '</div>' +
+            '<span class="status-badge ' + status + '">' + sl + '</span>' +
+          '</div>' +
+          '<div class="vm-info-row">' +
+            '<div class="vm-info-item">' +
+              '<span class="label">ID:</span>' +
+              '<span class="value">' + (vm.vmid || vm.id || '-') + '</span>' +
+              '<button class="copy-btn" onclick="navigator.clipboard.writeText(\'' + (vm.vmid || vm.id || '') + '\')" title="复制ID">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+              '</button>' +
+            '</div>' +
+            '<div class="vm-info-item">' +
+              '<span class="label">IP:</span>' +
+              '<span class="value">' + (vm.ip || vm.ip_address || '-') + '</span>' +
+              (vm.ip || vm.ip_address ? '<button class="copy-btn" onclick="navigator.clipboard.writeText(\'' + (vm.ip || vm.ip_address || '') + '\')" title="复制IP">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+              '</button>' : '') +
+            '</div>' +
+            '<span class="type-badge ' + (vm.type || 'kvm') + '">' + typeLabel + '</span>' +
+          '</div>' +
+          '<div class="vm-specs">' +
+            '<div class="spec-item"><div class="spec-label">CPU</div><div class="spec-value">' + (vm.cpu_cores || vm.cpu || '?') + ' 核</div></div>' +
+            '<div class="spec-item"><div class="spec-label">内存</div><div class="spec-value">' + (vm.memory || vm.memory_gb || vm.ram || '?') + ' GB</div></div>' +
+            '<div class="spec-item"><div class="spec-label">磁盘</div><div class="spec-value">' + (vm.disk || vm.disk_gb || '?') + ' GB</div></div>' +
+            '<div class="spec-item"><div class="spec-label">带宽</div><div class="spec-value">' + (vm.bandwidth || vm.bw || '?') + ' Mbps</div></div>' +
+          '</div>' +
+          expiryHtml +
+          '<div class="vm-actions">' + actionsHtml + '</div>';
+
+        grid.appendChild(card);
+      });
+    } catch (err) {
+      console.error('Failed to load VMs:', err);
+      const g = document.querySelector('.vm-grid');
+      if (g) g.innerHTML =
+        '<div class="empty-state" style="grid-column:1/-1">' +
+          '<h3>加载失败</h3><p>无法从服务器获取虚拟机列表，请刷新重试</p>' +
+        '</div>';
+    }
+  }
+
+  // ── VM actions (start/stop/restart) ──
+  async function vmAction(id, action) {
+    const token = API.Auth.getToken();
+    if (!token) return;
+
+    const actionMap = {
+      start:   { method: 'POST', url: '/api/vms/' + id + '/start' },
+      stop:    { method: 'POST', url: '/api/vms/' + id + '/stop' },
+      restart: { method: 'POST', url: '/api/vms/' + id + '/restart' }
+    };
+
+    const cfg = actionMap[action];
+    if (!cfg) return;
+
+    try {
+      const res = await fetch(cfg.url, {
+        method: cfg.method,
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success || data.message) {
+        showNotification('操作成功', action + ' 操作已提交', 'success');
+        setTimeout(loadVMs, 2000);
+      } else {
+        showNotification('操作失败', data.message || '未知错误', 'error');
+      }
+    } catch (err) {
+      showNotification('操作失败', '网络错误', 'error');
+    }
+  }
+
+  // ── Notification fallback ──
+  function showNotification(title, msg, type) {
+    if (typeof window.showNotification === 'function') {
+      window.showNotification(title, msg, type);
+    } else {
+      alert('[' + type + '] ' + title + ': ' + msg);
+    }
+  }
 </script>
 </body>
 </html>

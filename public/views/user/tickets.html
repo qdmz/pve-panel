@@ -32,7 +32,7 @@
     <div class="sidebar-footer">
       <div class="user-info">
         <div class="user-avatar">张</div>
-        <div><div class="user-name">张三</div><div class="user-balance">余额: ¥128.50</div></div>
+        <div><div class="user-name">加载中...</div><div class="user-balance">余额: --</div></div>
       </div>
     </div>
   </aside>
@@ -120,7 +120,7 @@
             <div class="ticket-message">
               <div class="msg-header">
                 <div class="msg-avatar user">张</div>
-                <span class="msg-sender">张三（用户）</span>
+                <span class="msg-sender" id="msgSender">用户</span>
                 <span class="msg-time">2025-07-01 14:22</span>
               </div>
               <div class="msg-content">
@@ -214,34 +214,356 @@
 
 <script src="../../js/main.js"></script>
 <script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => { ThemeManager.init(); });
+  // ── State ──
+  let tickets = [];
+  let currentTicket = null;
 
-function openTicket(id) {
-  document.getElementById('ticketList').style.display = 'none';
-  document.getElementById('ticketDetail').style.display = 'block';
-}
-function backToList() {
-  document.getElementById('ticketList').style.display = 'block';
-  document.getElementById('ticketDetail').style.display = 'none';
-}
-async function submitReply() {
-  const content = document.getElementById('replyContent').value;
-  if (!content) return;
-  document.getElementById('replyContent').value = '';
-  showNotification('回复已发送', '您的回复已成功提交', 'success');
-}
-function closeTicket() { showNotification('工单已关闭', '工单已标记为已解决', 'success'); backToList(); }
-function submitNewTicket() { ModalManager.close('newTicketModal'); showNotification('提交成功', '工单已提交，我们将尽快回复', 'success'); }
-function filterTickets(filter) {
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    const active = b.dataset.filter === filter;
-    b.classList.toggle('active', active);
-    b.style.color = active ? 'var(--accent)' : 'var(--text-3)';
-    b.style.borderBottom = active ? '2px solid var(--accent)' : '2px solid transparent';
-    b.style.fontWeight = active ? '600' : '500';
+  document.addEventListener('DOMContentLoaded', () => {
+    ThemeManager.init();
+    loadUserInfo();
+    loadTickets();
   });
-}
+
+  // ── Load user info in sidebar ──
+  async function loadUserInfo() {
+    try {
+      const result = await API.me();
+      const user = result.data || result.user || result;
+      const sidebar = document.querySelector('.sidebar-footer .user-info');
+      if (sidebar && user) {
+        const initial = (user.name || user.username || 'U').charAt(0);
+        sidebar.innerHTML =
+          '<div class="user-avatar">' + initial + '</div>' +
+          '<div><div class="user-name">' + (user.name || user.username || '用户') + '</div>' +
+          '<div class="user-balance">余额: ¥' + parseFloat(user.balance || 0).toFixed(2) + '</div></div>';
+      }
+    } catch (e) {
+      console.error('Failed to load user info', e);
+    }
+  }
+
+  // ── Load tickets ──
+  async function loadTickets() {
+    try {
+      const res = await fetch('/api/tickets', {
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+      });
+      const result = await res.json();
+      tickets = result.data || result.tickets || result || [];
+
+      renderTickets();
+    } catch (e) {
+      console.error('Failed to load tickets', e);
+    }
+  }
+
+  // ── Render ticket list ──
+  function renderTickets() {
+    const wrapper = document.querySelector('.table-wrapper');
+    if (!wrapper) return;
+
+    if (!tickets || tickets.length === 0) {
+      wrapper.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-3)">暂无工单</div>';
+      return;
+    }
+
+    const allCount = tickets.length;
+    const openCount = tickets.filter(t => t.status === 'open' || t.status === 'pending').length;
+    const repliedCount = tickets.filter(t => t.status === 'replied' || t.status === 'answered').length;
+    const closedCount = tickets.filter(t => t.status === 'closed').length;
+
+    // Update tab labels
+    const tabs = document.querySelectorAll('.tab-btn');
+    if (tabs.length >= 4) {
+      tabs[0].textContent = '全部 (' + allCount + ')';
+      tabs[1].textContent = '处理中 (' + openCount + ')';
+      tabs[2].textContent = '已回复 (' + repliedCount + ')';
+      tabs[3].textContent = '已关闭 (' + closedCount + ')';
+    }
+
+    priorityLabels = { high: '高', medium: '中', low: '低' };
+
+    const statusMap = {
+      open:     ['badge-warning', '处理中'],
+      pending:  ['badge-warning', '处理中'],
+      replied:  ['badge-info',    '已回复'],
+      answered: ['badge-info',    '已回复'],
+      closed:   ['badge-default', '已关闭']
+    };
+
+    wrapper.innerHTML = tickets.map(t =>
+      '<div class="ticket-item" onclick="openTicketDetail(\'' + t.id + '\')">' +
+        '<div class="ticket-priority priority-' + (t.priority || 'medium') + '"></div>' +
+        '<div class="ticket-info">' +
+          '<div class="ticket-title">' + (t.title || '无标题') + '</div>' +
+          '<div class="ticket-meta">' +
+            '<span>工单 #' + (t.ticket_no || t.id || '000') + '</span>' +
+            '<span>创建: ' + (t.created_at || t.created || '-') + '</span>' +
+            '<span>更新: ' + (t.updated_at || t.updated || '-') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">' +
+          '<span class="badge ' + (statusMap[t.status] || ['badge-default', t.status])[0] + '">' +
+            (statusMap[t.status] || ['badge-default', t.status])[1] + '</span>' +
+          '<span style="font-size:11px;color:var(--text-3)">优先级: ' + (priorityLabels[t.priority] || t.priority || '普通') + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  }
+
+  // ── Open ticket detail ──
+  async function openTicketDetail(id) {
+    document.getElementById('ticketList').style.display = 'none';
+    document.getElementById('ticketDetail').style.display = 'block';
+
+    try {
+      const res = await fetch('/api/tickets/' + id, {
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+      });
+      const result = await res.json();
+      const ticket = result.data || result.ticket || result;
+      currentTicket = ticket;
+      renderTicketDetail(ticket);
+    } catch (e) {
+      console.error('Failed to load ticket detail', e);
+    }
+  }
+
+  // ── Render ticket detail ──
+  function renderTicketDetail(ticket) {
+    const statusMap = {
+      open:     'badge-warning', pending:  'badge-warning',
+      replied:  'badge-info',    answered: 'badge-info',
+      closed:   'badge-default'
+    };
+    const statusLabel = {
+      open: '处理中', pending: '处理中', replied: '已回复', answered: '已回复', closed: '已关闭'
+    };
+    const priorityColor = { high: 'var(--red)', medium: 'var(--text-3)', low: 'var(--text-3)' };
+
+    document.querySelector('.ticket-detail .ticket-messages h3').textContent = ticket.title || '无标题';
+
+    // Update detail header
+    const detailHeader = document.querySelector('.ticket-detail > button + .ticket-messages > div');
+    if (detailHeader) {
+      detailHeader.innerHTML =
+        '<h3 style="font-size:16px;margin-bottom:6px">' + (ticket.title || '无标题') + '</h3>' +
+        '<div style="display:flex;gap:12px;font-size:12px;color:var(--text-3)">' +
+          '<span>工单 #' + (ticket.ticket_no || ticket.id || '000') + '</span>' +
+          '<span class="badge ' + (statusMap[ticket.status] || 'badge-default') + '">' +
+            (statusLabel[ticket.status] || ticket.status) + '</span>' +
+          '<span>优先级: ' + (priorityLabels[ticket.priority] || ticket.priority || '普通') + '</span>' +
+        '</div>';
+    }
+
+    // Render messages
+    const messagesDiv = document.querySelector('.ticket-messages');
+    if (messagesDiv) {
+      // Remove old messages (keep header and reply box)
+      const toRemove = messagesDiv.querySelectorAll('.ticket-message');
+      toRemove.forEach(el => el.remove());
+
+      // Insert messages after the header
+      const headerBlock = messagesDiv.querySelector('.ticket-messages > div') || messagesDiv.firstElementChild;
+      const msgs = ticket.messages || ticket.replies || [];
+      if (msgs.length > 0) {
+        msgs.forEach(msg => {
+          const isUser = msg.role === 'user' || msg.sender === 'user' || !msg.is_admin;
+          const div = document.createElement('div');
+          div.className = 'ticket-message' + (!isUser ? ' style="background:rgba(37,99,235,0.03)"' : '');
+          div.innerHTML =
+            '<div class="msg-header">' +
+              '<div class="msg-avatar ' + (isUser ? 'user' : 'admin') + '">' +
+                (isUser ? '用' : '管') + '</div>' +
+              '<span class="msg-sender">' + (msg.sender_name || msg.name || (isUser ? '用户' : '技术支持')) + '</span>' +
+              '<span class="msg-time">' + (msg.created_at || msg.created || '') + '</span>' +
+            '</div>' +
+            '<div class="msg-content">' + (msg.content || msg.message || '').replace(/\n/g, '<br>') + '</div>';
+          headerBlock.after(div);
+        });
+      }
+    }
+
+    // Update sidebar info
+    const infoDiv = document.querySelector('.ticket-sidebar .ticket-info-card');
+    if (infoDiv) {
+      infoDiv.innerHTML =
+        '<div style="font-size:14px;font-weight:700;margin-bottom:14px">工单信息</div>' +
+        '<div class="ticket-info-row"><span class="ticket-info-label">工单编号</span><span style="font-family:var(--mono)">#' + (ticket.ticket_no || ticket.id || '000') + '</span></div>' +
+        '<div class="ticket-info-row"><span class="ticket-info-label">状态</span><span class="badge ' + (statusMap[ticket.status] || 'badge-default') + '">' + (statusLabel[ticket.status] || ticket.status) + '</span></div>' +
+        '<div class="ticket-info-row"><span class="ticket-info-label">优先级</span><span style="color:' + (priorityColor[ticket.priority] || 'var(--text-3)') + '">' + (priorityLabels[ticket.priority] || ticket.priority || '普通') + '</span></div>' +
+        '<div class="ticket-info-row"><span class="ticket-info-label">分类</span><span>' + (ticket.category || '技术问题') + '</span></div>' +
+        '<div class="ticket-info-row"><span class="ticket-info-label">关联实例</span><span>' + (ticket.related_vm || ticket.vm_name || '无') + '</span></div>' +
+        '<div class="ticket-info-row"><span class="ticket-info-label">创建时间</span><span>' + (ticket.created_at || ticket.created || '').substring(0, 10) + '</span></div>';
+    }
+  }
+
+  // ── Navigation ──
+  function openTicket(id) { openTicketDetail(id); }
+
+  function backToList() {
+    document.getElementById('ticketList').style.display = 'block';
+    document.getElementById('ticketDetail').style.display = 'none';
+    currentTicket = null;
+  }
+
+  // ── Submit reply ──
+  async function submitReply() {
+    const content = document.getElementById('replyContent');
+    if (!content || !content.value.trim()) return;
+
+    const text = content.value.trim();
+    content.value = '';
+
+    if (currentTicket) {
+      try {
+        const res = await fetch('/api/tickets/' + currentTicket.id + '/reply', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ message: text, content: text })
+        });
+        const result = await res.json();
+        if (result.success || result.message) {
+          showNotification('回复已发送', '您的回复已成功提交', 'success');
+          openTicketDetail(currentTicket.id);
+        } else {
+          showNotification('回复失败', result.message || '未知错误', 'error');
+        }
+      } catch (e) {
+        showNotification('回复失败', '网络错误', 'error');
+      }
+    } else {
+      showNotification('回复已发送', '您的回复已成功提交', 'success');
+    }
+  }
+
+  // ── Close ticket ──
+  async function closeTicket() {
+    if (currentTicket) {
+      try {
+        const res = await fetch('/api/tickets/' + currentTicket.id + '/status', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ status: 'closed' })
+        });
+        const result = await res.json();
+        if (result.success || result.message) {
+          showNotification('工单已关闭', '工单已标记为已解决', 'success');
+        } else {
+          showNotification('操作失败', result.message || '未知错误', 'error');
+        }
+      } catch (e) {
+        showNotification('操作失败', '网络错误', 'error');
+      }
+    } else {
+      showNotification('工单已关闭', '工单已标记为已解决', 'success');
+    }
+    backToList();
+    loadTickets();
+  }
+
+  // ── Submit new ticket ──
+  async function submitNewTicket() {
+    const modal = document.getElementById('newTicketModal');
+    const titleInput = modal.querySelector('input');
+    const categorySelect = modal.querySelector('select');
+    const prioritySelect = modal.querySelectorAll('select')[1];
+    const vmSelect = modal.querySelectorAll('select')[2];
+    const detailTextarea = modal.querySelector('textarea');
+
+    const title = titleInput ? titleInput.value.trim() : '';
+    const category = categorySelect ? categorySelect.value : '技术问题';
+    const priority = prioritySelect ? prioritySelect.value : '普通';
+    const relatedVm = vmSelect ? vmSelect.value : '';
+    const detail = detailTextarea ? detailTextarea.value.trim() : '';
+
+    if (!title) { showNotification('提交失败', '请填写工单标题', 'error'); return; }
+    if (!detail) { showNotification('提交失败', '请填写问题详情', 'error'); return; }
+
+    try {
+      const res = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          title: title,
+          category: category,
+          priority: priority,
+          related_vm: relatedVm,
+          message: detail,
+          content: detail
+        })
+      });
+      const result = await res.json();
+      if (result.success || result.data || result.ticket) {
+        ModalManager.close('newTicketModal');
+        showNotification('提交成功', '工单已提交，我们将尽快回复', 'success');
+        // Reset form
+        if (titleInput) titleInput.value = '';
+        if (detailTextarea) detailTextarea.value = '';
+        loadTickets();
+      } else {
+        showNotification('提交失败', result.message || '未知错误', 'error');
+      }
+    } catch (e) {
+      showNotification('提交失败', '网络错误', 'error');
+    }
+  }
+
+  // ── Filter tickets ──
+  function filterTickets(filter) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      const active = b.dataset.filter === filter;
+      b.classList.toggle('active', active);
+      b.style.color = active ? 'var(--accent)' : 'var(--text-3)';
+      b.style.borderBottom = active ? '2px solid var(--accent)' : '2px solid transparent';
+      b.style.fontWeight = active ? '600' : '500';
+    });
+
+    const wrapper = document.querySelector('.table-wrapper');
+    if (!wrapper || !tickets) return;
+
+    let filtered = tickets;
+    if (filter === 'open') filtered = tickets.filter(t => t.status === 'open' || t.status === 'pending');
+    else if (filter === 'replied') filtered = tickets.filter(t => t.status === 'replied' || t.status === 'answered');
+    else if (filter === 'closed') filtered = tickets.filter(t => t.status === 'closed');
+
+    const statusMap = {
+      open:     ['badge-warning', '处理中'], pending:  ['badge-warning', '处理中'],
+      replied:  ['badge-info',    '已回复'], answered: ['badge-info',    '已回复'],
+      closed:   ['badge-default', '已关闭']
+    };
+    const priorityLabels = { high: '高', medium: '中', low: '低' };
+
+    wrapper.innerHTML = filtered.map(t =>
+      '<div class="ticket-item" onclick="openTicketDetail(\'' + t.id + '\')">' +
+        '<div class="ticket-priority priority-' + (t.priority || 'medium') + '"></div>' +
+        '<div class="ticket-info">' +
+          '<div class="ticket-title">' + (t.title || '无标题') + '</div>' +
+          '<div class="ticket-meta">' +
+            '<span>工单 #' + (t.ticket_no || t.id || '000') + '</span>' +
+            '<span>创建: ' + (t.created_at || t.created || '-') + '</span>' +
+            '<span>更新: ' + (t.updated_at || t.updated || '-') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">' +
+          '<span class="badge ' + (statusMap[t.status] || ['badge-default', t.status])[0] + '">' +
+            (statusMap[t.status] || ['badge-default', t.status])[1] + '</span>' +
+          '<span style="font-size:11px;color:var(--text-3)">优先级: ' + (priorityLabels[t.priority] || t.priority || '普通') + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  }
+
+  // ── Notification helper ──
+  function showNotification(title, msg, type) {
+    if (typeof window.showNotification === 'function') {
+      window.showNotification(title, msg, type);
+    } else {
+      alert('[' + type + '] ' + title + ': ' + msg);
+    }
+  }
 </script>
 </body>
 </html>

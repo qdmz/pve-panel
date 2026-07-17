@@ -118,214 +118,8 @@
 
       <!-- Announcements List -->
       <div class="announcements-list" id="announcementsList">
-        <!-- Pinned: Notice -->
-        <div class="announcement-card pinned" data-type="notice" data-id="1" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge notice">系统通知</span>
-            <span class="pin-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
-              置顶
-            </span>
-            <span class="announcement-date">2026-06-28</span>
-          </div>
-          <div class="announcement-title">CloudVM Pro 平台正式上线公告</div>
-          <div class="announcement-preview">
-            尊敬的客户，CloudVM Pro 新版管理平台已正式上线！新平台带来了全新的用户界面、更强大的虚拟机管理功能，以及更稳定的底层架构。所有现有用户数据已平滑迁移，您可以使用原有账号直接登录。
-          </div>
-          <div class="announcement-full">
-            <p>尊敬的客户：</p>
-            <p>CloudVM Pro 新版管理平台已于 2026年6月28日 正式上线！本次更新是我们自成立以来最大规模的一次平台升级。</p>
-            <p><strong>主要亮点：</strong></p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li>全新玻璃态 UI 设计，支持深色/浅色主题切换</li>
-              <li>实时虚拟机性能监控面板</li>
-              <li>一键重装系统，支持 20+ 操作系统模板</li>
-              <li>增强型 DDoS 防护，默认免费提供</li>
-              <li>API 接口全面升级至 v3 版本</li>
-            </ul>
-            <p>所有现有用户数据已平滑迁移，您可以使用原有账号直接登录。如遇任何问题，请通过工单系统或客服渠道联系我们。</p>
-            <p style="color:var(--text-3);">CloudVM Pro 团队<br>2026年6月28日</p>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
-
-        <!-- Pinned: Maintenance -->
-        <div class="announcement-card pinned" data-type="maintenance" data-id="2" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge maintenance">维护公告</span>
-            <span class="pin-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
-              置顶
-            </span>
-            <span class="announcement-date">2026-06-25</span>
-          </div>
-          <div class="announcement-title">华东节点计划维护通知 (7月5日 02:00-06:00)</div>
-          <div class="announcement-preview">
-            为提升服务稳定性，我们计划于2026年7月5日凌晨2:00至6:00对华东节点进行例行维护。维护期间，部分虚拟机可能出现短暂网络中断，但不会影响数据安全。建议您提前做好数据备份。
-          </div>
-          <div class="announcement-full">
-            <p><strong>维护详情：</strong></p>
-            <table style="width:100%;border-collapse:collapse;font-size:13px;margin:12px 0;">
-              <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 0;color:var(--text-3);">维护时间</td><td style="padding:6px 0;">2026年7月5日 02:00 - 06:00 (北京时间)</td></tr>
-              <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 0;color:var(--text-3);">影响范围</td><td style="padding:6px 0;">华东节点 (SHA-01, SHA-02)</td></tr>
-              <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 0;color:var(--text-3);">预期影响</td><td style="padding:6px 0;">单次网络中断不超过 5 分钟</td></tr>
-              <tr><td style="padding:6px 0;color:var(--text-3);">维护内容</td><td style="padding:6px 0;">网络设备固件升级 & 交换机冗余测试</td></tr>
-            </table>
-            <p><strong>建议措施：</strong></p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li>维护前对重要数据进行快照备份</li>
-              <li>如有高可用需求，建议临时切换至其他节点</li>
-              <li>维护完成后系统将自动恢复所有服务</li>
-            </ul>
-            <p>如有疑问，请联系技术支持。感谢您的理解与配合。</p>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
-
-        <!-- Update -->
-        <div class="announcement-card" data-type="update" data-id="3" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge update">产品更新</span>
-            <span class="announcement-date">2026-06-20</span>
-          </div>
-          <div class="announcement-title">操作系统模板更新：新增 Ubuntu 24.04 LTS 和 Debian 13</div>
-          <div class="announcement-preview">
-            我们已新增 Ubuntu 24.04 LTS 和 Debian 13 "Trixie" 操作系统模板。现在您可以在创建或重装虚拟机时选择这些最新的操作系统版本。所有模板均已预装优化内核和 CloudVM 增强工具。
-          </div>
-          <div class="announcement-full">
-            <p>本次新增的操作系统模板包括：</p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li><strong>Ubuntu 24.04 LTS (Noble Numbat)</strong> - 内核 6.8，支持至 2029年</li>
-              <li><strong>Debian 13 (Trixie)</strong> - 内核 6.12，最新稳定版</li>
-            </ul>
-            <p>所有模板已预装：</p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li>CloudVM 增强工具 (qemu-guest-agent)</li>
-              <li>优化网络参数</li>
-              <li>默认防火墙配置</li>
-              <li>自动安全更新</li>
-            </ul>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
-
-        <!-- Notice -->
-        <div class="announcement-card viewed" data-type="notice" data-id="4" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge notice">系统通知</span>
-            <span class="announcement-date">2026-06-15</span>
-          </div>
-          <div class="announcement-title">实名认证政策更新通知</div>
-          <div class="announcement-preview">
-            根据相关法规要求，自2026年7月1日起，所有新注册用户须在开通服务前完成实名认证。现有用户请于2026年8月1日前完成认证，否则部分功能将受限。
-          </div>
-          <div class="announcement-full">
-            <p>根据《中华人民共和国网络安全法》及相关规定，CloudVM Pro 自2026年7月1日起实施以下调整：</p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li>新用户注册后需在72小时内完成实名认证</li>
-              <li>现有用户需在2026年8月1日前完成认证</li>
-              <li>未认证账户将无法创建新实例和使用部分高级功能</li>
-              <li>已运行实例不受影响，但到期后将无法续费</li>
-            </ul>
-            <p>请前往 <a href="verify.html" style="color:var(--accent);">实名认证页面</a> 完成认证流程。</p>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
-
-        <!-- Event -->
-        <div class="announcement-card" data-type="event" data-id="5" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge event">活动通知</span>
-            <span class="announcement-date">2026-06-10</span>
-          </div>
-          <div class="announcement-title">年中大促：新购享8折，续费享85折</div>
-          <div class="announcement-preview">
-            为庆祝平台上线，我们推出年中大促活动。即日起至7月31日，新购任意产品享8折优惠，续费享85折优惠。使用优惠码 "MIDYEAR2026" 即可享受折扣。
-          </div>
-          <div class="announcement-full">
-            <p><strong>活动详情：</strong></p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li><strong>活动时间：</strong>2026年6月10日 - 2026年7月31日</li>
-              <li><strong>新购优惠：</strong>首次订购任意产品享 8 折 (优惠码: MIDYEAR2026)</li>
-              <li><strong>续费优惠：</strong>续费任意产品享 85 折 (优惠码: RENEW85)</li>
-              <li><strong>叠加优惠：</strong>年付用户可额外享受 9 折 (全年共享约 7.2 折)</li>
-            </ul>
-            <p>优惠码在订购/续费页面输入即可生效。每位用户限用一次。</p>
-            <p>立即前往 <a href="products.html" style="color:var(--accent);">购买产品</a></p>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
-
-        <!-- Maintenance -->
-        <div class="announcement-card viewed" data-type="maintenance" data-id="6" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge maintenance">维护公告</span>
-            <span class="announcement-date">2026-06-05</span>
-          </div>
-          <div class="announcement-title">华南节点网络升级完成公告</div>
-          <div class="announcement-preview">
-            华南节点网络升级已于6月5日凌晨顺利完成。升级后华南节点网络延迟降低约30%，带宽容量提升至原有2倍。感谢您在升级期间的耐心等待。
-          </div>
-          <div class="announcement-full">
-            <p>华南节点 (CAN-01, CAN-02) 网络升级已于北京时间 2026年6月5日 03:45 提前完成。</p>
-            <p><strong>升级成果：</strong></p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li>网络延迟降低约 30%</li>
-              <li>带宽总容量提升至 2 倍</li>
-              <li>新增冗余链路，可用性提升至 99.99%</li>
-            </ul>
-            <p>所有受影响的服务已在升级完成后自动恢复。如您的虚拟机仍有异常，请提交工单。</p>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
-
-        <!-- Update -->
-        <div class="announcement-card viewed" data-type="update" data-id="7" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge update">产品更新</span>
-            <span class="announcement-date">2026-05-28</span>
-          </div>
-          <div class="announcement-title">API v3 发布：更强大的自动化管理能力</div>
-          <div class="announcement-preview">
-            CloudVM Pro API v3 版本正式发布。新版本支持虚拟机全生命周期管理、实时监控数据获取、自动化快照策略配置等功能。查看 API 文档了解详情。
-          </div>
-          <div class="announcement-full">
-            <p>API v3 主要新增功能：</p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li>虚拟机创建/删除/启动/停止/重启 API</li>
-              <li>实时性能数据（CPU/内存/磁盘/网络）查询</li>
-              <li>快照创建、回滚、删除及自动化策略配置</li>
-              <li>Webhook 事件通知（实例状态变更、到期提醒等）</li>
-              <li>兼容 RESTful 规范，支持 JSON 请求/响应</li>
-            </ul>
-            <p>API Key 可在 <a href="profile.html" style="color:var(--accent);">账号设置 → API 标签页</a> 中生成。</p>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
-
-        <!-- Event -->
-        <div class="announcement-card viewed" data-type="event" data-id="8" onclick="toggleExpand(this)">
-          <div class="announcement-header">
-            <span class="type-badge event">活动通知</span>
-            <span class="announcement-date">2026-05-20</span>
-          </div>
-          <div class="announcement-title">邀请好友，双方各得50元余额</div>
-          <div class="announcement-preview">
-            邀请好友注册 CloudVM Pro 并完成首单消费，您和好友均可获得50元账户余额奖励。邀请人数无上限，多邀多得。前往账户页面查看您的专属邀请链接。
-          </div>
-          <div class="announcement-full">
-            <p><strong>活动规则：</strong></p>
-            <ul style="padding-left:20px;margin:8px 0;">
-              <li>邀请好友通过您的专属链接注册</li>
-              <li>好友完成实名认证并首单消费满 50 元</li>
-              <li>双方各获 50 元账户余额（可提现或消费）</li>
-              <li>邀请人数无上限</li>
-              <li>余额奖励在好友消费后 3 个工作日内到账</li>
-            </ul>
-            <p>您的专属邀请链接可在 <a href="profile.html" style="color:var(--accent);">账号设置</a> 页面查看。</p>
-          </div>
-          <div class="view-detail">查看详情 →</div>
-        </div>
+        <!-- Dynamically loaded from API -->
+        <div style="text-align:center;padding:40px;color:var(--text-3)" id="announceLoading">加载中...</div>
       </div>
     </div>
   </div>
@@ -333,12 +127,78 @@
 
 <script src="../../js/main.js"></script>
 <script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
+  let allAnnouncements = [];
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadAnnouncements();
+  });
+
+  async function loadAnnouncements() {
+    const el = document.getElementById('announcementsList');
+    if (!el) return;
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-3)"><div class="spinner" style="width:24px;height:24px;margin:0 auto 12px"></div>加载中...</div>';
+    
+    try {
+      const res = await fetch('/api/announcements', { headers: { 'Accept': 'application/json' } });
+      const data = await res.json();
+      
+      if (data.success && data.data) {
+        allAnnouncements = Array.isArray(data.data) ? data.data : (data.data.data || []);
+      }
+    } catch(e) {}
+    
+    renderAnnouncements('all');
+  }
+
+  function renderAnnouncements(type) {
+    const el = document.getElementById('announcementsList');
+    if (!el) return;
+    
+    let list = allAnnouncements;
+    if (type !== 'all') {
+      list = list.filter(a => a.type === type);
+    }
+    
+    if (!list.length) {
+      el.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-3)">暂无公告</div>';
+      return;
+    }
+    
+    const read = JSON.parse(localStorage.getItem('readAnnouncements') || '[]');
+    
+    el.innerHTML = list.map(a => {
+      const aid = a.id;
+      const isPinned = a.is_pinned || a.pinned;
+      const isViewed = read.includes(String(aid));
+      const typeMap = { 'notice': '系统通知', 'maintenance': '维护公告', 'update': '产品更新', 'event': '活动通知' };
+      const typeName = typeMap[a.type] || a.type || '通知';
+      
+      return `<div class="announcement-card ${isPinned ? 'pinned' : ''} ${isViewed ? 'viewed' : ''}" data-type="${a.type}" data-id="${aid}" onclick="toggleExpand(this)">
+        <div class="announcement-header">
+          <span class="type-badge ${a.type}">${typeName}</span>
+          ${isPinned ? '<span class="pin-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>置顶</span>' : ''}
+          <span class="announcement-date">${new Date(a.created_at || a.published_at).toISOString().slice(0,10)}</span>
+        </div>
+        <div class="announcement-title">${a.title}</div>
+        <div class="announcement-preview">${a.summary || a.excerpt || (a.content ? a.content.replace(/<[^>]*>/g,'').slice(0,200) : '')}</div>
+        ${a.content ? `<div class="announcement-full">${a.content}</div>` : ''}
+        ${a.content ? '<div class="view-detail">查看详情 →</div>' : ''}
+      </div>`;
+    }).join('');
+    
+    // Re-apply read states
+    read.forEach(id => {
+      const card = el.querySelector('.announcement-card[data-id="' + id + '"]');
+      if (card) card.classList.add('viewed');
+    });
+  }
+
   function toggleExpand(card) {
     const isExpanded = card.classList.contains('expanded');
     if (!isExpanded) {
       card.classList.add('viewed');
-      // Save read state
       const id = card.dataset.id;
       let read = JSON.parse(localStorage.getItem('readAnnouncements') || '[]');
       if (!read.includes(id)) read.push(id);
@@ -350,23 +210,8 @@
   function filterAnnouncements(type, btn) {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    document.querySelectorAll('.announcement-card').forEach(card => {
-      if (type === 'all' || card.dataset.type === type) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
-    });
+    renderAnnouncements(type);
   }
-
-  // Restore read states
-  document.addEventListener('DOMContentLoaded', function() {
-    const read = JSON.parse(localStorage.getItem('readAnnouncements') || '[]');
-    read.forEach(id => {
-      const card = document.querySelector('.announcement-card[data-id="' + id + '"]');
-      if (card) card.classList.add('viewed');
-    });
-  });
 </script>
 </body>
 </html>

@@ -73,15 +73,30 @@ window.VMOperations = {
     if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:14px;height:14px"></div>'; }
 
     try {
-      // Simulate API call
-      await new Promise(r => setTimeout(r, 1500));
-      window.showNotification('操作成功', `虚拟机 #${vmId} ${label} 指令已发送`, 'success');
+      // Map action to API endpoint
+      const apiMap = {
+        'start': 'start', 'stop': 'stop', 'restart': 'restart',
+        'reset': 'reset-password', 'reinstall': 'reinstall'
+      };
+      const apiAction = apiMap[action] || action;
+      
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`/api/vms/${vmId}/${apiAction}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
 
-      // Update status indicators
-      if (action === 'start') this.updateStatus(vmId, 'running');
-      if (action === 'stop') this.updateStatus(vmId, 'stopped');
+      if (data.success) {
+        window.showNotification('操作成功', `虚拟机 #${vmId} ${label} 指令已发送`, 'success');
+        if (action === 'start') this.updateStatus(vmId, 'running');
+        if (action === 'stop') this.updateStatus(vmId, 'stopped');
+      } else {
+        window.showNotification('操作失败', data.message || '请稍后重试或联系支持', 'error');
+      }
     } catch (e) {
-      window.showNotification('操作失败', '请稍后重试或联系支持', 'error');
+      window.showNotification('操作失败', '网络错误，请稍后重试', 'error');
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = label; }
     }

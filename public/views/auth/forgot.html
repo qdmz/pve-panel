@@ -94,6 +94,7 @@
 </div>
 
 <script src="../../js/main.js"></script>
+<script src="../../js/api.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
 
@@ -105,10 +106,30 @@ async function sendCode() {
   document.getElementById('emailErr').classList.remove('show');
   const btn = document.getElementById('sendBtn');
   btn.disabled = true; btn.textContent = '发送中...';
-  await new Promise(r => setTimeout(r, 800));
-  showNotification('验证码已发送', `重置验证码已发至 ${email}`, 'success');
-  startCountdown(60, btn, '重新发送');
+  
+  try {
+    const res = await fetch('/api/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showNotification('验证码已发送', `重置验证码已发至 ${email}`, 'success');
+      startCountdown(60, btn, '重新发送');
+    } else {
+      showNotification('发送失败', data.message || '验证码发送失败', 'error');
+      btn.disabled = false;
+      btn.textContent = '重新发送';
+    }
+  } catch(e) {
+    showNotification('网络错误', '无法连接服务器', 'error');
+    btn.disabled = false;
+    btn.textContent = '重新发送';
+  }
 }
+
+let resetToken = null;
 
 document.getElementById('forgotForm')?.addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -117,9 +138,29 @@ document.getElementById('forgotForm')?.addEventListener('submit', async function
   if (!email || !code) { return; }
   const btn = this.querySelector('.btn-submit');
   btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;margin:0 auto"></div>';
-  await new Promise(r => setTimeout(r, 1000));
-  document.getElementById('step1').style.display = 'none';
-  document.getElementById('step2').style.display = 'block';
+  
+  try {
+    // Verify code first - this may return a reset token
+    const res = await fetch('/api/verify-reset-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, code })
+    });
+    const data = await res.json();
+    if (data.success) {
+      resetToken = data.data?.token || data.data?.reset_token || code;
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('step2').style.display = 'block';
+    } else {
+      showAlert(data.message || '验证码验证失败', 'error');
+      btn.disabled = false;
+      btn.textContent = '验证';
+    }
+  } catch(e) {
+    showAlert('网络错误，请稍后重试', 'error');
+    btn.disabled = false;
+    btn.textContent = '验证';
+  }
 });
 
 document.getElementById('resetForm')?.addEventListener('submit', async function(e) {
@@ -129,9 +170,32 @@ document.getElementById('resetForm')?.addEventListener('submit', async function(
   if (p1 !== p2) { document.getElementById('confirmErr').classList.add('show'); return; }
   const btn = this.querySelector('.btn-submit');
   btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;margin:0 auto"></div>';
-  await new Promise(r => setTimeout(r, 1000));
-  document.getElementById('step2').style.display = 'none';
-  document.getElementById('step3').style.display = 'block';
+  
+  try {
+    const res = await fetch('/api/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('forgotEmail').value,
+        code: resetToken,
+        password: p1,
+        password_confirmation: p2
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step3').style.display = 'block';
+    } else {
+      showAlert(data.message || '密码重置失败', 'error');
+      btn.disabled = false;
+      btn.textContent = '重置密码';
+    }
+  } catch(e) {
+    showAlert('网络错误，请稍后重试', 'error');
+    btn.disabled = false;
+    btn.textContent = '重置密码';
+  }
 });
 </script>
 </body>

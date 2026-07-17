@@ -161,7 +161,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">真实姓名</label>
-            <input type="text" class="form-input" value="张三" placeholder="请输入真实姓名">
+            <input type="text" class="form-input" id="profileName" placeholder="请输入真实姓名">
           </div>
           <div class="form-group">
             <label class="form-label">手机号码</label>
@@ -192,7 +192,7 @@
             <label class="form-label">确认新密码</label>
             <input type="password" class="form-input" placeholder="请再次输入新密码">
           </div>
-          <button class="save-btn" onclick="saveProfile()">更新密码</button>
+          <button class="save-btn" onclick="changePassword()">更新密码</button>
         </div>
 
         <div class="settings-card">
@@ -353,7 +353,9 @@
 
 <script src="../../js/main.js"></script>
 <script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
+  // ── Tab switching ──
   function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -361,13 +363,91 @@
     document.getElementById('tab-' + tabId).classList.add('active');
   }
 
-  function saveProfile() {
-    const toast = document.getElementById('toast');
-    toast.textContent = '保存成功!';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+  // ── Load profile on page load ──
+  document.addEventListener('DOMContentLoaded', () => {
+    loadProfile();
+  });
+
+  // ── Fetch /api/me and populate profile ──
+  async function loadProfile() {
+    try {
+      const result = await API.me();
+      const user = result.data || result.user || result;
+      if (!user) return;
+
+      // Avatar preview
+      const avatar = document.getElementById('avatarPreview');
+      if (avatar) {
+        const initial = (user.name || user.username || 'U').charAt(0).toUpperCase();
+        avatar.textContent = initial;
+        if (user.avatar) {
+          avatar.style.backgroundImage = 'url(' + user.avatar + ')';
+          avatar.style.backgroundSize = 'cover';
+          avatar.textContent = '';
+        }
+      }
+
+      // Verification badge
+      const verifyBadge = document.querySelector('.verify-badge');
+      if (verifyBadge) {
+        const isVerified = user.verified || user.verification_status === 'verified';
+        verifyBadge.textContent = isVerified ? '已认证' : '未认证';
+        verifyBadge.className = 'verify-badge ' + (isVerified ? 'verified' : 'unverified');
+      }
+
+      // Username (disabled input)
+      const usernameInput = document.querySelector('#tab-profile input[disabled]');
+      if (usernameInput) usernameInput.value = user.username || user.name || '';
+
+      // Real name
+      const nameInput = document.querySelector('.form-label[for]') || document.querySelector('#tab-profile .form-group:nth-child(3) input');
+      const allInputs = document.querySelectorAll('#tab-profile .form-input');
+      if (allInputs.length >= 3) {
+        // index 0 = username (disabled), index 1 = name, index 2 = phone, index 3 = qq
+        if (allInputs[1]) allInputs[1].value = user.name || '';
+        if (allInputs[2]) allInputs[2].value = user.phone || user.mobile || '';
+        if (allInputs[3]) allInputs[3].value = user.qq || user.qq_number || '';
+      }
+
+      // Balance in sidebar
+      const sidebarBalance = document.querySelector('.sidebar-footer > div > div:last-child');
+      if (sidebarBalance && user.balance !== undefined) {
+        sidebarBalance.textContent = '¥ ' + parseFloat(user.balance).toFixed(2);
+      }
+    } catch (e) {
+      console.error('Failed to load profile', e);
+    }
   }
 
+  // ── Save profile (PUT /api/profile) ──
+  async function saveProfile() {
+    const allInputs = document.querySelectorAll('#tab-profile .form-input');
+    if (allInputs.length < 4) { showToast('保存失败', 'error'); return; }
+
+    const data = {
+      name: allInputs[1] ? allInputs[1].value : '',
+      phone: allInputs[2] ? allInputs[2].value : '',
+      qq: allInputs[3] ? allInputs[3].value : ''
+    };
+
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.success || result.data) {
+        showToast('保存成功!');
+      } else {
+        showToast(result.message || '保存失败', 'error');
+      }
+    } catch (e) {
+      showToast('网络错误', 'error');
+    }
+  }
+
+  // ── Avatar preview ──
   function previewAvatar(event) {
     const file = event.target.files[0];
     if (file) {
@@ -377,48 +457,105 @@
         preview.style.backgroundImage = 'url(' + e.target.result + ')';
         preview.style.backgroundSize = 'cover';
         preview.textContent = '';
-        saveProfile();
       };
       reader.readAsDataURL(file);
     }
   }
 
+  // ── 2FA toggle ──
   function toggle2FA() {
     const checked = document.getElementById('twofaToggle').checked;
     document.getElementById('twofaQR').style.display = checked ? 'block' : 'none';
     if (checked) {
-      const toast = document.getElementById('toast');
-      toast.textContent = '请扫描二维码完成两步验证设置';
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
+      showToast('请扫描二维码完成两步验证设置');
     }
   }
 
-  function generateKey() {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let key = 'cvmp_live_';
-    for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
-    document.querySelector('.api-key-display .key-text').textContent = key;
-    const toast = document.getElementById('toast');
-    toast.textContent = '新 API 密钥已生成!';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+  // ── Change password (PUT /api/password) ──
+  async function changePassword() {
+    const inputs = document.querySelectorAll('#tab-security .form-input');
+    if (inputs.length < 3) return;
+
+    const current = inputs[0].value;
+    const newPass = inputs[1].value;
+    const confirm = inputs[2].value;
+
+    if (!current || !newPass || !confirm) {
+      showToast('请填写所有密码字段', 'error');
+      return;
+    }
+    if (newPass !== confirm) {
+      showToast('两次输入的新密码不一致', 'error');
+      return;
+    }
+    if (newPass.length < 8) {
+      showToast('密码长度至少8位', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/password', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ current_password: current, password: newPass, password_confirmation: confirm })
+      });
+      const result = await res.json();
+      if (result.success || result.message) {
+        showToast('密码更新成功!');
+        inputs.forEach(i => i.value = '');
+      } else {
+        showToast(result.message || '密码更新失败', 'error');
+      }
+    } catch (e) {
+      showToast('网络错误', 'error');
+    }
   }
 
+  // ── Generate API key (POST /api/api-key) ──
+  async function generateKey() {
+    try {
+      const res = await fetch('/api/api-key', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + API.Auth.getToken(), 'Accept': 'application/json' }
+      });
+      const result = await res.json();
+      const key = result.data || result.api_key || result.key || '';
+
+      if (key) {
+        document.querySelector('.api-key-display .key-text').textContent = key;
+        showToast('新 API 密钥已生成!');
+      } else {
+        showToast(result.message || '生成失败', 'error');
+      }
+    } catch (e) {
+      showToast('网络错误', 'error');
+    }
+  }
+
+  // ── Copy key ──
   function copyKey() {
     const key = document.querySelector('.api-key-display .key-text').textContent;
     navigator.clipboard.writeText(key).then(() => {
-      const toast = document.getElementById('toast');
-      toast.textContent = '密钥已复制到剪贴板';
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
+      showToast('密钥已复制到剪贴板');
     });
   }
 
+  // ── Regenerate key ──
   function regenerateKey() {
     if (confirm('重新生成密钥后，旧密钥将立即失效。确定继续？')) {
       generateKey();
     }
+  }
+
+  // ── Toast helper ──
+  function showToast(msg, type) {
+    const toast = document.getElementById('toast');
+    if (!toast) { alert(msg); return; }
+    if (type === 'error') toast.style.background = '#ef4444';
+    else toast.style.background = '#10b981';
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
   }
 </script>
 </body>

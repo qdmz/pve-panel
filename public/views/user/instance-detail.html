@@ -57,7 +57,7 @@
     <div class="sidebar-footer">
       <div class="user-info">
         <div class="user-avatar">张</div>
-        <div><div class="user-name">张三</div><div class="user-balance">余额: ¥128.50</div></div>
+        <div><div class="user-name">加载中...</div><div class="user-balance">余额: --</div></div>
         <a href="../auth/login.html" style="color:var(--text-3);margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a>
       </div>
     </div>
@@ -370,50 +370,264 @@
 
 <script src="../../js/main.js"></script>
 <script src="../../js/dashboard.js"></script>
+<script src="../../js/api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+// Get VM ID from URL
+function getVmId() {
+  const m = window.location.href.match(/[?&]id=(\d+)/);
+  return m ? parseInt(m[1]) : null;
+}
+
+let vmData = null;
+let perfChart = null;
+let trafficChart = null;
+let cpuMonitor = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
   ThemeManager.init();
 
-  // Performance chart
-  const labels = Array.from({length:20},(_,i) => `-${19-i}s`);
-  const cpuData = Array.from({length:20},() => Math.random()*40+25);
-  const memData = Array.from({length:20},() => Math.random()*20+50);
-  CloudVMCharts.createLineChart(
-    document.getElementById('perfChart').getContext('2d'), labels,
-    [
-      { label:'CPU %', data: cpuData, backgroundColor:'rgba(37,99,235,0.06)', borderColor:'rgba(37,99,235,0.8)' },
-      { label:'内存 %', data: memData, backgroundColor:'rgba(22,163,74,0.06)', borderColor:'rgba(22,163,74,0.8)' }
-    ]
-  );
+  const vmId = getVmId();
+  if (!vmId) { showNotification('错误', '未指定虚拟机ID', 'error'); return; }
 
-  // Traffic detail
-  const days = Array.from({length:30},(_,i)=>`${i+1}日`);
-  const inData = Array.from({length:30},()=>Math.random()*8+1);
-  const outData = Array.from({length:30},()=>Math.random()*12+2);
-  CloudVMCharts.createBarChart(
-    document.getElementById('trafficDetail').getContext('2d'), days,
-    [
-      { label:'入站 GB', data: inData, backgroundColor:'rgba(37,99,235,0.6)' },
-      { label:'出站 GB', data: outData, backgroundColor:'rgba(22,163,74,0.6)' }
-    ]
-  );
+  await loadVmDetail();
+  loadMetrics();
+  loadTraffic();
+  loadSnapshots();
+  loadDomains();
+  loadNatRules();
 
-  // Realtime update simulation
-  setInterval(() => {
-    const cpu = Math.round(Math.random()*40+25);
-    const mem = Math.round(Math.random()*20+52);
-    document.getElementById('cpuVal').textContent = cpu + '%';
-    document.getElementById('memVal').textContent = mem + '%';
-  }, 3000);
+  // Realtime CPU/mem poll every 10s
+  cpuMonitor = setInterval(loadMetrics, 10000);
 });
+
+async function loadVmDetail() {
+  const vmId = getVmId();
+  if (!vmId) return;
+  try {
+    const token = localStorage.getItem('admin_token');
+    const res = await fetch(`/api/vms/${vmId}`, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+    });
+    const json = await res.json();
+    if (!json.success) { showNotification('加载失败', json.message || '无法加载VM详情', 'error'); return; }
+    
+    vmData = json.data.vm;
+    renderVmDetail(vmData);
+  } catch(e) {
+    showNotification('网络错误', '无法连接服务器', 'error');
+  }
+}
+
+function renderVmDetail(vm) {
+  document.getElementById('vmName').textContent = vm.name || `VM #${vm.id}`;
+  document.getElementById('vmHostname').textContent = vm.hostname || vm.name;
+  document.getElementById('vmPlan').textContent = vm.product?.name || `${vm.cpu}vCPU / ${vm.memory}MB / ${vm.disk}GB`;
+  
+  // Status
+  const statusBadge = document.getElementById('vmStatus');
+  const isRunning = vm.status === 'running';
+  statusBadge.className = 'badge ' + (isRunning ? 'badge-success' : 'badge-error');
+  statusBadge.textContent = isRunning ? '运行中' : '已停止';
+  
+  // Spec details
+  document.getElementById('cpuInfo').innerHTML = `<span class="badge badge-info">${vm.cpu} vCPU</span>`;
+  document.getElementById('memInfo').innerHTML = `<span class="badge badge-info">${vm.memory} MB</span>`;
+  document.getElementById('diskInfo').innerHTML = `<span class="badge badge-info">${vm.disk} GB</span>`;
+  document.getElementById('bandwidthInfo').innerHTML = `<span class="badge badge-info">${vm.bandwidth || 100} Mbps</span>`;
+  document.getElementById('trafficInfo').innerHTML = `<span class="badge badge-info">${vm.traffic || '-'} GB</span>`;
+
+  // Network
+  document.getElementById('ipv4Addr').textContent = vm.ipv4 || viewSource.IPv4 || '-';
+  document.getElementById('ipv6Addr').textContent = vm.ipv6 || '-';
+  const sshPort = vm.ssh_port || 22;
+  document.getElementById('sshInfo').innerHTML = `<code>ssh root@${vm.ipv4 || '...'} -p ${sshPort}</code>`;
+  
+  // Dates
+  const created = new Date(vm.created_at).toLocaleDateString('zh-CN');
+  const expires = vm.expires_at ? new Date(vm.expires_at).toLocaleDateString('zh-CN') : '-';
+  document.getElementById('createDate').textContent = created;
+  document.getElementById('expireDate').textContent = expires;
+  
+  // Action buttons state
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  if (startBtn && stopBtn) {
+    startBtn.style.display = isRunning ? 'none' : '';
+    stopBtn.style.display = isRunning ? '' : 'none';
+  }
+}
+
+async function loadMetrics() {
+  const vmId = getVmId();
+  if (!vmId) return;
+  try {
+    const token = localStorage.getItem('admin_token');
+    const res = await fetch(`/api/vms/${vmId}/metrics`, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+    });
+    const json = await res.json();
+    if (!json.success) return;
+    
+    const metrics = json.data;
+    const cpu = metrics.cpu_usage || 0;
+    const mem = metrics.memory_usage || 0;
+    document.getElementById('cpuVal').textContent = Math.round(cpu) + '%';
+    document.getElementById('memVal').textContent = Math.round(mem) + '%';
+    
+    // Update perf chart
+    if (!perfChart) {
+      const labels = Array.from({length:20},(_,i) => `-${19-i}s`);
+      const el = document.getElementById('perfChart');
+      if (!el) return;
+      perfChart = CloudVMCharts.createLineChart(el.getContext('2d'), labels, [
+        { label:'CPU %', data: Array(20).fill(cpu), backgroundColor:'rgba(37,99,235,0.06)', borderColor:'rgba(37,99,235,0.8)' },
+        { label:'内存 %', data: Array(20).fill(mem), backgroundColor:'rgba(22,163,74,0.06)', borderColor:'rgba(22,163,74,0.8)' }
+      ]);
+    } else {
+      // Shift data
+      if (perfChart.data.datasets[0].data.length >= 20) perfChart.data.datasets[0].data.shift();
+      if (perfChart.data.datasets[1].data.length >= 20) perfChart.data.datasets[1].data.shift();
+      perfChart.data.datasets[0].data.push(cpu);
+      perfChart.data.datasets[1].data.push(mem);
+      perfChart.update('none');
+    }
+  } catch(e) {}
+}
+
+async function loadTraffic() {
+  const vmId = getVmId();
+  if (!vmId) return;
+  try {
+    const token = localStorage.getItem('admin_token');
+    const res = await fetch(`/api/vms/${vmId}/traffic`, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+    });
+    const json = await res.json();
+    if (!json.success || !json.data) {
+      renderEmptyTraffic();
+      return;
+    }
+    const trafficData = json.data.daily || [];
+    const days = trafficData.map(t => t.date?.slice(5) || '');
+    const inData = trafficData.map(t => t.in_gb || 0);
+    const outData = trafficData.map(t => t.out_gb || 0);
+    
+    const el = document.getElementById('trafficDetail');
+    if (!el) return;
+    trafficChart = CloudVMCharts.createBarChart(el.getContext('2d'), days.length ? days : ['暂无数据'],
+      [
+        { label:'入站 GB', data: days.length ? inData : [0], backgroundColor:'rgba(37,99,235,0.6)' },
+        { label:'出站 GB', data: days.length ? outData : [0], backgroundColor:'rgba(22,163,74,0.6)' }
+      ]
+    );
+  } catch(e) {
+    renderEmptyTraffic();
+  }
+}
+
+function renderEmptyTraffic() {
+  const el = document.getElementById('trafficDetail');
+  if (!el) return;
+  trafficChart = CloudVMCharts.createBarChart(el.getContext('2d'), ['暂无数据'],
+    [{ label:'入站 GB', data: [0], backgroundColor:'rgba(37,99,235,0.3)' },
+     { label:'出站 GB', data: [0], backgroundColor:'rgba(22,163,74,0.3)' }]
+  );
+}
+
+async function loadSnapshots() {
+  if (!vmData) return;
+  const snaps = vmData.snapshots || [];
+  const container = document.getElementById('snapshotList');
+  if (!container) return;
+  if (!snaps.length) {
+    container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:20px">暂无快照</td></tr>';
+    return;
+  }
+  container.innerHTML = snaps.map(s => `
+    <tr>
+      <td><span class="badge badge-info">${s.name}</span></td>
+      <td>${new Date(s.created_at).toLocaleString('zh-CN')}</td>
+      <td>${s.size || '-'}</td>
+      <td><span class="badge badge-${s.status === 'completed' ? 'success' : 'warning'}">${s.status === 'completed' ? '正常' : s.status}</span></td>
+      <td>
+        <button class="btn-sm outline" onclick="restoreSnapshot('${s.name}')">恢复</button>
+        <button class="btn-sm danger" onclick="deleteSnapshot('${s.name}')">删除</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function loadDomains() {
+  if (!vmData) return;
+  const domains = vmData.domains || [];
+  const container = document.querySelector('.card:has(h3:contains(域名建站绑定)) tbody') || document.getElementById('domainList');
+  if (!container) return;
+  if (!domains.length) {
+    container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3)">暂无绑定域名</td></tr>';
+    return;
+  }
+  container.innerHTML = domains.map(d => `
+    <tr>
+      <td><span style="font-family:var(--mono)">${d.domain}</span></td>
+      <td>${d.target_port || 80}</td>
+      <td><span class="badge badge-${d.ssl ? 'success' : 'default'}">${d.ssl ? '已启用' : '未启用'}</span></td>
+      <td><span class="badge badge-success">正常</span></td>
+      <td><button class="btn-sm danger" onclick="removeDomain('${d.domain}')">移除</button></td>
+    </tr>
+  `).join('');
+}
+
+async function loadNatRules() {
+  if (!vmData) return;
+  const rules = vmData.nat_rules || [];
+  const container = document.querySelector('.card:has(h3:contains(NAT)) tbody') || document.getElementById('natList');
+  if (!container) return;
+  if (!rules.length) {
+    container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3)">暂无转发规则</td></tr>';
+    return;
+  }
+  container.innerHTML = rules.map(r => `
+    <tr>
+      <td><span class="badge badge-info">${r.public_port}</span></td>
+      <td>${r.private_port}</td>
+      <td>${r.protocol || 'TCP'}</td>
+      <td>${r.description || '-'}</td>
+      <td><button class="btn-sm danger" onclick="deleteNatRule(${r.id})">删除</button></td>
+    </tr>
+  `).join('');
+}
+
+function deleteNatRule(id) {
+  const vmId = getVmId();
+  if (!confirm('确认删除此NAT规则？')) return;
+  fetch(`/api/vms/${vmId}/nat-rules/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('admin_token'), 'Accept': 'application/json' }
+  }).then(r => r.json()).then(d => {
+    if (d.success) { showNotification('成功', 'NAT规则已删除', 'success'); loadVmDetail(); }
+    else showNotification('失败', d.message || '删除失败', 'error');
+  }).catch(() => showNotification('网络错误', '无法连接服务器', 'error'));
+}
 
 async function doResetPwd() {
   const p1 = document.getElementById('newRootPwd').value;
   const p2 = document.getElementById('confirmRootPwd').value;
   if (!p1 || p1 !== p2) { showNotification('错误', '密码不一致或未填写', 'error'); return; }
   ModalManager.close('resetPwdModal');
-  await new Promise(r => setTimeout(r, 1000));
-  showNotification('成功', 'Root 密码已重置', 'success');
+  const vmId = getVmId();
+  try {
+    const token = localStorage.getItem('admin_token');
+    const res = await fetch(`/api/vms/${vmId}/reset-password`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ password: p1 })
+    });
+    const data = await res.json();
+    if (data.success) showNotification('成功', 'Root 密码已重置', 'success');
+    else showNotification('失败', data.message || '密码重置失败', 'error');
+  } catch(e) {
+    showNotification('网络错误', '无法连接服务器', 'error');
+  }
 }
 
 async function doReinstall() {
