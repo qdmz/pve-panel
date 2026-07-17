@@ -321,7 +321,7 @@ async function doRecharge() {
     const res = await fetch('/api/recharge', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ amount: parseFloat(amount), method })
+      body: JSON.stringify({ amount: parseFloat(amount), payment_method: 'epay', payment_channel: method })
     });
     const data = await res.json();
     

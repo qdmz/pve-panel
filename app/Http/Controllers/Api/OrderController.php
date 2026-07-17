@@ -97,9 +97,25 @@ class OrderController extends Controller
                 ]);
 
                 app(VmProvisioningService::class)->provisionFromOrder($order);
+
+                return ApiResponse::success(['order' => $order], 'Order created successfully.', 201);
             }
 
-            return ApiResponse::success(['order' => $order], 'Order created successfully.', 201);
+            // Generate payment URL via Epay automatically
+            $paymentMethod = $request->get('payment_method', 'alipay');
+            $epay = new EpayService();
+
+            if ($epay->isConfigured()) {
+                $result = $epay->createOrder($order, $paymentMethod);
+
+                return ApiResponse::success([
+                    'order'       => $order,
+                    'payment_url' => $result['pay_url'] ?? '',
+                    'params'      => $result['params'] ?? [],
+                ], 'Order created. Proceed to payment.', 201);
+            }
+
+            return ApiResponse::success(['order' => $order], 'Order created successfully. Awaiting payment.', 201);
         } catch (\Exception $e) {
             \Log::error('OrderController::store failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return ApiResponse::error('Failed to create order.', 500);
